@@ -37,7 +37,7 @@ interface DesktopIcon {
 
 export default function Home() {
   const [windows, setWindows] = useState<WindowState[]>([
-    { id: 'Home', isOpen: false, zIndex: 0, icon: '/icons/home.png', position: { x: 0, y: 0 } },
+    { id: 'Home', isOpen: false, zIndex: 0, icon: '/icons/apple.png', position: { x: 0, y: 0 } },
     { id: 'Proyectos', isOpen: false, zIndex: 0, icon: '/icons/notas.png', position: { x: 0, y: 0 } },
     { id: 'Sobre Mí', isOpen: false, zIndex: 0, icon: '/icons/visualstudio.png', position: { x: 0, y: 0 } },
     { id: 'Contacto', isOpen: false, zIndex: 0, icon: '/icons/correo.png', position: { x: 0, y: 0 } },
@@ -45,6 +45,7 @@ export default function Home() {
 
   const [desktopIcons] = useState<DesktopIcon[]>([
     { id: 'LinkedIn', icon: '/icons/linkedin.png', url: 'https://www.linkedin.com/in/txnio/' },
+    { id: 'GitHub', icon: '/icons/github.png', url: 'https://github.com/txnioh' },  // Nuevo ícono de GitHub
   ]);
 
   const toggleWindow = (id: string) => {

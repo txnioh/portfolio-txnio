@@ -4,19 +4,20 @@ import { motion } from 'framer-motion';
 import Image from 'next/image';
 
 const DesktopIconsWrapper = styled.div`
-  position: absolute;
-  top: 50%;
+  position: fixed;
   left: 20px;
+  top: 50%;
   transform: translateY(-50%);
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
+  z-index: 10;
 `;
 
 const DesktopIcon = styled(motion.div)`
   width: 80px;
   height: 80px;
-  margin: 10px 0;
+  margin-bottom: 20px;
   cursor: pointer;
   display: flex;
   flex-direction: column;
