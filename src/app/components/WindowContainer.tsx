@@ -14,6 +14,7 @@ const WindowContainerWrapper = styled.div`
   justify-content: center;
   align-items: center;
   pointer-events: none;
+  z-index: 10; // Añadimos un z-index más alto
 `;
 
 interface WindowContainerProps {

@@ -19,6 +19,7 @@ const WindowWrapper = styled(motion.div)`
   display: flex;
   flex-direction: column;
   pointer-events: auto;
+  z-index: 100; // Aseguramos que cada ventana tenga un z-index alto
 `;
 
 const WindowHeader = styled.div`
@@ -109,11 +110,11 @@ const Window: React.FC<WindowProps> = ({ window, closeWindow, bringToFront }) =>
         scale: 1, 
         opacity: 1,
         x: window.position.x,
-        y: window.position.y
+        y: window.position.y,
+        zIndex: window.zIndex + 100 // Aseguramos que el z-index sea siempre alto
       }}
       exit={{ scale: 0.8, opacity: 0 }}
       transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-      style={{ zIndex: window.zIndex }}
       onClick={() => bringToFront(window.id)}
     >
       <WindowHeader>

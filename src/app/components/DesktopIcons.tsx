@@ -11,7 +11,7 @@ const DesktopIconsWrapper = styled.div`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  z-index: 10;
+  z-index: 1; // Cambiamos el z-index a un valor bajo
 `;
 
 const DesktopIcon = styled(motion.div)`
