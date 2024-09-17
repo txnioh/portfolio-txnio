@@ -45,7 +45,8 @@ export default function Home() {
 
   const [desktopIcons] = useState<DesktopIcon[]>([
     { id: 'LinkedIn', icon: '/icons/linkedin.png', url: 'https://www.linkedin.com/in/txnio/' },
-    { id: 'GitHub', icon: '/icons/github.png', url: 'https://github.com/txnioh' },  // Nuevo ícono de GitHub
+    { id: 'GitHub', icon: '/icons/github.png', url: 'https://github.com/txnioh' },
+    { id: 'Curriculum', icon: '/icons/pdf.png', url: '/CV.pdf' },  // Nuevo ícono para el CV
   ]);
 
   const toggleWindow = (id: string) => {
@@ -88,7 +89,12 @@ export default function Home() {
   };
 
   const openUrl = (url: string) => {
-    window.open(url, '_blank');
+    if (url.startsWith('http')) {
+      window.open(url, '_blank');
+    } else {
+      // Para archivos locales como el PDF, abrimos en la misma ventana
+      window.open(url, '_self');
+    }
   };
 
   return (
