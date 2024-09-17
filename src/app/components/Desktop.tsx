@@ -5,6 +5,7 @@ import Dock from './Dock';
 import TopBar from './TopBar';
 import WindowContainer from './WindowContainer';
 import DesktopIcons from './DesktopIcons';
+import { WindowState, DesktopIcon } from '../types'; // Añade esta línea
 
 const DesktopWrapper = styled.div`
   height: 100vh;

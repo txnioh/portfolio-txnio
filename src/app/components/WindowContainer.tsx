@@ -2,6 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { AnimatePresence } from 'framer-motion';
 import Window from './Window';
+import { WindowState } from '../types'; // Añade esta línea
 
 const WindowContainerWrapper = styled.div`
   position: fixed;
