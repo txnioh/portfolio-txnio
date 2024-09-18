@@ -67,6 +67,8 @@ export default function Home() {
   const [windowPositions, setWindowPositions] = useState({});
   const [windowSizes, setWindowSizes] = useState({});
 
+  const [isPageLoading, setIsPageLoading] = useState(true);
+
   useEffect(() => {
     const checkTime = () => {
       const currentHour = new Date().getHours();
@@ -106,11 +108,29 @@ export default function Home() {
     };
 
     preloadImages();
+
+    // Simula un tiempo de carga mínimo para la página completa
+    const pageLoadTimer = setTimeout(() => {
+      setIsPageLoading(false);
+    }, 3000); // Ajusta este tiempo según tus necesidades
+
+    return () => clearTimeout(pageLoadTimer);
   }, [windows, desktopIcons]);
+
+  const getCenterPosition = (index: number = 0) => {
+    const windowWidth = 1200; // Ancho predeterminado de la ventana (aumentado)
+    const windowHeight = 800; // Alto predeterminado de la ventana (aumentado)
+    const offset = index * 30; // Desplazamiento para ventanas subsiguientes
+    return {
+      x: Math.max(0, Math.floor((window.innerWidth - windowWidth) / 2) + offset),
+      y: Math.max(0, Math.floor((window.innerHeight - windowHeight) / 2) + offset)
+    };
+  };
 
   const toggleWindow = (id: string) => {
     const targetWindow = [...windows, ...desktopApps].find(w => w.id === id);
     if (targetWindow) {
+      const openWindowsCount = [...windows, ...desktopApps].filter(w => w.isOpen).length;
       if (desktopApps.some(app => app.id === id)) {
         setDesktopApps(prevApps => {
           const newApps = prevApps.map(app => 
@@ -118,9 +138,9 @@ export default function Home() {
           );
           const updatedApp = newApps.find(app => app.id === id);
           if (updatedApp && updatedApp.isOpen) {
-            const centerPosition = getCenterPosition();
+            const centerPosition = getCenterPosition(openWindowsCount);
             setWindowPositions(prev => ({ ...prev, [id]: centerPosition }));
-            setWindowSizes(prev => ({ ...prev, [id]: { width: 1000, height: 700 } })); // Tamaño inicial más grande
+            setWindowSizes(prev => ({ ...prev, [id]: { width: 1200, height: 800 } })); // Tamaño inicial más grande
             setOpenApps(prev => prev.some(app => app.id === id) ? prev : [...prev, updatedApp]);
           } else if (updatedApp) {
             setOpenApps(prev => prev.filter(app => app.id !== id));
@@ -133,9 +153,9 @@ export default function Home() {
             if (window.id === id) {
               const newIsOpen = !window.isOpen;
               if (newIsOpen) {
-                const centerPosition = getCenterPosition();
+                const centerPosition = getCenterPosition(openWindowsCount);
                 setWindowPositions(prev => ({ ...prev, [id]: centerPosition }));
-                setWindowSizes(prev => ({ ...prev, [id]: { width: 1000, height: 700 } })); // Tamaño inicial más grande
+                setWindowSizes(prev => ({ ...prev, [id]: { width: 1200, height: 800 } })); // Tamaño inicial más grande
               }
               return { ...window, isOpen: newIsOpen };
             }
@@ -187,28 +207,21 @@ export default function Home() {
     setWallpaperBase(newWallpaperBase);
   };
 
-  const updateWindowPosition = (id: string, position: { x: number; y: number }) => {
-    setWindowPositions(prev => ({ ...prev, [id]: position }));
+  const updateWindowPosition = (id: string, newPosition: { x: number; y: number }) => {
+    setWindowPositions(prev => ({ ...prev, [id]: newPosition }));
   };
 
-  const updateWindowSize = (id: string, size: { width: number; height: number }) => {
-    setWindowSizes(prev => ({ ...prev, [id]: size }));
-  };
-
-  const getCenterPosition = () => {
-    const windowWidth = 1000; // Ancho predeterminado de la ventana (aumentado)
-    const windowHeight = 700; // Alto predeterminado de la ventana (aumentado)
-    return {
-      x: Math.max(0, Math.floor((window.innerWidth - windowWidth) / 2)),
-      y: Math.max(0, Math.floor((window.innerHeight - windowHeight) / 2))
-    };
+  const updateWindowSize = (id: string, newSize: { width: number; height: number }) => {
+    setWindowSizes(prev => ({ ...prev, [id]: newSize }));
   };
 
   return (
     <>
       <GlobalStyles wallpaper={wallpaper} />
-      {isLoading ? (
-        <MacLoading text="designed by txnio" />
+      {isPageLoading ? (
+        <MacLoading text="Welcome to txniOS" />
+      ) : isLoading ? (
+        <MacLoading text="..." />
       ) : (
         <Desktop
           windows={windows}
