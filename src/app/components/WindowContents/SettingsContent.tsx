@@ -66,7 +66,7 @@ const SettingsContent: React.FC<SettingsContentProps> = ({ currentWallpaper, set
               isSelected={currentWallpaper.startsWith(wallpaper)}
               onClick={() => setWallpaper(wallpaper)}
             >
-              <Image src={`/${wallpaper}-day.png`} alt={`Wallpaper ${index + 1}`} layout="fill" objectFit="cover" />
+              <Image src={`/${wallpaper}-day.jpg`} alt={`Wallpaper ${index + 1}`} layout="fill" objectFit="cover" />
             </WallpaperOption>
           ))}
         </WallpaperOptions>

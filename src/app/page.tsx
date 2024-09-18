@@ -123,7 +123,7 @@ export default function Home() {
     return () => clearInterval(interval);
   }, []);
 
-  const wallpaper = `/${wallpaperBase}-${isNightTime ? 'night' : 'day'}.png`;
+  const wallpaper = `/${wallpaperBase}-${isNightTime ? 'night' : 'day'}.jpg`;
 
   const setWallpaper = (newWallpaperBase: string) => {
     setWallpaperBase(newWallpaperBase);
