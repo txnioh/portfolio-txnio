@@ -13,8 +13,6 @@ interface WindowProps {
   window: WindowState;
   closeWindow: (id: string) => void;
   bringToFront: (id: string) => void;
-  currentWallpaper: string;
-  setWallpaper: (wallpaper: string) => void;
   updatePosition: (id: string, position: { x: number; y: number }) => void;
   updateSize: (id: string, size: { width: number; height: number }) => void;
 }
@@ -92,8 +90,6 @@ const Window: React.FC<WindowProps> = ({
   window, 
   closeWindow, 
   bringToFront, 
-  currentWallpaper, 
-  setWallpaper,
   updatePosition,
   updateSize 
 }) => {
@@ -142,13 +138,13 @@ const Window: React.FC<WindowProps> = ({
     };
 
     if (isDragging || isResizing) {
-      window.addEventListener('mousemove', handleMouseMove);
-      window.addEventListener('mouseup', handleMouseUp);
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
     }
 
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
     };
   }, [isDragging, isResizing, dragOffset, id, position, size, updatePosition, updateSize, resizeDirection]);
 
