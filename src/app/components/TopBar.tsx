@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { FaCompass, FaCog } from 'react-icons/fa';
+import { FaSearch, FaCog } from 'react-icons/fa';
+import SearchBar from './SearchBar';
+import { WindowState, DesktopIcon } from '../types';
 
 const TopBarWrapper = styled.div`
   position: fixed;
@@ -38,8 +40,16 @@ const TopBarText = styled.div`
   margin: 0 5px;
 `;
 
-const TopBar: React.FC = () => {
+interface TopBarProps {
+  windows: WindowState[];
+  desktopIcons: DesktopIcon[];
+  toggleWindow: (id: string) => void;
+  openUrl: (url: string) => void;
+}
+
+const TopBar: React.FC<TopBarProps> = ({ windows, desktopIcons, toggleWindow, openUrl }) => {
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -56,16 +66,32 @@ const TopBar: React.FC = () => {
   };
 
   return (
-    <TopBarWrapper>
-      <TopBarLeft>
-        <TopBarIcon><FaCompass /></TopBarIcon>
-        <TopBarIcon><FaCog /></TopBarIcon>
-      </TopBarLeft>
-      <TopBarRight>
-        <TopBarText>{formatDate(currentTime)}</TopBarText>
-        <TopBarText>{formatTime(currentTime)}</TopBarText>
-      </TopBarRight>
-    </TopBarWrapper>
+    <>
+      <TopBarWrapper>
+        <TopBarLeft>
+          <TopBarText>Txnio Portfolio</TopBarText>
+        </TopBarLeft>
+        <TopBarRight>
+          <TopBarIcon onClick={() => setIsSearchOpen(true)}>
+            <FaSearch />
+          </TopBarIcon>
+          <TopBarIcon>
+            <FaCog />
+          </TopBarIcon>
+          <TopBarText>{formatDate(currentTime)}</TopBarText>
+          <TopBarText>{formatTime(currentTime)}</TopBarText>
+        </TopBarRight>
+      </TopBarWrapper>
+      {isSearchOpen && (
+        <SearchBar 
+          windows={windows}
+          desktopIcons={desktopIcons}
+          toggleWindow={toggleWindow}
+          openUrl={openUrl}
+          onClose={() => setIsSearchOpen(false)} 
+        />
+      )}
+    </>
   );
 };
 

@@ -34,7 +34,12 @@ const Desktop: React.FC<DesktopProps> = ({
 }) => {
   return (
     <DesktopWrapper>
-      <TopBar />
+      <TopBar 
+        windows={windows} 
+        desktopIcons={desktopIcons}
+        toggleWindow={toggleWindow} 
+        openUrl={openUrl}
+      />
       <Image
         src="/mac-wallpaper.jpg"
         alt="Mac Wallpaper"
