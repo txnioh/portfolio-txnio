@@ -7,6 +7,7 @@ import AboutMeContent from './WindowContents/AboutMeContent';
 import ContactContent from './WindowContents/ContactContent';
 import HomeContent from './WindowContents/HomeContent';
 import SettingsContent from './WindowContents/SettingsContent';
+import SnakeGame from './WindowContents/SnakeGame';
 
 const WindowWrapper = styled(motion.div)`
   background-color: rgba(30, 30, 30, 0.5);
@@ -103,6 +104,8 @@ const Window: React.FC<WindowProps> = ({ window, closeWindow, bringToFront, curr
         return <ContactContent />;
       case 'Ajustes':
         return <SettingsContent currentWallpaper={currentWallpaper} setWallpaper={setWallpaper} />;
+      case 'Snake Game':
+        return <SnakeGame />;
       default:
         return <div>Contenido no disponible</div>;
     }

@@ -16,6 +16,8 @@ const DesktopWrapper = styled.div`
 
 interface DesktopProps {
   windows: WindowState[];
+  desktopApps: WindowState[];
+  openApps: WindowState[];
   toggleWindow: (id: string) => void;
   closeWindow: (id: string) => void;
   bringToFront: (id: string) => void;
@@ -27,6 +29,8 @@ interface DesktopProps {
 
 const Desktop: React.FC<DesktopProps> = ({
   windows,
+  desktopApps,
+  openApps,
   toggleWindow,
   closeWindow,
   bringToFront,
@@ -38,22 +42,22 @@ const Desktop: React.FC<DesktopProps> = ({
   return (
     <DesktopWrapper>
       <TopBar 
-        windows={windows} 
+        windows={windows}
         desktopIcons={desktopIcons}
-        toggleWindow={toggleWindow} 
+        toggleWindow={toggleWindow}
         openUrl={openUrl}
         currentWallpaper={currentWallpaper}
         setWallpaper={setWallpaper}
       />
-      <DesktopIcons icons={desktopIcons} openUrl={openUrl} /> {/* Asegúrate de que esta línea esté presente */}
+      <DesktopIcons icons={desktopIcons} openUrl={openUrl} />
       <WindowContainer
-        windows={windows}
+        windows={[...windows, ...desktopApps]}
         closeWindow={closeWindow}
         bringToFront={bringToFront}
         currentWallpaper={currentWallpaper}
         setWallpaper={setWallpaper}
       />
-      <Dock windows={windows} toggleWindow={toggleWindow} />
+      <Dock windows={windows} openApps={openApps} toggleWindow={toggleWindow} />
     </DesktopWrapper>
   );
 };

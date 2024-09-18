@@ -20,6 +20,18 @@ const DockWrapper = styled.div`
   border: 1px solid rgba(255, 255, 255, 0.1);
 `;
 
+const DockSection = styled.div`
+  display: flex;
+  align-items: flex-end;
+`;
+
+const DockSeparator = styled.div`
+  width: 1px;
+  height: 40px;
+  background-color: rgba(255, 255, 255, 0.3);
+  margin: 0 10px;
+`;
+
 const DockIcon = styled(motion.div)`
   width: 50px;
   height: 50px;
@@ -58,38 +70,43 @@ const OpenIndicator = styled.div`
 
 interface DockProps {
   windows: WindowState[];
+  openApps: WindowState[];
   toggleWindow: (id: string) => void;
 }
 
-const Dock: React.FC<DockProps> = ({ windows, toggleWindow }) => {
+const Dock: React.FC<DockProps> = ({ windows, openApps, toggleWindow }) => {
   const [hoveredIcon, setHoveredIcon] = useState<string | null>(null);
+
+  const allIcons = [...windows, ...openApps];
 
   return (
     <DockWrapper>
-      {windows.map((window) => (
-        <DockIcon
-          key={window.id}
-          whileHover={{ y: -10, scale: 1.1 }}
-          onClick={() => toggleWindow(window.id)}
-          onHoverStart={() => setHoveredIcon(window.id)}
-          onHoverEnd={() => setHoveredIcon(null)}
-        >
-          <Image src={window.icon} alt={window.id} width={40} height={40} />
-          {window.isOpen && <OpenIndicator />}
-          <AnimatePresence>
-            {hoveredIcon === window.id && (
-              <IconLabel
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 10 }}
-                transition={{ duration: 0.1 }}
-              >
-                {window.id}
-              </IconLabel>
-            )}
-          </AnimatePresence>
-        </DockIcon>
-      ))}
+      <DockSection>
+        {allIcons.map((item) => (
+          <DockIcon
+            key={item.id}
+            whileHover={{ y: -10, scale: 1.1 }}
+            onClick={() => toggleWindow(item.id)}
+            onHoverStart={() => setHoveredIcon(item.id)}
+            onHoverEnd={() => setHoveredIcon(null)}
+          >
+            <Image src={item.icon} alt={item.id} width={40} height={40} />
+            {item.isOpen && <OpenIndicator />}
+            <AnimatePresence>
+              {hoveredIcon === item.id && (
+                <IconLabel
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  transition={{ duration: 0.1 }}
+                >
+                  {item.id}
+                </IconLabel>
+              )}
+            </AnimatePresence>
+          </DockIcon>
+        ))}
+      </DockSection>
     </DockWrapper>
   );
 };

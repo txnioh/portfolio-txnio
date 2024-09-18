@@ -46,10 +46,17 @@ export default function Home() {
     { id: 'Contacto', isOpen: false, zIndex: 0, icon: '/icons/correo.png', position: { x: 0, y: 0 } },
   ]);
 
+  const [desktopApps, setDesktopApps] = useState<WindowState[]>([
+    { id: 'Snake Game', isOpen: false, zIndex: 0, icon: '/icons/game.png', position: { x: 0, y: 0 } },
+  ]);
+
+  const [openApps, setOpenApps] = useState<WindowState[]>([]);
+
   const [desktopIcons] = useState<DesktopIcon[]>([
     { id: 'LinkedIn', icon: '/icons/linkedin.png', url: 'https://www.linkedin.com/in/txnio/' },
     { id: 'GitHub', icon: '/icons/github.png', url: 'https://github.com/txnioh' },
     { id: 'Curriculum', icon: '/icons/pdf.png', url: '/CV.pdf' },
+    { id: 'Snake Game', icon: '/icons/game.png', url: '' },
   ]);
 
   const [wallpaperBase, setWallpaperBase] = useState('wallpaper1');
@@ -98,33 +105,45 @@ export default function Home() {
   }, [windows, desktopIcons]);
 
   const toggleWindow = (id: string) => {
-    setWindows(prevWindows => {
-      const targetWindow = prevWindows.find(w => w.id === id);
-      if (targetWindow?.url) {
-        window.open(targetWindow.url, '_blank');
-        return prevWindows;
+    const targetWindow = [...windows, ...desktopApps].find(w => w.id === id);
+    if (targetWindow) {
+      if (desktopApps.some(app => app.id === id)) {
+        setDesktopApps(prevApps => {
+          const newApps = prevApps.map(app => 
+            app.id === id ? { ...app, isOpen: !app.isOpen } : app
+          );
+          const updatedApp = newApps.find(app => app.id === id);
+          if (updatedApp) {
+            if (updatedApp.isOpen) {
+              setOpenApps(prev => prev.some(app => app.id === id) ? prev : [...prev, updatedApp]);
+            } else {
+              setOpenApps(prev => prev.filter(app => app.id !== id));
+            }
+          }
+          return newApps;
+        });
+      } else {
+        setWindows(prevWindows => 
+          prevWindows.map(window => 
+            window.id === id ? { ...window, isOpen: !window.isOpen } : window
+          )
+        );
       }
-
-      const openWindows = prevWindows.filter(w => w.isOpen);
-      const newWindows = prevWindows.map(w => {
-        if (w.id === id) {
-          const isOpening = !w.isOpen;
-          const newZIndex = Math.max(...prevWindows.map(w => w.zIndex)) + 1;
-          const newPosition = isOpening
-            ? { x: openWindows.length * 30, y: openWindows.length * 30 }
-            : w.position;
-          return { ...w, isOpen: isOpening, zIndex: newZIndex, position: newPosition };
-        }
-        return w;
-      });
-      return newWindows;
-    });
+      bringToFront(id);
+    }
   };
 
   const closeWindow = (id: string) => {
-    setWindows(prevWindows => prevWindows.map(window => 
-      window.id === id ? { ...window, isOpen: false } : window
-    ));
+    if (desktopApps.some(app => app.id === id)) {
+      setDesktopApps(prevApps => 
+        prevApps.map(app => app.id === id ? { ...app, isOpen: false } : app)
+      );
+      setOpenApps(prev => prev.filter(app => app.id !== id));
+    } else {
+      setWindows(prevWindows => 
+        prevWindows.map(window => window.id === id ? { ...window, isOpen: false } : window)
+      );
+    }
   };
 
   const bringToFront = (id: string) => {
@@ -137,8 +156,15 @@ export default function Home() {
   };
 
   const openUrl = (url: string) => {
-    // Siempre abrimos en una nueva pestaña
-    window.open(url, '_blank');
+    if (url) {
+      window.open(url, '_blank');
+    } else {
+      // Si la URL está vacía, busca la ventana correspondiente y la abre
+      const window = [...windows, ...desktopApps].find(w => w.id === 'Snake Game');
+      if (window) {
+        toggleWindow(window.id);
+      }
+    }
   };
 
   const wallpaper = `/${wallpaperBase}-${isNightTime ? 'night' : 'day'}.jpg`;
@@ -155,6 +181,8 @@ export default function Home() {
       ) : (
         <Desktop
           windows={windows}
+          desktopApps={desktopApps}
+          openApps={openApps}
           toggleWindow={toggleWindow}
           closeWindow={closeWindow}
           bringToFront={bringToFront}
