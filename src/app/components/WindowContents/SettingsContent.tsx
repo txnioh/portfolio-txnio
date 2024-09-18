@@ -98,7 +98,7 @@ const SettingsContent: React.FC<SettingsContentProps> = ({ currentWallpaper, set
     const loadImages = async () => {
       const imagePromises = wallpapers.map(wallpaper => {
         return new Promise((resolve, reject) => {
-          const img = new Image();
+          const img = new Image() as HTMLImageElement;
           img.src = `/${wallpaper}-day.jpg`;
           img.onload = resolve;
           img.onerror = reject;
