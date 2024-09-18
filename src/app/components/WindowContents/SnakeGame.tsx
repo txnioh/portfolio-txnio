@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import styled from 'styled-components';
 
 const GameContainer = styled.div`
@@ -61,16 +61,16 @@ const SnakeGame: React.FC = () => {
   const [score, setScore] = useState<number>(0);
   const [isGameOver, setIsGameOver] = useState<boolean>(false);
 
-  const checkCollision = (head: number[]): boolean => {
-    for (let i = 1; i < snake.length; i++) {
-      if (head[0] === snake[i][0] && head[1] === snake[i][1]) {
-        return true;
-      }
-    }
-    return false;
-  };
-
   const moveSnake = useCallback(() => {
+    const checkCollision = (head: number[]): boolean => {
+      for (let i = 1; i < snake.length; i++) {
+        if (head[0] === snake[i][0] && head[1] === snake[i][1]) {
+          return true;
+        }
+      }
+      return false;
+    };
+
     if (isGameOver) return;
 
     const newSnake = [...snake];
@@ -107,7 +107,7 @@ const SnakeGame: React.FC = () => {
     }
 
     setSnake(newSnake);
-  }, [snake, direction, food, score, isGameOver, checkCollision]); // Añadimos checkCollision a las dependencias
+  }, [snake, direction, food, score, isGameOver]);
 
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
