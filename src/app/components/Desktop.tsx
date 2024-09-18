@@ -68,16 +68,18 @@ const Desktop: React.FC<DesktopProps> = ({
           window.isOpen && (
             <Window
               key={window.id}
-              window={{
-                ...window,
-                position: windowPositions[window.id] || window.position,
-                size: windowSizes[window.id] || { width: 1200, height: 800 }
-              }}
-              closeWindow={closeWindow}
-              bringToFront={bringToFront}
+              id={window.id}
+              title={window.id}
+              onClose={() => closeWindow(window.id)}
+              onFocus={() => bringToFront(window.id)}
+              zIndex={window.zIndex}
+              position={windowPositions[window.id] || window.position}
+              size={windowSizes[window.id] || { width: 1200, height: 800 }}
               updatePosition={updateWindowPosition}
               updateSize={updateWindowSize}
-            />
+            >
+              {/* Window content */}
+            </Window>
           )
         ))}
       </WindowContainerStyled>
