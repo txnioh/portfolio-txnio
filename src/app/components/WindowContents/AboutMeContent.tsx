@@ -39,33 +39,62 @@ const VSCodeContent = styled.div`
 
 const AboutMeContent: React.FC = () => {
   const aboutMeCode = `
-const aboutTxnio = {
-  name: "Txnio",
-  role: "Full Stack Developer",
-  skills: [
-    "JavaScript", "TypeScript", "React",
-    "Node.js", "Python", "SQL", "NoSQL"
+const sobreAntonioGonzalez = {
+  nombre: "Antonio J. González",
+  alias: "Txnio",
+  rol: "Desarrollador Frontend y Entusiasta de la IA",
+  experiencia: {
+    "Power Platform": "1.5 años",
+    "Desarrollo Frontend": "3+ años"
+  },
+  habilidades: [
+    "JavaScript", "TypeScript", "React", "NextJS",
+    "Node.js", "Python", "HTML5", "CSS3",
+    "Power Platform", "Integración de IA"
   ],
-  interests: [
-    "Web Development", "Machine Learning",
-    "Blockchain", "Open Source"
+  stackActual: {
+    frontend: ["React", "NextJS", "TypeScript"],
+    estilos: ["Styled-Components", "TailwindCSS"],
+    gestionEstado: ["Redux", "Context API"],
+    backend: ["Node.js", "Express"],
+    baseDeDatos: ["MongoDB", "PostgreSQL"],
+    despliegue: ["Vercel", "Netlify", "Docker"]
+  },
+  intereses: [
+    "Desarrollo Frontend", "Diseño impulsado por IA",
+    "Integración de Machine Learning", "Código Abierto"
   ],
-  currentlyLearning: "Next.js and GraphQL",
-  funFact: "I can solve a Rubik's cube in under 2 minutes!"
+  aprendiendoActualmente: ["Swift", "NextJS Avanzado", "GraphQL"],
+  herramientasIA: [
+    "GPT-4 para optimización de código",
+    "DALL-E para inspiración en UI/UX",
+    "GitHub Copilot para mejorar la productividad"
+  ],
+  datosCuriosos: "Uso la IA para generar ideas creativas, ¡pero el toque final siempre es humano!"
 };
 
-console.log("Welcome to my portfolio!");
-console.log(aboutTxnio);
+console.log("¡Bienvenido a mi universo tecnológico!");
+console.log(JSON.stringify(sobreAntonioGonzalez, null, 2));
+
+// Objetivos Futuros
+const objetivos2023 = [
+  "Dominar NextJS 13 con App Router",
+  "Contribuir a proyectos de IA de código abierto",
+  "Lanzar una aplicación web mejorada con IA",
+  "Hablar en una conferencia tecnológica"
+];
+
+console.log("Mis objetivos para 2023:", objetivos2023);
   `.trim();
 
   return (
     <VSCodeContainer>
       <VSCodeHeader>
-        <VSCodeTab>aboutMe.js</VSCodeTab>
+        <VSCodeTab>sobreTxnio.ts</VSCodeTab>
       </VSCodeHeader>
       <VSCodeContent>
         <SyntaxHighlighter
-          language="javascript"
+          language="typescript"
           style={vscDarkPlus}
           showLineNumbers
           wrapLines
