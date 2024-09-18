@@ -55,13 +55,15 @@ const SettingsOverlay = styled.div`
 `;
 
 const SettingsContainer = styled.div`
-  width: 60%;
-  max-width: 600px;
-  background-color: rgba(30, 30, 30, 0.8);
-  backdrop-filter: blur(10px);
-  border-radius: 10px;
-  padding: 20px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  width: 80%;
+  max-width: 800px;
+  height: 80%;
+  max-height: 600px;
+  background-color: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
 `;
 
 interface TopBarProps {

@@ -36,20 +36,66 @@ interface DesktopIcon {
   url: string;
 }
 
+const wallpapers = ['wallpaper1', 'wallpaper2', 'wallpaper3'];
+
 export default function Home() {
   const [windows, setWindows] = useState<WindowState[]>([
     { id: 'Home', isOpen: false, zIndex: 0, icon: '/icons/apple.png', position: { x: 0, y: 0 } },
     { id: 'Proyectos', isOpen: false, zIndex: 0, icon: '/icons/notas.png', position: { x: 0, y: 0 } },
     { id: 'Sobre Mí', isOpen: false, zIndex: 0, icon: '/icons/visualstudio.png', position: { x: 0, y: 0 } },
     { id: 'Contacto', isOpen: false, zIndex: 0, icon: '/icons/correo.png', position: { x: 0, y: 0 } },
-    // Eliminamos la línea de Ajustes
   ]);
 
   const [desktopIcons] = useState<DesktopIcon[]>([
     { id: 'LinkedIn', icon: '/icons/linkedin.png', url: 'https://www.linkedin.com/in/txnio/' },
     { id: 'GitHub', icon: '/icons/github.png', url: 'https://github.com/txnioh' },
-    { id: 'Curriculum', icon: '/icons/pdf.png', url: '/CV.pdf' },  // Nuevo ícono para el CV
+    { id: 'Curriculum', icon: '/icons/pdf.png', url: '/CV.pdf' },
   ]);
+
+  const [wallpaperBase, setWallpaperBase] = useState('wallpaper1');
+  const [isNightTime, setIsNightTime] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const checkTime = () => {
+      const currentHour = new Date().getHours();
+      setIsNightTime(currentHour >= 18 || currentHour < 6);
+    };
+
+    checkTime();
+    const interval = setInterval(checkTime, 60000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const preloadImages = async () => {
+      const imagesToPreload = [
+        ...windows.map(w => w.icon),
+        ...desktopIcons.map(d => d.icon),
+        ...wallpapers.flatMap(w => [`/${w}-day.jpg`, `/${w}-night.jpg`])
+      ];
+
+      const imagePromises = imagesToPreload.map(src => {
+        return new Promise((resolve, reject) => {
+          const img = new Image();
+          img.src = src;
+          img.onload = resolve;
+          img.onerror = reject;
+        });
+      });
+
+      try {
+        await Promise.all(imagePromises);
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Error preloading images:', error);
+        setIsLoading(false);
+      }
+    };
+
+    preloadImages();
+  }, [windows, desktopIcons]);
 
   const toggleWindow = (id: string) => {
     setWindows(prevWindows => {
@@ -91,37 +137,9 @@ export default function Home() {
   };
 
   const openUrl = (url: string) => {
-    if (url.startsWith('http')) {
-      window.open(url, '_blank');
-    } else {
-      // Para archivos locales como el PDF, abrimos en la misma ventana
-      window.open(url, '_self');
-    }
+    // Siempre abrimos en una nueva pestaña
+    window.open(url, '_blank');
   };
-
-  const [wallpaperBase, setWallpaperBase] = useState('wallpaper1');
-  const [isNightTime, setIsNightTime] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 2000); // Ajusta este tiempo según tus necesidades
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
-    const checkTime = () => {
-      const currentHour = new Date().getHours();
-      setIsNightTime(currentHour >= 18 || currentHour < 6);
-    };
-
-    checkTime();
-    const interval = setInterval(checkTime, 60000);
-
-    return () => clearInterval(interval);
-  }, []);
 
   const wallpaper = `/${wallpaperBase}-${isNightTime ? 'night' : 'day'}.jpg`;
 
@@ -133,7 +151,7 @@ export default function Home() {
     <>
       <GlobalStyles wallpaper={wallpaper} />
       {isLoading ? (
-        <MacLoading />
+        <MacLoading text="designed by txnio" />
       ) : (
         <Desktop
           windows={windows}

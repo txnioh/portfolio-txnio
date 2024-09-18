@@ -6,13 +6,13 @@ const fadeIn = keyframes`
   to { opacity: 1; }
 `;
 
-const LoadingContainer = styled.div`
-  position: fixed;
+const LoadingContainer = styled.div<{ fullScreen?: boolean }>`
+  position: ${props => props.fullScreen ? 'fixed' : 'absolute'};
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: #000;
+  width: ${props => props.fullScreen ? '100vw' : '100%'};
+  height: ${props => props.fullScreen ? '100vh' : '100%'};
+  background-color: rgba(0, 0, 0, 0.8);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -40,18 +40,23 @@ const LoadingProgress = styled.div`
   width: 100%;
   height: 100%;
   background-color: #fff;
-  animation: loading 2s ease-in-out forwards;
+  animation: loading 2s ease-in-out infinite;
 
   @keyframes loading {
     0% { transform: translateX(-100%); }
-    100% { transform: translateX(0); }
+    100% { transform: translateX(100%); }
   }
 `;
 
-const MacLoading: React.FC = () => {
+interface MacLoadingProps {
+  fullScreen?: boolean;
+  text?: string;
+}
+
+const MacLoading: React.FC<MacLoadingProps> = ({ fullScreen = true, text = "designed by txnio" }) => {
   return (
-    <LoadingContainer>
-      <LoadingText>designed by txnio</LoadingText>
+    <LoadingContainer fullScreen={fullScreen}>
+      <LoadingText>{text}</LoadingText>
       <LoadingBar>
         <LoadingProgress />
       </LoadingBar>
