@@ -29,6 +29,7 @@ interface WindowState {
   icon: string;
   position: { x: number; y: number };
   url?: string;
+  isPermanent: boolean;
 }
 
 interface DesktopIcon {
@@ -41,17 +42,12 @@ const wallpapers = ['wallpaper1', 'wallpaper2', 'wallpaper3'];
 
 export default function Home() {
   const [windows, setWindows] = useState<WindowState[]>([
-    { id: 'Home', isOpen: false, zIndex: 0, icon: '/icons/apple.png', position: { x: 0, y: 0 } },
-    { id: 'Proyectos', isOpen: false, zIndex: 0, icon: '/icons/notas.png', position: { x: 0, y: 0 } },
-    { id: 'Sobre Mí', isOpen: false, zIndex: 0, icon: '/icons/visualstudio.png', position: { x: 0, y: 0 } },
-    { id: 'Contacto', isOpen: false, zIndex: 0, icon: '/icons/correo.png', position: { x: 0, y: 0 } },
+    { id: 'Home', isOpen: false, zIndex: 0, icon: '/icons/apple.png', position: { x: 0, y: 0 }, isPermanent: true },
+    { id: 'Proyectos', isOpen: false, zIndex: 0, icon: '/icons/notas.png', position: { x: 0, y: 0 }, isPermanent: true },
+    { id: 'Sobre Mí', isOpen: false, zIndex: 0, icon: '/icons/visualstudio.png', position: { x: 0, y: 0 }, isPermanent: true },
+    { id: 'Contacto', isOpen: false, zIndex: 0, icon: '/icons/correo.png', position: { x: 0, y: 0 }, isPermanent: true },
+    { id: 'Snake Game', isOpen: false, zIndex: 0, icon: '/icons/game.png', position: { x: 0, y: 0 }, isPermanent: false },
   ]);
-
-  const [desktopApps, setDesktopApps] = useState<WindowState[]>([
-    { id: 'Snake Game', isOpen: false, zIndex: 0, icon: '/icons/game.png', position: { x: 0, y: 0 } },
-  ]);
-
-  const [openApps, setOpenApps] = useState<WindowState[]>([]);
 
   const [desktopIcons] = useState<DesktopIcon[]>([
     { id: 'LinkedIn', icon: '/icons/linkedin.png', url: 'https://www.linkedin.com/in/txnio/' },
@@ -65,7 +61,7 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
 
   const [windowPositions, setWindowPositions] = useState({});
-  const [windowSizes, setWindowSizes] = useState({});
+  const [windowSizes, setWindowSizes] = useState<{ [key: string]: { width: number; height: number } }>({});
 
   const [isPageLoading, setIsPageLoading] = useState(true);
 
@@ -128,56 +124,31 @@ export default function Home() {
   };
 
   const toggleWindow = (id: string) => {
-    const targetWindow = [...windows, ...desktopApps].find(w => w.id === id);
+    const targetWindow = windows.find(w => w.id === id);
     if (targetWindow) {
-      const openWindowsCount = [...windows, ...desktopApps].filter(w => w.isOpen).length;
-      if (desktopApps.some(app => app.id === id)) {
-        setDesktopApps(prevApps => {
-          const newApps = prevApps.map(app => 
-            app.id === id ? { ...app, isOpen: !app.isOpen } : app
-          );
-          const updatedApp = newApps.find(app => app.id === id);
-          if (updatedApp && updatedApp.isOpen) {
-            const centerPosition = getCenterPosition(openWindowsCount);
-            setWindowPositions(prev => ({ ...prev, [id]: centerPosition }));
-            setWindowSizes(prev => ({ ...prev, [id]: { width: 1200, height: 800 } })); // Tamaño inicial más grande
-            setOpenApps(prev => prev.some(app => app.id === id) ? prev : [...prev, updatedApp]);
-          } else if (updatedApp) {
-            setOpenApps(prev => prev.filter(app => app.id !== id));
-          }
-          return newApps;
-        });
-      } else {
-        setWindows(prevWindows => 
-          prevWindows.map(window => {
-            if (window.id === id) {
-              const newIsOpen = !window.isOpen;
-              if (newIsOpen) {
-                const centerPosition = getCenterPosition(openWindowsCount);
-                setWindowPositions(prev => ({ ...prev, [id]: centerPosition }));
-                setWindowSizes(prev => ({ ...prev, [id]: { width: 1200, height: 800 } })); // Tamaño inicial más grande
-              }
-              return { ...window, isOpen: newIsOpen };
+      const openWindowsCount = windows.filter(w => w.isOpen).length;
+      setWindows(prevWindows => 
+        prevWindows.map(window => {
+          if (window.id === id) {
+            const newIsOpen = !window.isOpen;
+            if (newIsOpen) {
+              const centerPosition = getCenterPosition(openWindowsCount);
+              setWindowPositions(prev => ({ ...prev, [id]: centerPosition }));
+              setWindowSizes(prev => ({ ...prev, [id]: { width: 1200, height: 800 } }));
             }
-            return window;
-          })
-        );
-      }
+            return { ...window, isOpen: newIsOpen };
+          }
+          return window;
+        })
+      );
       bringToFront(id);
     }
   };
 
   const closeWindow = (id: string) => {
-    if (desktopApps.some(app => app.id === id)) {
-      setDesktopApps(prevApps => 
-        prevApps.map(app => app.id === id ? { ...app, isOpen: false } : app)
-      );
-      setOpenApps(prev => prev.filter(app => app.id !== id));
-    } else {
-      setWindows(prevWindows => 
-        prevWindows.map(window => window.id === id ? { ...window, isOpen: false } : window)
-      );
-    }
+    setWindows(prevWindows => 
+      prevWindows.map(window => window.id === id ? { ...window, isOpen: false } : window)
+    );
   };
 
   const bringToFront = (id: string) => {
@@ -194,7 +165,7 @@ export default function Home() {
       window.open(url, '_blank');
     } else {
       // Si la URL está vacía, busca la ventana correspondiente y la abre
-      const window = [...windows, ...desktopApps].find(w => w.id === 'Snake Game');
+      const window = windows.find(w => w.id === 'Snake Game');
       if (window) {
         toggleWindow(window.id);
       }
@@ -225,8 +196,6 @@ export default function Home() {
       ) : (
         <Desktop
           windows={windows}
-          desktopApps={desktopApps}
-          openApps={openApps}
           toggleWindow={toggleWindow}
           closeWindow={closeWindow}
           bringToFront={bringToFront}

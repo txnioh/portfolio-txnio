@@ -1,49 +1,42 @@
 import React from 'react';
-import styled from 'styled-components';
 import Window from './Window';
 import { WindowState } from '../types';
 
-const WindowContainerStyled = styled.div`
-  position: relative;
-  flex: 1;
-`;
-
 interface WindowContainerProps {
-  windows: WindowState[];
+  window: WindowState;
   closeWindow: (id: string) => void;
   bringToFront: (id: string) => void;
+  position: { x: number; y: number };
+  size: { width: number; height: number };
+  updateWindowPosition: (id: string, newPosition: { x: number; y: number }) => void;
+  updateWindowSize: (id: string, newSize: { width: number; height: number }) => void;
   currentWallpaper: string;
   setWallpaper: (wallpaper: string) => void;
-  updateWindowPosition: (id: string, position: { x: number; y: number }) => void;
-  updateWindowSize: (id: string, size: { width: number; height: number }) => void;
 }
 
 const WindowContainer: React.FC<WindowContainerProps> = ({
-  windows,
+  window,
   closeWindow,
   bringToFront,
+  position,
+  size,
+  updateWindowPosition,
+  updateWindowSize,
   currentWallpaper,
   setWallpaper,
-  updateWindowPosition,
-  updateWindowSize
 }) => {
   return (
-    <WindowContainerStyled>
-      {windows.map((window) => (
-        window.isOpen && (
-          <Window
-            key={window.id}
-            window={window}
-            closeWindow={closeWindow}
-            bringToFront={bringToFront}
-            currentWallpaper={currentWallpaper}
-            setWallpaper={setWallpaper}
-            updatePosition={updateWindowPosition}
-            updateSize={updateWindowSize}
-          />
-        )
-      ))}
-    </WindowContainerStyled>
+    <Window
+      window={window}
+      closeWindow={closeWindow}
+      bringToFront={bringToFront}
+      position={position}
+      size={size}
+      updatePosition={(newPosition) => updateWindowPosition(window.id, newPosition)}
+      updateSize={(newSize) => updateWindowSize(window.id, newSize)}
+      currentWallpaper={currentWallpaper}
+      setWallpaper={setWallpaper}
+    />
   );
 };
 

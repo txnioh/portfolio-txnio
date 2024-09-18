@@ -7,14 +7,18 @@ import ContactContent from './WindowContents/ContactContent';
 import HomeContent from './WindowContents/HomeContent';
 import SettingsContent from './WindowContents/SettingsContent';
 import SnakeGame from './WindowContents/SnakeGame';
-import { WindowState } from '../types'; // Asegúrate de importar WindowState
+import { WindowState } from '../types';
 
 interface WindowProps {
   window: WindowState;
   closeWindow: (id: string) => void;
   bringToFront: (id: string) => void;
-  updatePosition: (id: string, position: { x: number; y: number }) => void;
-  updateSize: (id: string, size: { width: number; height: number }) => void;
+  position: { x: number; y: number };
+  size: { width: number; height: number };
+  updatePosition: (newPosition: { x: number; y: number }) => void;
+  updateSize: (newSize: { width: number; height: number }) => void;
+  currentWallpaper: string;
+  setWallpaper: (wallpaper: string) => void;
 }
 
 const WindowContainer = styled(motion.div)`
@@ -36,6 +40,7 @@ const WindowHeader = styled.div`
   background-color: rgba(255, 255, 255, 0.1);
   cursor: move;
   user-select: none;
+  height: 30px; // Aumentamos la altura del encabezado
 `;
 
 const CloseButton = styled.button`
@@ -86,15 +91,22 @@ const ResizeHandle = styled.div<{ position: string }>`
   }}
 `;
 
-const Window: React.FC<WindowProps> = ({ 
-  window, 
-  closeWindow, 
-  bringToFront, 
+const Window: React.FC<WindowProps> = ({
+  window,
+  closeWindow,
+  bringToFront,
+  position,
+  size,
   updatePosition,
-  updateSize 
+  updateSize,
+  currentWallpaper,
+  setWallpaper
 }) => {
-  const { id, title, zIndex, position, size } = window;
+  const { id, zIndex } = window;
   
+  const defaultSize = { width: 800, height: 600 };
+  const windowSize = size || defaultSize;
+
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
   const [resizeDirection, setResizeDirection] = useState('');
@@ -104,19 +116,19 @@ const Window: React.FC<WindowProps> = ({
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (isDragging) {
-        updatePosition(id, {
+        updatePosition({
           x: e.clientX - dragOffset.x,
           y: e.clientY - dragOffset.y,
         });
       } else if (isResizing) {
-        let newWidth = size.width;
-        let newHeight = size.height;
+        let newWidth = windowSize.width;
+        let newHeight = windowSize.height;
         let newX = position.x;
 
         if (resizeDirection.includes('right')) {
           newWidth = e.clientX - position.x;
         } else if (resizeDirection.includes('left')) {
-          newWidth = size.width + (position.x - e.clientX);
+          newWidth = windowSize.width + (position.x - e.clientX);
           newX = e.clientX;
         }
 
@@ -124,9 +136,9 @@ const Window: React.FC<WindowProps> = ({
           newHeight = e.clientY - position.y;
         }
 
-        updateSize(id, { width: Math.max(newWidth, 200), height: Math.max(newHeight, 100) });
+        updateSize({ width: Math.max(newWidth, 200), height: Math.max(newHeight, 100) });
         if (resizeDirection.includes('left')) {
-          updatePosition(id, { x: newX, y: position.y });
+          updatePosition({ x: newX, y: position.y });
         }
       }
     };
@@ -146,7 +158,7 @@ const Window: React.FC<WindowProps> = ({
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [isDragging, isResizing, dragOffset, id, position, size, updatePosition, updateSize, resizeDirection]);
+  }, [isDragging, isResizing, dragOffset, position, windowSize, updatePosition, updateSize, resizeDirection]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsDragging(true);
@@ -176,7 +188,7 @@ const Window: React.FC<WindowProps> = ({
       case 'Contacto':
         return <ContactContent />;
       case 'Settings':
-        return <SettingsContent currentWallpaper="" setWallpaper={() => {}} />;
+        return <SettingsContent currentWallpaper={currentWallpaper} setWallpaper={setWallpaper} />;
       case 'Snake Game':
         return <SnakeGame />;
       default:
@@ -190,8 +202,8 @@ const Window: React.FC<WindowProps> = ({
       style={{
         left: `${position.x}px`,
         top: `${position.y}px`,
-        width: `${size.width}px`,
-        height: `${size.height}px`,
+        width: `${windowSize.width}px`,
+        height: `${windowSize.height}px`,
         zIndex,
       }}
       onClick={() => bringToFront(id)}
@@ -201,7 +213,7 @@ const Window: React.FC<WindowProps> = ({
     >
       <WindowHeader onMouseDown={handleMouseDown}>
         <CloseButton onClick={() => closeWindow(id)} />
-        <WindowTitle>{title}</WindowTitle>
+        <WindowTitle>{id}</WindowTitle>
       </WindowHeader>
       <WindowContent>{renderContent()}</WindowContent>
       <ResizeHandle position="right" onMouseDown={(e) => handleResizeMouseDown(e, 'right')} />

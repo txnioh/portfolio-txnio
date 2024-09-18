@@ -5,6 +5,7 @@ export interface WindowState {
   icon: string;
   position: { x: number; y: number };
   url?: string;
+  isPermanent?: boolean;
 }
 
 export interface DesktopIcon {

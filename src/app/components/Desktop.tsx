@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import Window from './Window';
+import WindowContainer from './WindowContainer';
 import TopBar from './TopBar';
 import Dock from './Dock';
 import DesktopIcons from './DesktopIcons';
@@ -21,8 +21,6 @@ const WindowContainerStyled = styled.div`
 
 interface DesktopProps {
   windows: WindowState[];
-  desktopApps: WindowState[];
-  openApps: WindowState[];
   toggleWindow: (id: string) => void;
   closeWindow: (id: string) => void;
   bringToFront: (id: string) => void;
@@ -38,8 +36,6 @@ interface DesktopProps {
 
 const Desktop: React.FC<DesktopProps> = ({
   windows,
-  desktopApps,
-  openApps,
   toggleWindow,
   closeWindow,
   bringToFront,
@@ -64,26 +60,24 @@ const Desktop: React.FC<DesktopProps> = ({
       />
       <WindowContainerStyled>
         <DesktopIcons icons={desktopIcons} openUrl={openUrl} />
-        {[...windows, ...desktopApps].map((window) => (
+        {windows.map((window) => (
           window.isOpen && (
-            <Window
+            <WindowContainer
               key={window.id}
-              id={window.id}
-              title={window.id}
-              onClose={() => closeWindow(window.id)}
-              onFocus={() => bringToFront(window.id)}
-              zIndex={window.zIndex}
-              position={windowPositions[window.id] || window.position}
-              size={windowSizes[window.id] || { width: 1200, height: 800 }}
-              updatePosition={updateWindowPosition}
-              updateSize={updateWindowSize}
-            >
-              {/* Window content */}
-            </Window>
+              window={window}
+              closeWindow={closeWindow}
+              bringToFront={bringToFront}
+              position={windowPositions[window.id] || { x: 0, y: 0 }}
+              size={windowSizes[window.id] || { width: 800, height: 600 }}
+              updateWindowPosition={updateWindowPosition}
+              updateWindowSize={updateWindowSize}
+              currentWallpaper={currentWallpaper}
+              setWallpaper={setWallpaper}
+            />
           )
         ))}
       </WindowContainerStyled>
-      <Dock windows={windows} openApps={openApps} toggleWindow={toggleWindow} />
+      <Dock windows={windows} toggleWindow={toggleWindow} />
     </DesktopWrapper>
   );
 };

@@ -65,19 +65,19 @@ const OpenIndicator = styled.div`
 
 interface DockProps {
   windows: WindowState[];
-  openApps: WindowState[];
   toggleWindow: (id: string) => void;
 }
 
-const Dock: React.FC<DockProps> = ({ windows, openApps, toggleWindow }) => {
+const Dock: React.FC<DockProps> = ({ windows, toggleWindow }) => {
   const [hoveredIcon, setHoveredIcon] = useState<string | null>(null);
 
-  const allIcons = [...windows, ...openApps];
+  // Filtrar solo las ventanas que están abiertas o son aplicaciones permanentes del Dock
+  const dockIcons = windows.filter(window => window.isOpen || window.isPermanent);
 
   return (
     <DockWrapper>
       <DockSection>
-        {allIcons.map((item) => (
+        {dockIcons.map((item) => (
           <DockIcon
             key={item.id}
             whileHover={{ y: -10, scale: 1.1 }}
