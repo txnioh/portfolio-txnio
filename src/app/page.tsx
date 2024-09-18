@@ -1,15 +1,15 @@
 'use client'
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createGlobalStyle } from 'styled-components';
 import Desktop from './components/Desktop';
 
-const GlobalStyles = createGlobalStyle`
+const GlobalStyles = createGlobalStyle<{ wallpaper: string }>`
   body {
     margin: 0;
     padding: 0;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-    background-image: url('/mac-wallpaper.jpg');
+    background-image: url(${props => props.wallpaper});
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -41,6 +41,7 @@ export default function Home() {
     { id: 'Proyectos', isOpen: false, zIndex: 0, icon: '/icons/notas.png', position: { x: 0, y: 0 } },
     { id: 'Sobre Mí', isOpen: false, zIndex: 0, icon: '/icons/visualstudio.png', position: { x: 0, y: 0 } },
     { id: 'Contacto', isOpen: false, zIndex: 0, icon: '/icons/correo.png', position: { x: 0, y: 0 } },
+    // Eliminamos la línea de Ajustes
   ]);
 
   const [desktopIcons] = useState<DesktopIcon[]>([
@@ -97,9 +98,30 @@ export default function Home() {
     }
   };
 
+  const [wallpaperBase, setWallpaperBase] = useState('wallpaper1');
+  const [isNightTime, setIsNightTime] = useState(false);
+
+  useEffect(() => {
+    const checkTime = () => {
+      const currentHour = new Date().getHours();
+      setIsNightTime(currentHour >= 18 || currentHour < 6);
+    };
+
+    checkTime(); // Comprobar inmediatamente
+    const interval = setInterval(checkTime, 60000); // Comprobar cada minuto
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const wallpaper = `/${wallpaperBase}-${isNightTime ? 'night' : 'day'}.png`;
+
+  const setWallpaper = (newWallpaperBase: string) => {
+    setWallpaperBase(newWallpaperBase);
+  };
+
   return (
     <>
-      <GlobalStyles />
+      <GlobalStyles wallpaper={wallpaper} />
       <Desktop
         windows={windows}
         toggleWindow={toggleWindow}
@@ -107,6 +129,8 @@ export default function Home() {
         bringToFront={bringToFront}
         desktopIcons={desktopIcons}
         openUrl={openUrl}
+        currentWallpaper={wallpaperBase}
+        setWallpaper={setWallpaper}
       />
     </>
   );

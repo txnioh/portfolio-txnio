@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { FaSearch, FaCog } from 'react-icons/fa';
 import SearchBar from './SearchBar';
+import SettingsContent from './WindowContents/SettingsContent';
 import { WindowState, DesktopIcon } from '../types';
 
 const TopBarWrapper = styled.div`
@@ -40,16 +41,42 @@ const TopBarText = styled.div`
   margin: 0 5px;
 `;
 
+const SettingsOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+`;
+
+const SettingsContainer = styled.div`
+  width: 60%;
+  max-width: 600px;
+  background-color: rgba(30, 30, 30, 0.8);
+  backdrop-filter: blur(10px);
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+`;
+
 interface TopBarProps {
   windows: WindowState[];
   desktopIcons: DesktopIcon[];
   toggleWindow: (id: string) => void;
   openUrl: (url: string) => void;
+  currentWallpaper: string;
+  setWallpaper: (wallpaper: string) => void;
 }
 
-const TopBar: React.FC<TopBarProps> = ({ windows, desktopIcons, toggleWindow, openUrl }) => {
+const TopBar: React.FC<TopBarProps> = ({ windows, desktopIcons, toggleWindow, openUrl, currentWallpaper, setWallpaper }) => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -69,13 +96,13 @@ const TopBar: React.FC<TopBarProps> = ({ windows, desktopIcons, toggleWindow, op
     <>
       <TopBarWrapper>
         <TopBarLeft>
-          <TopBarText>Txnio Portfolio</TopBarText>
+          <TopBarText>made with love by txnio.</TopBarText>
         </TopBarLeft>
         <TopBarRight>
           <TopBarIcon onClick={() => setIsSearchOpen(true)}>
             <FaSearch />
           </TopBarIcon>
-          <TopBarIcon>
+          <TopBarIcon onClick={() => setIsSettingsOpen(true)}>
             <FaCog />
           </TopBarIcon>
           <TopBarText>{formatDate(currentTime)}</TopBarText>
@@ -90,6 +117,16 @@ const TopBar: React.FC<TopBarProps> = ({ windows, desktopIcons, toggleWindow, op
           openUrl={openUrl}
           onClose={() => setIsSearchOpen(false)} 
         />
+      )}
+      {isSettingsOpen && (
+        <SettingsOverlay onClick={() => setIsSettingsOpen(false)}>
+          <SettingsContainer onClick={(e) => e.stopPropagation()}>
+            <SettingsContent 
+              currentWallpaper={currentWallpaper} 
+              setWallpaper={setWallpaper} 
+            />
+          </SettingsContainer>
+        </SettingsOverlay>
       )}
     </>
   );

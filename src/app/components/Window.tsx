@@ -6,6 +6,7 @@ import ProjectsContent from './WindowContents/ProjectsContent';
 import AboutMeContent from './WindowContents/AboutMeContent';
 import ContactContent from './WindowContents/ContactContent';
 import HomeContent from './WindowContents/HomeContent';
+import SettingsContent from './WindowContents/SettingsContent';
 
 const WindowWrapper = styled(motion.div)`
   background-color: rgba(30, 30, 30, 0.5);
@@ -85,9 +86,11 @@ interface WindowProps {
   window: WindowState;
   closeWindow: (id: string) => void;
   bringToFront: (id: string) => void;
+  currentWallpaper: string;
+  setWallpaper: (wallpaper: string) => void;
 }
 
-const Window: React.FC<WindowProps> = ({ window, closeWindow, bringToFront }) => {
+const Window: React.FC<WindowProps> = ({ window, closeWindow, bringToFront, currentWallpaper, setWallpaper }) => {
   const renderContent = () => {
     switch (window.id) {
       case 'Home':
@@ -98,6 +101,8 @@ const Window: React.FC<WindowProps> = ({ window, closeWindow, bringToFront }) =>
         return <AboutMeContent />;
       case 'Contacto':
         return <ContactContent />;
+      case 'Ajustes':
+        return <SettingsContent currentWallpaper={currentWallpaper} setWallpaper={setWallpaper} />;
       default:
         return <div>Contenido no disponible</div>;
     }

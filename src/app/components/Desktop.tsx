@@ -22,6 +22,8 @@ interface DesktopProps {
   bringToFront: (id: string) => void;
   desktopIcons: DesktopIcon[];
   openUrl: (url: string) => void;
+  currentWallpaper: string;
+  setWallpaper: (wallpaper: string) => void;
 }
 
 const Desktop: React.FC<DesktopProps> = ({
@@ -30,7 +32,9 @@ const Desktop: React.FC<DesktopProps> = ({
   closeWindow,
   bringToFront,
   desktopIcons,
-  openUrl
+  openUrl,
+  currentWallpaper,
+  setWallpaper
 }) => {
   return (
     <DesktopWrapper>
@@ -39,20 +43,16 @@ const Desktop: React.FC<DesktopProps> = ({
         desktopIcons={desktopIcons}
         toggleWindow={toggleWindow} 
         openUrl={openUrl}
+        currentWallpaper={currentWallpaper}
+        setWallpaper={setWallpaper}
       />
-      <Image
-        src="/mac-wallpaper.jpg"
-        alt="Mac Wallpaper"
-        fill
-        style={{ objectFit: 'cover' }}
-        quality={100}
-        priority
-      />
-      <DesktopIcons icons={desktopIcons} openUrl={openUrl} />
+      <DesktopIcons icons={desktopIcons} openUrl={openUrl} /> {/* Asegúrate de que esta línea esté presente */}
       <WindowContainer
         windows={windows}
         closeWindow={closeWindow}
         bringToFront={bringToFront}
+        currentWallpaper={currentWallpaper}
+        setWallpaper={setWallpaper}
       />
       <Dock windows={windows} toggleWindow={toggleWindow} />
     </DesktopWrapper>

@@ -21,9 +21,11 @@ interface WindowContainerProps {
   windows: WindowState[];
   closeWindow: (id: string) => void;
   bringToFront: (id: string) => void;
+  currentWallpaper: string;
+  setWallpaper: (wallpaper: string) => void;
 }
 
-const WindowContainer: React.FC<WindowContainerProps> = ({ windows, closeWindow, bringToFront }) => {
+const WindowContainer: React.FC<WindowContainerProps> = ({ windows, closeWindow, bringToFront, currentWallpaper, setWallpaper }) => {
   return (
     <WindowContainerWrapper>
       <AnimatePresence>
@@ -33,6 +35,8 @@ const WindowContainer: React.FC<WindowContainerProps> = ({ windows, closeWindow,
             window={window}
             closeWindow={closeWindow}
             bringToFront={bringToFront}
+            currentWallpaper={currentWallpaper}
+            setWallpaper={setWallpaper}
           />
         ))}
       </AnimatePresence>

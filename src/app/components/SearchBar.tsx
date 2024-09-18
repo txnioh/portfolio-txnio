@@ -3,8 +3,9 @@ import styled from 'styled-components';
 import Image from 'next/image';
 import { FaSearch, FaTimes } from 'react-icons/fa';
 import { WindowState, DesktopIcon } from '../types';
+import { motion, AnimatePresence } from 'framer-motion';
 
-const SearchOverlay = styled.div`
+const SearchOverlay = styled(motion.div)`
   position: fixed;
   top: 0;
   left: 0;
@@ -17,7 +18,7 @@ const SearchOverlay = styled.div`
   z-index: 2000;
 `;
 
-const SearchContainer = styled.div`
+const SearchContainer = styled(motion.div)`
   width: 60%;
   max-width: 600px;
   background-color: rgba(255, 255, 255, 0.1);
@@ -139,35 +140,63 @@ const SearchBar: React.FC<SearchBarProps> = ({ windows, desktopIcons, toggleWind
   };
 
   return (
-    <SearchOverlay onClick={onClose}>
-      <SearchContainer onClick={e => e.stopPropagation()}>
-        <SearchInputContainer>
-          <FaSearch color="white" />
-          <SearchInput
-            ref={inputRef}
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Buscar aplicaciones..."
-          />
-          <FaTimes color="white" onClick={onClose} style={{ cursor: 'pointer' }} />
-        </SearchInputContainer>
-        <SearchResults>
-          {filteredItems.slice(0, 4).map((item, index) => (
-            <SearchResultItem
-              key={item.id}
-              isSelected={index === selectedIndex}
-              onClick={() => handleItemClick(item)}
-            >
-              <ItemIcon>
-                <Image src={item.icon} alt={item.id} layout="fill" objectFit="contain" />
-              </ItemIcon>
-              <ItemName>{item.id}</ItemName>
-            </SearchResultItem>
-          ))}
-        </SearchResults>
-      </SearchContainer>
-    </SearchOverlay>
+    <AnimatePresence>
+      <SearchOverlay
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.3 }}
+        onClick={onClose}
+      >
+        <SearchContainer
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 0.95, opacity: 0 }}
+          transition={{ 
+            type: "spring", 
+            stiffness: 300, 
+            damping: 30,
+            opacity: { duration: 0.2 }
+          }}
+          onClick={e => e.stopPropagation()}
+        >
+          <SearchInputContainer>
+            <FaSearch color="white" />
+            <SearchInput
+              ref={inputRef}
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Buscar aplicaciones..."
+            />
+            <FaTimes color="white" onClick={onClose} style={{ cursor: 'pointer' }} />
+          </SearchInputContainer>
+          <SearchResults>
+            <AnimatePresence>
+              {filteredItems.slice(0, 4).map((item, index) => (
+                <motion.div
+                  key={item.id}
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2, delay: index * 0.05 }}
+                >
+                  <SearchResultItem
+                    isSelected={index === selectedIndex}
+                    onClick={() => handleItemClick(item)}
+                  >
+                    <ItemIcon>
+                      <Image src={item.icon} alt={item.id} layout="fill" objectFit="contain" />
+                    </ItemIcon>
+                    <ItemName>{item.id}</ItemName>
+                  </SearchResultItem>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </SearchResults>
+        </SearchContainer>
+      </SearchOverlay>
+    </AnimatePresence>
   );
 };
 
