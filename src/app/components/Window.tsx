@@ -7,15 +7,14 @@ import ContactContent from './WindowContents/ContactContent';
 import HomeContent from './WindowContents/HomeContent';
 import SettingsContent from './WindowContents/SettingsContent';
 import SnakeGame from './WindowContents/SnakeGame';
+import { WindowState } from '../types'; // Asegúrate de importar WindowState
 
 interface WindowProps {
-  id: string;
-  title: string;
-  onClose: () => void;
-  onFocus: () => void;
-  zIndex: number;
-  position: { x: number; y: number };
-  size: { width: number; height: number };
+  window: WindowState;
+  closeWindow: (id: string) => void;
+  bringToFront: (id: string) => void;
+  currentWallpaper: string;
+  setWallpaper: (wallpaper: string) => void;
   updatePosition: (id: string, position: { x: number; y: number }) => void;
   updateSize: (id: string, size: { width: number; height: number }) => void;
 }
@@ -89,7 +88,17 @@ const ResizeHandle = styled.div<{ position: string }>`
   }}
 `;
 
-const Window: React.FC<WindowProps> = ({ id, title, onClose, onFocus, zIndex, position, size, updatePosition, updateSize }) => {
+const Window: React.FC<WindowProps> = ({ 
+  window, 
+  closeWindow, 
+  bringToFront, 
+  currentWallpaper, 
+  setWallpaper,
+  updatePosition,
+  updateSize 
+}) => {
+  const { id, title, zIndex, position, size } = window;
+  
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
   const [resizeDirection, setResizeDirection] = useState('');
@@ -149,7 +158,7 @@ const Window: React.FC<WindowProps> = ({ id, title, onClose, onFocus, zIndex, po
       x: e.clientX - position.x,
       y: e.clientY - position.y,
     });
-    onFocus();
+    bringToFront(id);
     e.preventDefault();
   };
 
@@ -157,7 +166,7 @@ const Window: React.FC<WindowProps> = ({ id, title, onClose, onFocus, zIndex, po
     e.stopPropagation();
     setIsResizing(true);
     setResizeDirection(direction);
-    onFocus();
+    bringToFront(id);
   };
 
   const renderContent = () => {
@@ -189,13 +198,13 @@ const Window: React.FC<WindowProps> = ({ id, title, onClose, onFocus, zIndex, po
         height: `${size.height}px`,
         zIndex,
       }}
-      onClick={onFocus}
+      onClick={() => bringToFront(id)}
       initial={{ opacity: 0, scale: 0.8 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.2 }}
     >
       <WindowHeader onMouseDown={handleMouseDown}>
-        <CloseButton onClick={onClose} />
+        <CloseButton onClick={() => closeWindow(id)} />
         <WindowTitle>{title}</WindowTitle>
       </WindowHeader>
       <WindowContent>{renderContent()}</WindowContent>

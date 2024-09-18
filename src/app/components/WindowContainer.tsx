@@ -1,20 +1,11 @@
 import React from 'react';
 import styled from 'styled-components';
-import { AnimatePresence } from 'framer-motion';
 import Window from './Window';
-import { WindowState } from '../types'; // Añade esta línea
+import { WindowState } from '../types';
 
-const WindowContainerWrapper = styled.div`
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  pointer-events: none;
-  z-index: 10; // Añadimos un z-index más alto
+const WindowContainerStyled = styled.div`
+  position: relative;
+  flex: 1;
 `;
 
 interface WindowContainerProps {
@@ -23,13 +14,23 @@ interface WindowContainerProps {
   bringToFront: (id: string) => void;
   currentWallpaper: string;
   setWallpaper: (wallpaper: string) => void;
+  updateWindowPosition: (id: string, position: { x: number; y: number }) => void;
+  updateWindowSize: (id: string, size: { width: number; height: number }) => void;
 }
 
-const WindowContainer: React.FC<WindowContainerProps> = ({ windows, closeWindow, bringToFront, currentWallpaper, setWallpaper }) => {
+const WindowContainer: React.FC<WindowContainerProps> = ({
+  windows,
+  closeWindow,
+  bringToFront,
+  currentWallpaper,
+  setWallpaper,
+  updateWindowPosition,
+  updateWindowSize
+}) => {
   return (
-    <WindowContainerWrapper>
-      <AnimatePresence>
-        {windows.filter(window => window.isOpen).map((window) => (
+    <WindowContainerStyled>
+      {windows.map((window) => (
+        window.isOpen && (
           <Window
             key={window.id}
             window={window}
@@ -37,10 +38,12 @@ const WindowContainer: React.FC<WindowContainerProps> = ({ windows, closeWindow,
             bringToFront={bringToFront}
             currentWallpaper={currentWallpaper}
             setWallpaper={setWallpaper}
+            updatePosition={updateWindowPosition}
+            updateSize={updateWindowSize}
           />
-        ))}
-      </AnimatePresence>
-    </WindowContainerWrapper>
+        )
+      ))}
+    </WindowContainerStyled>
   );
 };
 
