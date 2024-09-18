@@ -18,6 +18,7 @@ const GlobalStyles = createGlobalStyle<{ wallpaper: string }>`
     width: 100vw;
     overflow: hidden;
     color: #e0e0e0;
+    user-select: none; // Evita la selección de texto en todo el cuerpo
   }
 `;
 
@@ -62,6 +63,9 @@ export default function Home() {
   const [wallpaperBase, setWallpaperBase] = useState('wallpaper1');
   const [isNightTime, setIsNightTime] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+
+  const [windowPositions, setWindowPositions] = useState({});
+  const [windowSizes, setWindowSizes] = useState({});
 
   useEffect(() => {
     const checkTime = () => {
@@ -113,20 +117,30 @@ export default function Home() {
             app.id === id ? { ...app, isOpen: !app.isOpen } : app
           );
           const updatedApp = newApps.find(app => app.id === id);
-          if (updatedApp) {
-            if (updatedApp.isOpen) {
-              setOpenApps(prev => prev.some(app => app.id === id) ? prev : [...prev, updatedApp]);
-            } else {
-              setOpenApps(prev => prev.filter(app => app.id !== id));
-            }
+          if (updatedApp && updatedApp.isOpen) {
+            const centerPosition = getCenterPosition();
+            setWindowPositions(prev => ({ ...prev, [id]: centerPosition }));
+            setWindowSizes(prev => ({ ...prev, [id]: { width: 1000, height: 700 } })); // Tamaño inicial más grande
+            setOpenApps(prev => prev.some(app => app.id === id) ? prev : [...prev, updatedApp]);
+          } else if (updatedApp) {
+            setOpenApps(prev => prev.filter(app => app.id !== id));
           }
           return newApps;
         });
       } else {
         setWindows(prevWindows => 
-          prevWindows.map(window => 
-            window.id === id ? { ...window, isOpen: !window.isOpen } : window
-          )
+          prevWindows.map(window => {
+            if (window.id === id) {
+              const newIsOpen = !window.isOpen;
+              if (newIsOpen) {
+                const centerPosition = getCenterPosition();
+                setWindowPositions(prev => ({ ...prev, [id]: centerPosition }));
+                setWindowSizes(prev => ({ ...prev, [id]: { width: 1000, height: 700 } })); // Tamaño inicial más grande
+              }
+              return { ...window, isOpen: newIsOpen };
+            }
+            return window;
+          })
         );
       }
       bringToFront(id);
@@ -173,6 +187,23 @@ export default function Home() {
     setWallpaperBase(newWallpaperBase);
   };
 
+  const updateWindowPosition = (id: string, position: { x: number; y: number }) => {
+    setWindowPositions(prev => ({ ...prev, [id]: position }));
+  };
+
+  const updateWindowSize = (id: string, size: { width: number; height: number }) => {
+    setWindowSizes(prev => ({ ...prev, [id]: size }));
+  };
+
+  const getCenterPosition = () => {
+    const windowWidth = 1000; // Ancho predeterminado de la ventana (aumentado)
+    const windowHeight = 700; // Alto predeterminado de la ventana (aumentado)
+    return {
+      x: Math.max(0, Math.floor((window.innerWidth - windowWidth) / 2)),
+      y: Math.max(0, Math.floor((window.innerHeight - windowHeight) / 2))
+    };
+  };
+
   return (
     <>
       <GlobalStyles wallpaper={wallpaper} />
@@ -190,6 +221,10 @@ export default function Home() {
           openUrl={openUrl}
           currentWallpaper={wallpaperBase}
           setWallpaper={setWallpaper}
+          windowPositions={windowPositions}
+          windowSizes={windowSizes}
+          updateWindowPosition={updateWindowPosition}
+          updateWindowSize={updateWindowSize}
         />
       )}
     </>

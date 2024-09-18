@@ -1,7 +1,6 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { WindowState } from '../types';
 import ProjectsContent from './WindowContents/ProjectsContent';
 import AboutMeContent from './WindowContents/AboutMeContent';
 import ContactContent from './WindowContents/ContactContent';
@@ -9,91 +8,160 @@ import HomeContent from './WindowContents/HomeContent';
 import SettingsContent from './WindowContents/SettingsContent';
 import SnakeGame from './WindowContents/SnakeGame';
 
-const WindowWrapper = styled(motion.div)`
-  background-color: rgba(30, 30, 30, 0.5);
+interface WindowProps {
+  id: string;
+  title: string;
+  onClose: () => void;
+  onFocus: () => void;
+  zIndex: number;
+  position: { x: number; y: number };
+  size: { width: number; height: number };
+  updatePosition: (id: string, position: { x: number; y: number }) => void;
+  updateSize: (id: string, size: { width: number; height: number }) => void;
+}
+
+const WindowContainer = styled(motion.div)`
+  position: absolute;
+  background-color: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(10px);
-  border-radius: 10px;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
-  width: 80%;
-  max-width: 800px;
-  height: 70%;
-  overflow: hidden;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
   display: flex;
   flex-direction: column;
-  pointer-events: auto;
-  z-index: 100; // Aseguramos que cada ventana tenga un z-index alto
+  color: white;
+  overflow: hidden;
 `;
 
 const WindowHeader = styled.div`
   display: flex;
-  justify-content: center;
   align-items: center;
-  padding: 10px 20px;
-  background-color: rgba(50, 50, 50, 0.5);
-  backdrop-filter: blur(5px);
-  border-bottom: 1px solid rgba(68, 68, 68, 0.5);
-  position: relative;
-`;
-
-const WindowTitle = styled.h2`
-  margin: 0;
-  font-size: 14px;
-  font-weight: 500;
-  color: #e0e0e0;
+  padding: 8px;
+  background-color: rgba(255, 255, 255, 0.1);
+  cursor: move;
+  user-select: none;
 `;
 
 const CloseButton = styled.button`
-  background-color: #ff5f57;
-  border: none;
-  border-radius: 50%;
   width: 12px;
   height: 12px;
+  border-radius: 50%;
+  background-color: #ff5f56;
+  border: none;
+  margin-right: 8px;
   cursor: pointer;
   position: absolute;
-  left: 20px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  transition: background-color 0.3s;
+  left: 8px;
+`;
 
-  &:hover {
-    background-color: #ff5f57;
-    &::before,
-    &::after {
-      content: '';
-      position: absolute;
-      width: 8px;
-      height: 2px;
-      background-color: rgba(0, 0, 0, 0.5);
-    }
-    &::before {
-      transform: rotate(45deg);
-    }
-    &::after {
-      transform: rotate(-45deg);
-    }
-  }
+const WindowTitle = styled.span`
+  flex: 1;
+  text-align: center;
+  font-weight: bold;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 `;
 
 const WindowContent = styled.div`
   flex: 1;
-  overflow-y: auto;
-  padding: 0; // Eliminamos el padding
-  display: flex; // Añadimos display flex
-  flex-direction: column; // Para que el contenido se extienda verticalmente
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
 `;
 
-interface WindowProps {
-  window: WindowState;
-  closeWindow: (id: string) => void;
-  bringToFront: (id: string) => void;
-  currentWallpaper: string;
-  setWallpaper: (wallpaper: string) => void;
-}
+const ResizeHandle = styled.div<{ position: string }>`
+  position: absolute;
+  ${({ position }) => {
+    switch (position) {
+      case 'right':
+        return 'top: 0; right: 0; width: 5px; height: 100%; cursor: ew-resize;';
+      case 'bottom':
+        return 'bottom: 0; left: 0; width: 100%; height: 5px; cursor: ns-resize;';
+      case 'left':
+        return 'top: 0; left: 0; width: 5px; height: 100%; cursor: ew-resize;';
+      case 'bottom-right':
+        return 'bottom: 0; right: 0; width: 10px; height: 10px; cursor: nwse-resize;';
+      case 'bottom-left':
+        return 'bottom: 0; left: 0; width: 10px; height: 10px; cursor: nesw-resize;';
+      default:
+        return '';
+    }
+  }}
+`;
 
-const Window: React.FC<WindowProps> = ({ window, closeWindow, bringToFront, currentWallpaper, setWallpaper }) => {
+const Window: React.FC<WindowProps> = ({ id, title, onClose, onFocus, zIndex, position, size, updatePosition, updateSize }) => {
+  const [isDragging, setIsDragging] = useState(false);
+  const [isResizing, setIsResizing] = useState(false);
+  const [resizeDirection, setResizeDirection] = useState('');
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const windowRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (isDragging) {
+        updatePosition(id, {
+          x: e.clientX - dragOffset.x,
+          y: e.clientY - dragOffset.y,
+        });
+      } else if (isResizing) {
+        let newWidth = size.width;
+        let newHeight = size.height;
+        let newX = position.x;
+
+        if (resizeDirection.includes('right')) {
+          newWidth = e.clientX - position.x;
+        } else if (resizeDirection.includes('left')) {
+          newWidth = size.width + (position.x - e.clientX);
+          newX = e.clientX;
+        }
+
+        if (resizeDirection.includes('bottom')) {
+          newHeight = e.clientY - position.y;
+        }
+
+        updateSize(id, { width: Math.max(newWidth, 200), height: Math.max(newHeight, 100) });
+        if (resizeDirection.includes('left')) {
+          updatePosition(id, { x: newX, y: position.y });
+        }
+      }
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+      setIsResizing(false);
+      setResizeDirection('');
+    };
+
+    if (isDragging || isResizing) {
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
+    }
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging, isResizing, dragOffset, id, position, size, updatePosition, updateSize, resizeDirection]);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setIsDragging(true);
+    setDragOffset({
+      x: e.clientX - position.x,
+      y: e.clientY - position.y,
+    });
+    onFocus();
+    e.preventDefault();
+  };
+
+  const handleResizeMouseDown = (e: React.MouseEvent, direction: string) => {
+    e.stopPropagation();
+    setIsResizing(true);
+    setResizeDirection(direction);
+    onFocus();
+  };
+
   const renderContent = () => {
-    switch (window.id) {
+    switch (id) {
       case 'Home':
         return <HomeContent />;
       case 'Proyectos':
@@ -102,8 +170,8 @@ const Window: React.FC<WindowProps> = ({ window, closeWindow, bringToFront, curr
         return <AboutMeContent />;
       case 'Contacto':
         return <ContactContent />;
-      case 'Ajustes':
-        return <SettingsContent currentWallpaper={currentWallpaper} setWallpaper={setWallpaper} />;
+      case 'Settings':
+        return <SettingsContent currentWallpaper="" setWallpaper={() => {}} />;
       case 'Snake Game':
         return <SnakeGame />;
       default:
@@ -112,27 +180,31 @@ const Window: React.FC<WindowProps> = ({ window, closeWindow, bringToFront, curr
   };
 
   return (
-    <WindowWrapper
-      initial={{ scale: 0.8, opacity: 0 }}
-      animate={{ 
-        scale: 1, 
-        opacity: 1,
-        x: window.position.x,
-        y: window.position.y,
-        zIndex: window.zIndex + 100 // Aseguramos que el z-index sea siempre alto
+    <WindowContainer
+      ref={windowRef}
+      style={{
+        left: `${position.x}px`,
+        top: `${position.y}px`,
+        width: `${size.width}px`,
+        height: `${size.height}px`,
+        zIndex,
       }}
-      exit={{ scale: 0.8, opacity: 0 }}
-      transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-      onClick={() => bringToFront(window.id)}
+      onClick={onFocus}
+      initial={{ opacity: 0, scale: 0.8 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.2 }}
     >
-      <WindowHeader>
-        <CloseButton onClick={() => closeWindow(window.id)} />
-        <WindowTitle>{window.id}</WindowTitle>
+      <WindowHeader onMouseDown={handleMouseDown}>
+        <CloseButton onClick={onClose} />
+        <WindowTitle>{title}</WindowTitle>
       </WindowHeader>
-      <WindowContent>
-        {renderContent()}
-      </WindowContent>
-    </WindowWrapper>
+      <WindowContent>{renderContent()}</WindowContent>
+      <ResizeHandle position="right" onMouseDown={(e) => handleResizeMouseDown(e, 'right')} />
+      <ResizeHandle position="bottom" onMouseDown={(e) => handleResizeMouseDown(e, 'bottom')} />
+      <ResizeHandle position="left" onMouseDown={(e) => handleResizeMouseDown(e, 'left')} />
+      <ResizeHandle position="bottom-right" onMouseDown={(e) => handleResizeMouseDown(e, 'bottom-right')} />
+      <ResizeHandle position="bottom-left" onMouseDown={(e) => handleResizeMouseDown(e, 'bottom-left')} />
+    </WindowContainer>
   );
 };
 
