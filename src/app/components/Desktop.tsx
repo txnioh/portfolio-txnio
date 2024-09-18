@@ -1,6 +1,5 @@
 import React from 'react';
 import styled from 'styled-components';
-import Image from 'next/image';
 import Dock from './Dock';
 import TopBar from './TopBar';
 import WindowContainer from './WindowContainer';
