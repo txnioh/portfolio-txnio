@@ -74,7 +74,7 @@ const SnakeGame: React.FC = () => {
     if (isGameOver) return;
 
     const newSnake = [...snake];
-    let head = [...newSnake[0]];
+    const head = [...newSnake[0]]; // Cambiamos 'let' por 'const'
 
     switch (direction) {
       case 'UP': head[1] -= 1; break;
@@ -107,7 +107,7 @@ const SnakeGame: React.FC = () => {
     }
 
     setSnake(newSnake);
-  }, [snake, direction, food, score, isGameOver]);
+  }, [snake, direction, food, score, isGameOver, checkCollision]); // Añadimos checkCollision a las dependencias
 
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {

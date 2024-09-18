@@ -25,12 +25,7 @@ const DockSection = styled.div`
   align-items: flex-end;
 `;
 
-const DockSeparator = styled.div`
-  width: 1px;
-  height: 40px;
-  background-color: rgba(255, 255, 255, 0.3);
-  margin: 0 10px;
-`;
+// Eliminamos la declaración de DockSeparator ya que no se usa
 
 const DockIcon = styled(motion.div)`
   width: 50px;
