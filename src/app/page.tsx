@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { createGlobalStyle } from 'styled-components';
 import Desktop from './components/Desktop';
+import MacLoading from './components/MacLoading';
 
 const GlobalStyles = createGlobalStyle<{ wallpaper: string }>`
   body {
@@ -100,6 +101,15 @@ export default function Home() {
 
   const [wallpaperBase, setWallpaperBase] = useState('wallpaper1');
   const [isNightTime, setIsNightTime] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 2000); // Ajusta este tiempo según tus necesidades
+
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     const checkTime = () => {
@@ -107,8 +117,8 @@ export default function Home() {
       setIsNightTime(currentHour >= 18 || currentHour < 6);
     };
 
-    checkTime(); // Comprobar inmediatamente
-    const interval = setInterval(checkTime, 60000); // Comprobar cada minuto
+    checkTime();
+    const interval = setInterval(checkTime, 60000);
 
     return () => clearInterval(interval);
   }, []);
@@ -122,16 +132,20 @@ export default function Home() {
   return (
     <>
       <GlobalStyles wallpaper={wallpaper} />
-      <Desktop
-        windows={windows}
-        toggleWindow={toggleWindow}
-        closeWindow={closeWindow}
-        bringToFront={bringToFront}
-        desktopIcons={desktopIcons}
-        openUrl={openUrl}
-        currentWallpaper={wallpaperBase}
-        setWallpaper={setWallpaper}
-      />
+      {isLoading ? (
+        <MacLoading />
+      ) : (
+        <Desktop
+          windows={windows}
+          toggleWindow={toggleWindow}
+          closeWindow={closeWindow}
+          bringToFront={bringToFront}
+          desktopIcons={desktopIcons}
+          openUrl={openUrl}
+          currentWallpaper={wallpaperBase}
+          setWallpaper={setWallpaper}
+        />
+      )}
     </>
   );
 }

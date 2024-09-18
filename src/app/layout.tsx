@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
+import { Inter } from 'next/font/google';
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -12,6 +13,8 @@ const geistMono = localFont({
   variable: "--font-geist-mono",
   weight: "100 900",
 });
+
+const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: "Txnio Portfolio",
@@ -25,10 +28,39 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <style>{`
+          body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            background-color: black;
+          }
+          #__next {
+            height: 100%;
+            width: 100%;
+          }
+          #content-wrapper {
+            opacity: 0;
+            transition: opacity 0.3s ease-in;
+          }
+        `}</style>
+        <script dangerouslySetInnerHTML={{
+          __html: `
+            window.onload = function() {
+              document.getElementById('content-wrapper').style.opacity = '1';
+            }
+          `
+        }} />
+      </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased ${inter.className}`}
       >
-        {children}
+        <div id="content-wrapper">
+          {children}
+        </div>
       </body>
     </html>
   );
