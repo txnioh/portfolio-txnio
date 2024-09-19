@@ -225,7 +225,7 @@ const Window: React.FC<WindowProps> = ({
       case 'Settings':
         return <SettingsContent currentWallpaper={currentWallpaper} setWallpaper={setWallpaper} />;
       case 'Snake Game':
-        return <SnakeGame />;
+        return window.isOpen ? <SnakeGame /> : null;
       default:
         return <div>Contenido no disponible</div>;
     }

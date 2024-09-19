@@ -151,6 +151,7 @@ const SnakeGame: React.FC = () => {
   const [isGameOver, setIsGameOver] = useState<boolean>(false);
   const gameboardRef = useRef<HTMLDivElement>(null);
   const isMobile = useMediaQuery({ maxWidth: 768 });
+  const gameIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const moveSnake = useCallback(() => {
     const checkCollision = (head: number[]): boolean => {
@@ -213,23 +214,25 @@ const SnakeGame: React.FC = () => {
 
     document.addEventListener('keydown', handleKeyPress);
 
-    const gameInterval = setInterval(moveSnake, 100);
+    gameIntervalRef.current = setInterval(moveSnake, 100);
 
     return () => {
       document.removeEventListener('keydown', handleKeyPress);
-      clearInterval(gameInterval);
+      if (gameIntervalRef.current) {
+        clearInterval(gameIntervalRef.current);
+      }
     };
   }, [moveSnake, isGameOver]);
 
-  const restartGame = () => {
+  const restartGame = useCallback(() => {
     setSnake([[0, 0]]);
     setFood([10, 10]);
     setDirection('RIGHT');
     setScore(0);
     setIsGameOver(false);
-  };
+  }, []);
 
-  const handleTouchControl = (newDirection: string) => {
+  const handleTouchControl = useCallback((newDirection: string) => {
     if (isGameOver) return;
     setDirection(prev => {
       switch (newDirection) {
@@ -240,7 +243,21 @@ const SnakeGame: React.FC = () => {
         default: return prev;
       }
     });
-  };
+  }, [isGameOver]);
+
+  // Efecto para limpiar el juego cuando el componente se desmonta
+  useEffect(() => {
+    return () => {
+      if (gameIntervalRef.current) {
+        clearInterval(gameIntervalRef.current);
+      }
+      setSnake([[0, 0]]);
+      setFood([10, 10]);
+      setDirection('RIGHT');
+      setScore(0);
+      setIsGameOver(false);
+    };
+  }, []);
 
   return (
     <GameContainer>
@@ -324,4 +341,4 @@ const SnakeGame: React.FC = () => {
   );
 };
 
-export default SnakeGame;
+export default React.memo(SnakeGame);

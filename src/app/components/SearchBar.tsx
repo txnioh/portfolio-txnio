@@ -19,17 +19,13 @@ const SearchOverlay = styled(motion.div)`
 `;
 
 const SearchContainer = styled.div<{ isMobile: boolean }>`
-  position: fixed;
-  top: ${props => props.isMobile ? '35px' : '25px'};
-  left: 50%;
-  transform: translateX(-50%);
   width: ${props => props.isMobile ? '90%' : '600px'};
+  max-width: 600px;
   background-color: rgba(30, 30, 30, 0.8);
   backdrop-filter: blur(10px);
   border-radius: 10px;
-  padding: 10px;
+  padding: 20px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  z-index: 1000;
 `;
 
 const SearchInputContainer = styled.div`
@@ -86,7 +82,7 @@ interface SearchBarProps {
   toggleWindow: (id: string) => void;
   openUrl: (url: string) => void;
   onClose: () => void;
-  isMobile: boolean; // Añadimos esta prop
+  isMobile: boolean;
 }
 
 interface SearchItem {
@@ -113,6 +109,13 @@ const SearchBar: React.FC<SearchBarProps> = ({
     if (inputRef.current) {
       inputRef.current.focus();
     }
+
+    // Limpiar al desmontar
+    return () => {
+      setSearchTerm('');
+      setFilteredItems([]);
+      setSelectedIndex(0);
+    };
   }, []);
 
   useEffect(() => {
@@ -121,10 +124,24 @@ const SearchBar: React.FC<SearchBarProps> = ({
       ...desktopIcons.map(d => ({ id: d.id, icon: d.icon, type: 'desktopIcon' as const, url: d.url }))
     ];
 
-    const filtered = allItems.filter(item =>
-      item.id.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    setFilteredItems(filtered);
+    // Eliminar duplicados basados en el id
+    const uniqueItems = allItems.reduce((acc, current) => {
+      const x = acc.find(item => item.id === current.id);
+      if (!x) {
+        return acc.concat([current]);
+      } else {
+        return acc;
+      }
+    }, [] as SearchItem[]);
+
+    if (searchTerm.trim() === '') {
+      setFilteredItems([]);
+    } else {
+      const filtered = uniqueItems.filter(item =>
+        item.id.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredItems(filtered);
+    }
     setSelectedIndex(0);
   }, [searchTerm, windows, desktopIcons]);
 
@@ -138,7 +155,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
         handleItemClick(filteredItems[selectedIndex]);
       }
     } else if (e.key === 'Escape') {
-      onClose();
+      handleClose();
     }
   };
 
@@ -148,6 +165,13 @@ const SearchBar: React.FC<SearchBarProps> = ({
     } else if (item.type === 'desktopIcon' && item.url) {
       openUrl(item.url);
     }
+    handleClose();
+  };
+
+  const handleClose = () => {
+    setSearchTerm('');
+    setFilteredItems([]);
+    setSelectedIndex(0);
     onClose();
   };
 
@@ -158,9 +182,9 @@ const SearchBar: React.FC<SearchBarProps> = ({
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.3 }}
-        onClick={onClose}
+        onClick={handleClose}
       >
-        <SearchContainer isMobile={isMobile}>
+        <SearchContainer isMobile={isMobile} onClick={(e) => e.stopPropagation()}>
           <SearchInputContainer>
             <FaSearch color="white" />
             <SearchInput
@@ -170,7 +194,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
               onKeyDown={handleKeyDown}
               placeholder="Buscar aplicaciones..."
             />
-            <FaTimes color="white" onClick={onClose} style={{ cursor: 'pointer' }} />
+            <FaTimes color="white" onClick={handleClose} style={{ cursor: 'pointer' }} />
           </SearchInputContainer>
           <SearchResults>
             <AnimatePresence>
