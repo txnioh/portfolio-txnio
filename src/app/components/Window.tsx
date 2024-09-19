@@ -19,10 +19,14 @@ interface WindowProps {
   updateSize: (newSize: { width: number; height: number }) => void;
   currentWallpaper: string;
   setWallpaper: (wallpaper: string) => void;
+  isMobile: boolean;
 }
 
-const WindowContainer = styled(motion.div)`
-  position: absolute;
+const MOBILE_WINDOW_WIDTH = 'calc(100% - 20px)';
+const MOBILE_WINDOW_HEIGHT = 'calc(100% - 160px)';
+
+const WindowContainer = styled(motion.div)<{ isMobile: boolean }>`
+  position: ${({ isMobile }) => isMobile ? 'fixed' : 'absolute'};
   background-color: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(10px);
   border-radius: 8px;
@@ -31,6 +35,14 @@ const WindowContainer = styled(motion.div)`
   flex-direction: column;
   color: white;
   overflow: hidden;
+  ${({ isMobile }) => isMobile && `
+    top: 60px;
+    left: 10px;
+    right: 10px;
+    bottom: 60px;
+    width: ${MOBILE_WINDOW_WIDTH} !important;
+    height: ${MOBILE_WINDOW_HEIGHT} !important;
+  `}
 `;
 
 const WindowHeader = styled.div`
@@ -40,7 +52,7 @@ const WindowHeader = styled.div`
   background-color: rgba(255, 255, 255, 0.1);
   cursor: move;
   user-select: none;
-  height: 30px; // Aumentamos la altura del encabezado
+  height: 30px;
 `;
 
 const CloseButton = styled.button`
@@ -100,12 +112,14 @@ const Window: React.FC<WindowProps> = ({
   updatePosition,
   updateSize,
   currentWallpaper,
-  setWallpaper
+  setWallpaper,
+  isMobile
 }) => {
   const { id, zIndex } = window;
   
-  const defaultSize = { width: 800, height: 600 };
-  const windowSize = size || defaultSize;
+  const windowSize = isMobile
+    ? { width: MOBILE_WINDOW_WIDTH, height: MOBILE_WINDOW_HEIGHT }
+    : size;
 
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
@@ -200,27 +214,32 @@ const Window: React.FC<WindowProps> = ({
     <WindowContainer
       ref={windowRef}
       style={{
-        left: `${position.x}px`,
-        top: `${position.y}px`,
-        width: `${windowSize.width}px`,
-        height: `${windowSize.height}px`,
+        left: isMobile ? '10px' : `${position.x}px`,
+        top: isMobile ? '60px' : `${position.y}px`,
+        width: isMobile ? MOBILE_WINDOW_WIDTH : `${windowSize.width}px`,
+        height: isMobile ? MOBILE_WINDOW_HEIGHT : `${windowSize.height}px`,
         zIndex,
       }}
       onClick={() => bringToFront(id)}
       initial={{ opacity: 0, scale: 0.8 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.2 }}
+      isMobile={isMobile}
     >
-      <WindowHeader onMouseDown={handleMouseDown}>
+      <WindowHeader onMouseDown={isMobile ? undefined : handleMouseDown}>
         <CloseButton onClick={() => closeWindow(id)} />
         <WindowTitle>{id}</WindowTitle>
       </WindowHeader>
       <WindowContent>{renderContent()}</WindowContent>
-      <ResizeHandle position="right" onMouseDown={(e) => handleResizeMouseDown(e, 'right')} />
-      <ResizeHandle position="bottom" onMouseDown={(e) => handleResizeMouseDown(e, 'bottom')} />
-      <ResizeHandle position="left" onMouseDown={(e) => handleResizeMouseDown(e, 'left')} />
-      <ResizeHandle position="bottom-right" onMouseDown={(e) => handleResizeMouseDown(e, 'bottom-right')} />
-      <ResizeHandle position="bottom-left" onMouseDown={(e) => handleResizeMouseDown(e, 'bottom-left')} />
+      {!isMobile && (
+        <>
+          <ResizeHandle position="right" onMouseDown={(e) => handleResizeMouseDown(e, 'right')} />
+          <ResizeHandle position="bottom" onMouseDown={(e) => handleResizeMouseDown(e, 'bottom')} />
+          <ResizeHandle position="left" onMouseDown={(e) => handleResizeMouseDown(e, 'left')} />
+          <ResizeHandle position="bottom-right" onMouseDown={(e) => handleResizeMouseDown(e, 'bottom-right')} />
+          <ResizeHandle position="bottom-left" onMouseDown={(e) => handleResizeMouseDown(e, 'bottom-left')} />
+        </>
+      )}
     </WindowContainer>
   );
 };

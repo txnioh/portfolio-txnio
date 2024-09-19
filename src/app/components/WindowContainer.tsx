@@ -12,6 +12,7 @@ interface WindowContainerProps {
   updateWindowSize: (id: string, newSize: { width: number; height: number }) => void;
   currentWallpaper: string;
   setWallpaper: (wallpaper: string) => void;
+  isMobile: boolean;
 }
 
 const WindowContainer: React.FC<WindowContainerProps> = ({
@@ -24,6 +25,7 @@ const WindowContainer: React.FC<WindowContainerProps> = ({
   updateWindowSize,
   currentWallpaper,
   setWallpaper,
+  isMobile,
 }) => {
   return (
     <Window
@@ -36,6 +38,7 @@ const WindowContainer: React.FC<WindowContainerProps> = ({
       updateSize={(newSize) => updateWindowSize(window.id, newSize)}
       currentWallpaper={currentWallpaper}
       setWallpaper={setWallpaper}
+      isMobile={isMobile}
     />
   );
 };

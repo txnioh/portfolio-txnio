@@ -4,7 +4,8 @@ import WindowContainer from './WindowContainer';
 import TopBar from './TopBar';
 import Dock from './Dock';
 import DesktopIcons from './DesktopIcons';
-import { WindowState, DesktopIcon } from '../types'; // Añade esta línea
+import { WindowState, DesktopIcon } from '../types';
+import { useMediaQuery } from 'react-responsive';
 
 const DesktopWrapper = styled.div`
   height: 100vh;
@@ -48,6 +49,8 @@ const Desktop: React.FC<DesktopProps> = ({
   updateWindowPosition,
   updateWindowSize
 }) => {
+  const isMobile = useMediaQuery({ maxWidth: 768 });
+
   return (
     <DesktopWrapper>
       <TopBar 
@@ -57,6 +60,7 @@ const Desktop: React.FC<DesktopProps> = ({
         openUrl={openUrl}
         currentWallpaper={currentWallpaper}
         setWallpaper={setWallpaper}
+        isMobile={isMobile}
       />
       <WindowContainerStyled>
         <DesktopIcons icons={desktopIcons} openUrl={openUrl} />
@@ -73,11 +77,12 @@ const Desktop: React.FC<DesktopProps> = ({
               updateWindowSize={updateWindowSize}
               currentWallpaper={currentWallpaper}
               setWallpaper={setWallpaper}
+              isMobile={isMobile}
             />
           )
         ))}
       </WindowContainerStyled>
-      <Dock windows={windows} toggleWindow={toggleWindow} />
+      <Dock windows={windows} toggleWindow={toggleWindow} isMobile={isMobile} />
     </DesktopWrapper>
   );
 };
