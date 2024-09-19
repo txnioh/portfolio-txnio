@@ -7,7 +7,7 @@ const GameContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
   height: 100%;
   background-color: #1e1e1e;
   padding: 10px;
@@ -112,43 +112,51 @@ const MobileLayout = styled.div`
   position: relative;
   width: 100%;
   height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 `;
 
 const GameWrapper = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   width: 100%;
   max-width: 300px;
+  position: relative;
 `;
 
 const TouchControlsContainer = styled.div`
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  top: 62%;
+  left: 52%;
+  transform: translate(-50%, -50%);
   display: flex;
   justify-content: center;
   align-items: center;
   pointer-events: none;
+  width: 100%;
+  height: 100%;
 `;
 
 const TouchControls = styled.div`
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
-  width: 180px;
+  width: 150px;
+  height: 150px;
 `;
 
 const TouchButton = styled.button`
-  background-color: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background-color: rgba(255, 255, 255, 0.05);
+  border: none;
   border-radius: 50%;
-  width: 50px;
-  height: 50px;
-  font-size: 24px;
-  color: white;
+  width: 100%;
+  height: 100%;
+  font-size: 20px;
+  color: rgba(255, 255, 255, 0.7);
   cursor: pointer;
   display: flex;
   justify-content: center;
@@ -157,7 +165,7 @@ const TouchButton = styled.button`
   pointer-events: auto;
 
   &:active {
-    background-color: rgba(255, 255, 255, 0.2);
+    background-color: rgba(255, 255, 255, 0.1);
     transform: scale(0.95);
   }
 `;
@@ -309,30 +317,26 @@ const SnakeGame: React.FC = () => {
     </>
   );
 
-  const mobileControls = (
-    <TouchControls>
-      <div />
-      <TouchButton onClick={() => handleTouchControl('UP')}>↑</TouchButton>
-      <div />
-      <TouchButton onClick={() => handleTouchControl('LEFT')}>←</TouchButton>
-      <div />
-      <TouchButton onClick={() => handleTouchControl('RIGHT')}>→</TouchButton>
-      <div />
-      <TouchButton onClick={() => handleTouchControl('DOWN')}>↓</TouchButton>
-      <div />
-    </TouchControls>
-  );
-
   return (
     <GameContainer>
       {isMobile ? (
         <MobileLayout>
           <GameWrapper>
             {gameContent}
+            <TouchControlsContainer>
+              <TouchControls>
+                <div />
+                <TouchButton onClick={() => handleTouchControl('UP')}>▲</TouchButton>
+                <div />
+                <TouchButton onClick={() => handleTouchControl('LEFT')}>◄</TouchButton>
+                <div />
+                <TouchButton onClick={() => handleTouchControl('RIGHT')}>►</TouchButton>
+                <div />
+                <TouchButton onClick={() => handleTouchControl('DOWN')}>▼</TouchButton>
+                <div />
+              </TouchControls>
+            </TouchControlsContainer>
           </GameWrapper>
-          <TouchControlsContainer>
-            {mobileControls}
-          </TouchControlsContainer>
         </MobileLayout>
       ) : (
         gameContent
