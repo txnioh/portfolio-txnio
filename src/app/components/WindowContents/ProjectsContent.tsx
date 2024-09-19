@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import { FaGithub, FaExternalLinkAlt } from 'react-icons/fa';
 
 const ProjectsContainer = styled.div`
   display: flex;
   flex-direction: column;
+  align-items: center;
   height: 100%;
   background-color: rgba(30, 30, 30, 0.5);
   backdrop-filter: blur(10px);
@@ -13,15 +14,38 @@ const ProjectsContainer = styled.div`
   padding: 20px;
 `;
 
+const TitleContainer = styled.div`
+  width: 100%;
+  text-align: center;
+  margin-bottom: 30px;
+`;
+
 const Title = styled.h2`
   color: #FFA500;
-  margin-bottom: 20px;
+  font-size: 2.5rem;
+  margin: 0;
+  padding: 10px 0;
+  position: relative;
+  display: inline-block;
+
+  &::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    transform: translateX(-50%);
+    width: 50%;
+    height: 3px;
+    background-color: #FFA500;
+  }
 `;
 
 const ProjectGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 20px;
+  width: 100%;
+  max-width: 1200px;
 `;
 
 const ProjectCard = styled.div`
@@ -120,7 +144,9 @@ const projects: Project[] = [
 const ProjectsContent: React.FC = () => {
   return (
     <ProjectsContainer>
-      <Title>Mis Proyectos</Title>
+      <TitleContainer>
+        <Title>Mis Proyectos</Title>
+      </TitleContainer>
       <ProjectGrid>
         {projects.map(project => (
           <ProjectCard key={project.id}>
