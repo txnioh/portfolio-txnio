@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import styled from 'styled-components';
 
 const GameContainer = styled.div`
@@ -12,14 +12,17 @@ const GameContainer = styled.div`
 
 const GameBoard = styled.div`
   display: grid;
-  grid-template-columns: repeat(20, 20px);
-  grid-template-rows: repeat(20, 20px);
+  grid-template-columns: repeat(20, 1fr);
+  grid-template-rows: repeat(20, 1fr);
   border: 2px solid #333;
+  width: 100%;
+  max-width: 400px;
+  aspect-ratio: 1 / 1;
 `;
 
 const Cell = styled.div<{ isSnake: boolean; isFood: boolean }>`
-  width: 20px;
-  height: 20px;
+  width: 100%;
+  height: 100%;
   background-color: ${props => 
     props.isSnake ? '#4caf50' : 
     props.isFood ? '#f44336' : 
@@ -54,12 +57,35 @@ const RestartButton = styled.button`
   }
 `;
 
+const TouchControls = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 20px;
+  width: 150px;
+`;
+
+const TouchButton = styled.button`
+  background-color: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 5px;
+  padding: 10px;
+  font-size: 24px;
+  color: white;
+  cursor: pointer;
+
+  &:active {
+    background-color: rgba(255, 255, 255, 0.4);
+  }
+`;
+
 const SnakeGame: React.FC = () => {
   const [snake, setSnake] = useState<number[][]>([[0, 0]]);
   const [food, setFood] = useState<number[]>([10, 10]);
   const [direction, setDirection] = useState<string>('RIGHT');
   const [score, setScore] = useState<number>(0);
   const [isGameOver, setIsGameOver] = useState<boolean>(false);
+  const gameboardRef = useRef<HTMLDivElement>(null);
 
   const moveSnake = useCallback(() => {
     const checkCollision = (head: number[]): boolean => {
@@ -74,7 +100,7 @@ const SnakeGame: React.FC = () => {
     if (isGameOver) return;
 
     const newSnake = [...snake];
-    const head = [...newSnake[0]]; // Cambiamos 'let' por 'const'
+    const head = [...newSnake[0]];
 
     switch (direction) {
       case 'UP': head[1] -= 1; break;
@@ -138,9 +164,22 @@ const SnakeGame: React.FC = () => {
     setIsGameOver(false);
   };
 
+  const handleTouchControl = (newDirection: string) => {
+    if (isGameOver) return;
+    setDirection(prev => {
+      switch (newDirection) {
+        case 'UP': return prev !== 'DOWN' ? 'UP' : prev;
+        case 'DOWN': return prev !== 'UP' ? 'DOWN' : prev;
+        case 'LEFT': return prev !== 'RIGHT' ? 'LEFT' : prev;
+        case 'RIGHT': return prev !== 'LEFT' ? 'RIGHT' : prev;
+        default: return prev;
+      }
+    });
+  };
+
   return (
     <GameContainer>
-      <GameBoard>
+      <GameBoard ref={gameboardRef}>
         {Array.from({ length: 400 }).map((_, index) => {
           const x = index % 20;
           const y = Math.floor(index / 20);
@@ -156,6 +195,17 @@ const SnakeGame: React.FC = () => {
           <RestartButton onClick={restartGame}>Restart</RestartButton>
         </>
       )}
+      <TouchControls>
+        <div />
+        <TouchButton onClick={() => handleTouchControl('UP')}>↑</TouchButton>
+        <div />
+        <TouchButton onClick={() => handleTouchControl('LEFT')}>←</TouchButton>
+        <div />
+        <TouchButton onClick={() => handleTouchControl('RIGHT')}>→</TouchButton>
+        <div />
+        <TouchButton onClick={() => handleTouchControl('DOWN')}>↓</TouchButton>
+        <div />
+      </TouchControls>
     </GameContainer>
   );
 };
