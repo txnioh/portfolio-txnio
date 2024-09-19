@@ -109,9 +109,7 @@ const AnimatedRestartButton = styled(motion.button)`
 `;
 
 const MobileLayout = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  position: relative;
   width: 100%;
   height: 100%;
 `;
@@ -125,10 +123,15 @@ const GameWrapper = styled.div`
 `;
 
 const TouchControlsContainer = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   display: flex;
   justify-content: center;
-  width: 100%;
-  margin-top: 20px;
+  align-items: center;
+  pointer-events: none;
 `;
 
 const TouchControls = styled.div`
@@ -139,8 +142,8 @@ const TouchControls = styled.div`
 `;
 
 const TouchButton = styled.button`
-  background-color: rgba(50, 50, 50, 0.8);
-  border: 2px solid #000;
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 50%;
   width: 50px;
   height: 50px;
@@ -151,11 +154,11 @@ const TouchButton = styled.button`
   justify-content: center;
   align-items: center;
   transition: all 0.2s ease-in-out;
+  pointer-events: auto;
 
   &:active {
-    background-color: rgba(80, 80, 80, 0.8);
+    background-color: rgba(255, 255, 255, 0.2);
     transform: scale(0.95);
-    border-color: #fff;
   }
 `;
 
