@@ -10,7 +10,7 @@ const GameContainer = styled.div`
   justify-content: flex-start;
   height: 100%;
   background-color: #1e1e1e;
-  padding: 20px;
+  padding: 10px;
 `;
 
 const ScoreBoard = styled(motion.div)`
@@ -41,7 +41,7 @@ const GameBoard = styled.div`
   grid-template-rows: repeat(20, 1fr);
   border: 2px solid #333;
   width: 100%;
-  max-width: 400px;
+  max-width: 300px;
   aspect-ratio: 1 / 1;
 `;
 
@@ -108,27 +108,43 @@ const AnimatedRestartButton = styled(motion.button)`
   }
 `;
 
+const MobileLayout = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+`;
+
+const GameWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 300px;
+`;
+
 const TouchControlsContainer = styled.div`
   display: flex;
   justify-content: center;
   width: 100%;
-  margin-top: 40px; // Aumentamos el espacio entre el juego y los controles
+  margin-top: 20px;
 `;
 
 const TouchControls = styled.div`
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 15px;
-  width: 240px;
+  gap: 10px;
+  width: 180px;
 `;
 
 const TouchButton = styled.button`
   background-color: rgba(50, 50, 50, 0.8);
   border: 2px solid #000;
   border-radius: 50%;
-  width: 80px;
-  height: 80px;
-  font-size: 32px;
+  width: 50px;
+  height: 50px;
+  font-size: 24px;
   color: white;
   cursor: pointer;
   display: flex;
@@ -259,8 +275,8 @@ const SnakeGame: React.FC = () => {
     };
   }, []);
 
-  return (
-    <GameContainer>
+  const gameContent = (
+    <>
       <AnimatePresence>
         <ScoreBoard
           initial={{ opacity: 0, y: -50 }}
@@ -287,6 +303,37 @@ const SnakeGame: React.FC = () => {
           return <Cell key={index} isSnake={isSnake} isFood={isFood} />;
         })}
       </GameBoard>
+    </>
+  );
+
+  const mobileControls = (
+    <TouchControls>
+      <div />
+      <TouchButton onClick={() => handleTouchControl('UP')}>↑</TouchButton>
+      <div />
+      <TouchButton onClick={() => handleTouchControl('LEFT')}>←</TouchButton>
+      <div />
+      <TouchButton onClick={() => handleTouchControl('RIGHT')}>→</TouchButton>
+      <div />
+      <TouchButton onClick={() => handleTouchControl('DOWN')}>↓</TouchButton>
+      <div />
+    </TouchControls>
+  );
+
+  return (
+    <GameContainer>
+      {isMobile ? (
+        <MobileLayout>
+          <GameWrapper>
+            {gameContent}
+          </GameWrapper>
+          <TouchControlsContainer>
+            {mobileControls}
+          </TouchControlsContainer>
+        </MobileLayout>
+      ) : (
+        gameContent
+      )}
       <AnimatePresence>
         {isGameOver && (
           <GameOverOverlay
@@ -321,22 +368,6 @@ const SnakeGame: React.FC = () => {
           </GameOverOverlay>
         )}
       </AnimatePresence>
-      
-      {isMobile && (
-        <TouchControlsContainer>
-          <TouchControls>
-            <div />
-            <TouchButton onClick={() => handleTouchControl('UP')}>↑</TouchButton>
-            <div />
-            <TouchButton onClick={() => handleTouchControl('LEFT')}>←</TouchButton>
-            <div />
-            <TouchButton onClick={() => handleTouchControl('RIGHT')}>→</TouchButton>
-            <div />
-            <TouchButton onClick={() => handleTouchControl('DOWN')}>↓</TouchButton>
-            <div />
-          </TouchControls>
-        </TouchControlsContainer>
-      )}
     </GameContainer>
   );
 };
