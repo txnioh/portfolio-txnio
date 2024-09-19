@@ -1,11 +1,10 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import WindowContainer from './WindowContainer';
 import TopBar from './TopBar';
 import Dock from './Dock';
 import DesktopIcons from './DesktopIcons';
 import { WindowState, DesktopIcon } from '../types';
-import { useMediaQuery } from 'react-responsive';
 
 const DesktopWrapper = styled.div`
   height: 100vh;
@@ -49,7 +48,18 @@ const Desktop: React.FC<DesktopProps> = ({
   updateWindowPosition,
   updateWindowSize
 }) => {
-  const isMobile = useMediaQuery({ maxWidth: 768 });
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   return (
     <DesktopWrapper>

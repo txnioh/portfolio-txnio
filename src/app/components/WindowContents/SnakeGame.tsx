@@ -108,11 +108,17 @@ const AnimatedRestartButton = styled(motion.button)`
   }
 `;
 
+const TouchControlsContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-top: 40px; // Aumentamos el espacio entre el juego y los controles
+`;
+
 const TouchControls = styled.div`
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 15px;
-  margin-top: 20px;
   width: 240px;
 `;
 
@@ -298,18 +304,21 @@ const SnakeGame: React.FC = () => {
           </GameOverOverlay>
         )}
       </AnimatePresence>
+      
       {isMobile && (
-        <TouchControls>
-          <div />
-          <TouchButton onClick={() => handleTouchControl('UP')}>↑</TouchButton>
-          <div />
-          <TouchButton onClick={() => handleTouchControl('LEFT')}>←</TouchButton>
-          <div />
-          <TouchButton onClick={() => handleTouchControl('RIGHT')}>→</TouchButton>
-          <div />
-          <TouchButton onClick={() => handleTouchControl('DOWN')}>↓</TouchButton>
-          <div />
-        </TouchControls>
+        <TouchControlsContainer>
+          <TouchControls>
+            <div />
+            <TouchButton onClick={() => handleTouchControl('UP')}>↑</TouchButton>
+            <div />
+            <TouchButton onClick={() => handleTouchControl('LEFT')}>←</TouchButton>
+            <div />
+            <TouchButton onClick={() => handleTouchControl('RIGHT')}>→</TouchButton>
+            <div />
+            <TouchButton onClick={() => handleTouchControl('DOWN')}>↓</TouchButton>
+            <div />
+          </TouchControls>
+        </TouchControlsContainer>
       )}
     </GameContainer>
   );
