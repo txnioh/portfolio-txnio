@@ -55,62 +55,6 @@ const Cell = styled.div<{ isSnake: boolean; isFood: boolean }>`
   border: 1px solid #333;
 `;
 
-const Score = styled.div`
-  color: #fff;
-  font-size: 24px;
-  margin-top: 20px;
-`;
-
-const GameOver = styled.div`
-  color: #f44336;
-  font-size: 32px;
-  margin-top: 20px;
-`;
-
-const RestartButton = styled.button`
-  margin-top: 20px;
-  padding: 10px 20px;
-  background-color: #4caf50;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 18px;
-
-  &:hover {
-    background-color: #45a049;
-  }
-`;
-
-const TouchControls = styled.div`
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 15px;
-  margin-top: 20px;
-  width: 240px; // Aumentamos el ancho total
-`;
-
-const TouchButton = styled.button`
-  background-color: rgba(50, 50, 50, 0.8);
-  border: 2px solid #000;
-  border-radius: 50%;
-  width: 80px; // Aumentamos el tamaño
-  height: 80px; // Aumentamos el tamaño
-  font-size: 32px; // Aumentamos el tamaño de la fuente
-  color: white;
-  cursor: pointer;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  transition: all 0.2s ease-in-out;
-
-  &:active {
-    background-color: rgba(80, 80, 80, 0.8);
-    transform: scale(0.95);
-    border-color: #fff;
-  }
-`;
-
 const GameOverOverlay = styled(motion.div)`
   position: absolute;
   top: 0;
@@ -161,6 +105,35 @@ const AnimatedRestartButton = styled(motion.button)`
   &:active {
     transform: translateY(0);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+`;
+
+const TouchControls = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  margin-top: 20px;
+  width: 240px;
+`;
+
+const TouchButton = styled.button`
+  background-color: rgba(50, 50, 50, 0.8);
+  border: 2px solid #000;
+  border-radius: 50%;
+  width: 80px;
+  height: 80px;
+  font-size: 32px;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.2s ease-in-out;
+
+  &:active {
+    background-color: rgba(80, 80, 80, 0.8);
+    transform: scale(0.95);
+    border-color: #fff;
   }
 `;
 

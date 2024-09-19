@@ -5,12 +5,12 @@ import SearchBar from './SearchBar';
 import SettingsContent from './WindowContents/SettingsContent';
 import { WindowState, DesktopIcon } from '../types';
 
-const TopBarWrapper = styled.div`
+const TopBarWrapper = styled.div<{ isMobile: boolean }>`
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  height: 25px;
+  height: ${props => props.isMobile ? '35px' : '25px'};
   background-color: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(10px);
   display: flex;
@@ -18,7 +18,7 @@ const TopBarWrapper = styled.div`
   align-items: center;
   padding: 0 10px;
   color: white;
-  font-size: 12px;
+  font-size: ${props => props.isMobile ? '14px' : '12px'};
   z-index: 1000;
 `;
 
@@ -32,13 +32,14 @@ const TopBarRight = styled.div`
   align-items: center;
 `;
 
-const TopBarIcon = styled.div`
-  margin: 0 5px;
+const TopBarIcon = styled.div<{ isMobile: boolean }>`
+  margin: 0 ${props => props.isMobile ? '10px' : '5px'};
   cursor: pointer;
+  font-size: ${props => props.isMobile ? '18px' : '14px'};
 `;
 
-const TopBarText = styled.div`
-  margin: 0 5px;
+const TopBarText = styled.div<{ isMobile: boolean }>`
+  margin: 0 ${props => props.isMobile ? '10px' : '5px'};
 `;
 
 const SettingsOverlay = styled.div`
@@ -54,10 +55,10 @@ const SettingsOverlay = styled.div`
   z-index: 2000;
 `;
 
-const SettingsContainer = styled.div`
-  width: 80%;
+const SettingsContainer = styled.div<{ isMobile: boolean }>`
+  width: ${props => props.isMobile ? '90%' : '80%'};
   max-width: 800px;
-  height: 80%;
+  height: ${props => props.isMobile ? '90%' : '80%'};
   max-height: 600px;
   background-color: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(20px);
@@ -73,9 +74,18 @@ interface TopBarProps {
   openUrl: (url: string) => void;
   currentWallpaper: string;
   setWallpaper: (wallpaper: string) => void;
+  isMobile: boolean;
 }
 
-const TopBar: React.FC<TopBarProps> = ({ windows, desktopIcons, toggleWindow, openUrl, currentWallpaper, setWallpaper }) => {
+const TopBar: React.FC<TopBarProps> = ({
+  windows,
+  desktopIcons,
+  toggleWindow,
+  openUrl,
+  currentWallpaper,
+  setWallpaper,
+  isMobile
+}) => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -96,19 +106,23 @@ const TopBar: React.FC<TopBarProps> = ({ windows, desktopIcons, toggleWindow, op
 
   return (
     <>
-      <TopBarWrapper>
+      <TopBarWrapper isMobile={isMobile}>
         <TopBarLeft>
-          <TopBarText>made with love by txnio.</TopBarText>
+          <TopBarText isMobile={isMobile}>made with love by txnio.</TopBarText>
         </TopBarLeft>
         <TopBarRight>
-          <TopBarIcon onClick={() => setIsSearchOpen(true)}>
+          <TopBarIcon isMobile={isMobile} onClick={() => setIsSearchOpen(true)}>
             <FaSearch />
           </TopBarIcon>
-          <TopBarIcon onClick={() => setIsSettingsOpen(true)}>
+          <TopBarIcon isMobile={isMobile} onClick={() => setIsSettingsOpen(true)}>
             <FaCog />
           </TopBarIcon>
-          <TopBarText>{formatDate(currentTime)}</TopBarText>
-          <TopBarText>{formatTime(currentTime)}</TopBarText>
+          {!isMobile && (
+            <>
+              <TopBarText isMobile={isMobile}>{formatDate(currentTime)}</TopBarText>
+              <TopBarText isMobile={isMobile}>{formatTime(currentTime)}</TopBarText>
+            </>
+          )}
         </TopBarRight>
       </TopBarWrapper>
       {isSearchOpen && (
@@ -118,11 +132,12 @@ const TopBar: React.FC<TopBarProps> = ({ windows, desktopIcons, toggleWindow, op
           toggleWindow={toggleWindow}
           openUrl={openUrl}
           onClose={() => setIsSearchOpen(false)} 
+          isMobile={isMobile}
         />
       )}
       {isSettingsOpen && (
         <SettingsOverlay onClick={() => setIsSettingsOpen(false)}>
-          <SettingsContainer onClick={(e) => e.stopPropagation()}>
+          <SettingsContainer onClick={(e) => e.stopPropagation()} isMobile={isMobile}>
             <SettingsContent 
               currentWallpaper={currentWallpaper} 
               setWallpaper={setWallpaper} 

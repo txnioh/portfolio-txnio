@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import ProjectsContent from './WindowContents/ProjectsContent';
@@ -14,7 +14,7 @@ interface WindowProps {
   closeWindow: (id: string) => void;
   bringToFront: (id: string) => void;
   position: { x: number; y: number };
-  size: { width: number; height: number };
+  size: { width: number | string; height: number | string };
   updatePosition: (newPosition: { x: number; y: number }) => void;
   updateSize: (newSize: { width: number; height: number }) => void;
   currentWallpaper: string;
@@ -117,9 +117,15 @@ const Window: React.FC<WindowProps> = ({
 }) => {
   const { id, zIndex } = window;
   
-  const windowSize = isMobile
-    ? { width: MOBILE_WINDOW_WIDTH, height: MOBILE_WINDOW_HEIGHT }
-    : size;
+  const windowSize = useMemo(() => {
+    if (isMobile) {
+      return { width: MOBILE_WINDOW_WIDTH, height: MOBILE_WINDOW_HEIGHT };
+    }
+    return {
+      width: typeof size.width === 'string' ? parseInt(size.width, 10) : size.width,
+      height: typeof size.height === 'string' ? parseInt(size.height, 10) : size.height
+    };
+  }, [isMobile, size]);
 
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
@@ -135,22 +141,37 @@ const Window: React.FC<WindowProps> = ({
           y: e.clientY - dragOffset.y,
         });
       } else if (isResizing) {
-        let newWidth = windowSize.width;
-        let newHeight = windowSize.height;
+        let newWidth: number;
+        let newHeight: number;
         let newX = position.x;
+
+        const currentWidth = typeof windowSize.width === 'string' 
+          ? parseInt(windowSize.width, 10) 
+          : windowSize.width;
+
+        const currentHeight = typeof windowSize.height === 'string'
+          ? parseInt(windowSize.height, 10)
+          : windowSize.height;
 
         if (resizeDirection.includes('right')) {
           newWidth = e.clientX - position.x;
         } else if (resizeDirection.includes('left')) {
-          newWidth = windowSize.width + (position.x - e.clientX);
+          newWidth = currentWidth + (position.x - e.clientX);
           newX = e.clientX;
+        } else {
+          newWidth = currentWidth;
         }
 
         if (resizeDirection.includes('bottom')) {
           newHeight = e.clientY - position.y;
+        } else {
+          newHeight = currentHeight;
         }
 
-        updateSize({ width: Math.max(newWidth, 200), height: Math.max(newHeight, 100) });
+        updateSize({ 
+          width: Math.max(newWidth, 200), 
+          height: Math.max(newHeight, 100) 
+        });
         if (resizeDirection.includes('left')) {
           updatePosition({ x: newX, y: position.y });
         }

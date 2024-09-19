@@ -18,14 +18,18 @@ const SearchOverlay = styled(motion.div)`
   z-index: 2000;
 `;
 
-const SearchContainer = styled(motion.div)`
-  width: 60%;
-  max-width: 600px;
-  background-color: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(20px);
-  border-radius: 20px;
-  padding: 20px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+const SearchContainer = styled.div<{ isMobile: boolean }>`
+  position: fixed;
+  top: ${props => props.isMobile ? '35px' : '25px'};
+  left: 50%;
+  transform: translateX(-50%);
+  width: ${props => props.isMobile ? '90%' : '600px'};
+  background-color: rgba(30, 30, 30, 0.8);
+  backdrop-filter: blur(10px);
+  border-radius: 10px;
+  padding: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
 `;
 
 const SearchInputContainer = styled.div`
@@ -82,6 +86,7 @@ interface SearchBarProps {
   toggleWindow: (id: string) => void;
   openUrl: (url: string) => void;
   onClose: () => void;
+  isMobile: boolean; // Añadimos esta prop
 }
 
 interface SearchItem {
@@ -91,7 +96,14 @@ interface SearchItem {
   url?: string;
 }
 
-const SearchBar: React.FC<SearchBarProps> = ({ windows, desktopIcons, toggleWindow, openUrl, onClose }) => {
+const SearchBar: React.FC<SearchBarProps> = ({ 
+  windows, 
+  desktopIcons, 
+  toggleWindow, 
+  openUrl, 
+  onClose,
+  isMobile 
+}) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredItems, setFilteredItems] = useState<SearchItem[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -148,18 +160,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ windows, desktopIcons, toggleWind
         transition={{ duration: 0.3 }}
         onClick={onClose}
       >
-        <SearchContainer
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0.95, opacity: 0 }}
-          transition={{ 
-            type: "spring", 
-            stiffness: 300, 
-            damping: 30,
-            opacity: { duration: 0.2 }
-          }}
-          onClick={e => e.stopPropagation()}
-        >
+        <SearchContainer isMobile={isMobile}>
           <SearchInputContainer>
             <FaSearch color="white" />
             <SearchInput

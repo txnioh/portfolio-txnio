@@ -1,7 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
 import { FaDesktop, FaCamera, FaFilm, FaFigma, FaRobot, FaPalette } from 'react-icons/fa';
-import { SiAdobecreativecloud } from 'react-icons/si';
 
 const HomeContainer = styled.div`
   display: flex;

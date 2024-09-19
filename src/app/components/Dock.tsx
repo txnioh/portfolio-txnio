@@ -4,18 +4,19 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import { WindowState } from '../types';
 
-const DockWrapper = styled.div`
+const DockWrapper = styled.div<{ isMobile: boolean }>`
   background-color: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(10px);
-  border-radius: 20px;
+  border-radius: ${props => props.isMobile ? '0' : '20px'};
   padding: 10px;
   display: flex;
   justify-content: center;
   align-items: flex-end;
   position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
+  bottom: ${props => props.isMobile ? '0' : '20px'};
+  left: ${props => props.isMobile ? '0' : '50%'};
+  right: ${props => props.isMobile ? '0' : 'auto'};
+  transform: ${props => props.isMobile ? 'none' : 'translateX(-50%)'};
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
   border: 1px solid rgba(255, 255, 255, 0.1);
 `;
@@ -66,39 +67,42 @@ const OpenIndicator = styled.div`
 interface DockProps {
   windows: WindowState[];
   toggleWindow: (id: string) => void;
+  isMobile: boolean;
 }
 
-const Dock: React.FC<DockProps> = ({ windows, toggleWindow }) => {
+const Dock: React.FC<DockProps> = ({ windows, toggleWindow, isMobile }) => {
   const [hoveredIcon, setHoveredIcon] = useState<string | null>(null);
 
   // Filtrar solo las ventanas que están abiertas o son aplicaciones permanentes del Dock
   const dockIcons = windows.filter(window => window.isOpen || window.isPermanent);
 
   return (
-    <DockWrapper>
+    <DockWrapper isMobile={isMobile}>
       <DockSection>
         {dockIcons.map((item) => (
           <DockIcon
             key={item.id}
-            whileHover={{ y: -10, scale: 1.1 }}
+            whileHover={isMobile ? {} : { y: -10, scale: 1.1 }}
             onClick={() => toggleWindow(item.id)}
-            onHoverStart={() => setHoveredIcon(item.id)}
-            onHoverEnd={() => setHoveredIcon(null)}
+            onHoverStart={() => !isMobile && setHoveredIcon(item.id)}
+            onHoverEnd={() => !isMobile && setHoveredIcon(null)}
           >
             <Image src={item.icon} alt={item.id} width={40} height={40} />
             {item.isOpen && <OpenIndicator />}
-            <AnimatePresence>
-              {hoveredIcon === item.id && (
-                <IconLabel
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
-                  transition={{ duration: 0.1 }}
-                >
-                  {item.id}
-                </IconLabel>
-              )}
-            </AnimatePresence>
+            {!isMobile && (
+              <AnimatePresence>
+                {hoveredIcon === item.id && (
+                  <IconLabel
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    transition={{ duration: 0.1 }}
+                  >
+                    {item.id}
+                  </IconLabel>
+                )}
+              </AnimatePresence>
+            )}
           </DockIcon>
         ))}
       </DockSection>
