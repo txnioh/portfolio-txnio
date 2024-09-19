@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import { FaEnvelope, FaLinkedin } from 'react-icons/fa';
 
 const ContactContainer = styled.div`
   display: flex;
@@ -11,6 +12,39 @@ const ContactContainer = styled.div`
   color: #e0e0e0;
   height: 100%; // Aseguramos que ocupe toda la altura
   overflow-y: auto; // Permitimos scroll si el contenido es muy largo
+`;
+
+const ContactInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 30px;
+`;
+
+const ContactMethod = styled.a`
+  display: flex;
+  align-items: center;
+  color: #e0e0e0;
+  text-decoration: none;
+  margin: 10px 0;
+  font-size: 18px;
+  transition: color 0.3s;
+
+  &:hover {
+    color: #0078d4;
+  }
+
+  svg {
+    margin-right: 10px;
+    font-size: 24px;
+  }
+`;
+
+const Divider = styled.hr`
+  width: 100%;
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin: 20px 0;
 `;
 
 const ContactForm = styled.form`
@@ -118,6 +152,16 @@ const ContactContent: React.FC = () => {
   return (
     <ContactContainer>
       <FormTitle>Contáctame</FormTitle>
+      <ContactInfo>
+        <ContactMethod href="mailto:txniodev@gmail.com">
+          <FaEnvelope /> txniodev@gmail.com
+        </ContactMethod>
+        <ContactMethod href="https://www.linkedin.com/in/txnio" target="_blank" rel="noopener noreferrer">
+          <FaLinkedin /> Mi perfil de LinkedIn
+        </ContactMethod>
+      </ContactInfo>
+      <Divider />
+      <FormTitle>O envíame un mensaje directo</FormTitle>
       {!isSubmitted ? (
         <ContactForm onSubmit={handleSubmit}>
           <FormField>
@@ -153,7 +197,7 @@ const ContactContent: React.FC = () => {
         </ContactForm>
       ) : (
         <SuccessMessage>
-          ¡Gracias por tu mensaje! Te responderé pronto.
+          ¡Gracias por tu mensaje! Ahora mismo esto no está activo, ya que necesito trabajo para poder pagarme un dominio y que esto funcione, intenta contactarme por LinkedIn o correo.
         </SuccessMessage>
       )}
     </ContactContainer>

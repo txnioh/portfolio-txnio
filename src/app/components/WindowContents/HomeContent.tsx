@@ -127,8 +127,8 @@ const HomeContent: React.FC = () => {
 
   return (
     <HomeContainer>
-      <Title>Bienvenido al Portfolio de Antonio J. González</Title>
-      <Subtitle>Desarrollador Full Stack | Creativo Digital | Entusiasta de la Tecnología</Subtitle>
+      <Title>Bienvenid@ a mi portfolio</Title>
+      <Subtitle>Desarrollador FullStack | Creativo Digital | Entusiasta de la Tecnología y Arte</Subtitle>
       <InterestsGrid>
         {interests.map((interest, index) => (
           <InterestCard key={index}>
@@ -138,12 +138,12 @@ const HomeContent: React.FC = () => {
           </InterestCard>
         ))}
       </InterestsGrid>
-      <GallerySection>
+      {/* <GallerySection>
         <GalleryTitle>Mi Galería</GalleryTitle>
         <GalleryPlaceholder>
           Aquí se mostrarán las fotos de la galería próximamente.
         </GalleryPlaceholder>
-      </GallerySection>
+      </GallerySection> */}
     </HomeContainer>
   );
 };
