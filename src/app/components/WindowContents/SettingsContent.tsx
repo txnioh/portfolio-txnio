@@ -1,82 +1,80 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import styled from 'styled-components';
-import Image from 'next/image';
-import { motion, AnimatePresence } from 'framer-motion';
-import { FaSpinner } from 'react-icons/fa';
+import { FaDesktop } from 'react-icons/fa';
 
-const SettingsContainer = styled(motion.div)`
+const SettingsContainer = styled.div`
   display: flex;
   flex-direction: column;
-  padding: 30px;
-  background-color: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(20px);
+  background-color: rgba(25, 25, 25, 0.9);
+  backdrop-filter: blur(10px);
   color: #e0e0e0;
-  height: 100%;
+  padding: 20px;
   overflow-y: auto;
-  border-radius: 20px;
+  height: 100%;
+  width: 100%;
 `;
 
 const Title = styled.h2`
-  margin-bottom: 30px;
-  color: #000000;
-  font-size: 24px;
+  color: #ffffff;
+  margin-bottom: 20px;
+  font-size: 1.5rem;
+  border-bottom: 1px solid #444;
+  padding-bottom: 10px;
 `;
 
 const Section = styled.div`
-  display: flex;
-  flex-direction: column;
   margin-bottom: 30px;
 `;
 
 const SectionTitle = styled.h3`
-  margin-bottom: 20px;
-  font-size: 18px;
-  color: #000000;
-`;
-
-const WallpaperOptions = styled.div`
+  color: #0078d4;
+  margin-bottom: 15px;
+  font-size: 1.2rem;
   display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
-`;
-
-const WallpaperOption = styled(motion.div)<{ isSelected: boolean }>`
-  cursor: pointer;
-  border: 2px solid ${props => props.isSelected ? '#000000' : 'transparent'};
-  border-radius: 12px;
-  overflow: hidden;
-  width: 180px;
-  height: 101px;
-  position: relative;
-  transition: all 0.3s ease;
-
-  &:hover {
-    transform: scale(1.05);
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+  align-items: center;
+  
+  svg {
+    margin-right: 10px;
   }
 `;
 
-const InfoText = styled.p`
-  font-size: 14px;
-  color: #b0b0b0;
-  margin-top: 10px;
+const WallpaperGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 15px;
 `;
 
-const LoadingContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 200px;
-`;
+const WallpaperOption = styled.div<{ isSelected: boolean; backgroundImage: string }>`
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 8px;
+  background-image: url(${props => props.backgroundImage});
+  background-size: cover;
+  background-position: center;
+  cursor: pointer;
+  border: 3px solid ${props => props.isSelected ? '#0078d4' : 'transparent'};
+  transition: all 0.2s ease-in-out;
+  position: relative;
+  overflow: hidden;
 
-const SpinnerIcon = styled(FaSpinner)`
-  font-size: 40px;
-  color: #000000;
-  animation: spin 1s linear infinite;
+  &:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  }
 
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: ${props => props.isSelected ? 'rgba(0, 120, 212, 0.3)' : 'rgba(0, 0, 0, 0.1)'};
+    transition: background 0.2s ease-in-out;
+  }
+
+  &:hover::after {
+    background: rgba(0, 0, 0, 0.2);
   }
 `;
 
@@ -85,74 +83,27 @@ interface SettingsContentProps {
   setWallpaper: (wallpaper: string) => void;
 }
 
-const wallpapers = [
-  'wallpaper1',
-  'wallpaper2',
-  'wallpaper3'
-];
-
-const SettingsContent: React.FC<SettingsContentProps> = ({ currentWallpaper, setWallpaper }) => {
-  const [loadingWallpapers, setLoadingWallpapers] = useState(true);
-
-  useEffect(() => {
-    const loadImages = async () => {
-      const imagePromises = wallpapers.map(wallpaper => {
-        return new Promise((resolve, reject) => {
-          const img = document.createElement('img');
-          img.src = `/${wallpaper}-day.jpg`;
-          img.onload = () => resolve(img);
-          img.onerror = reject;
-        });
-      });
-
-      try {
-        await Promise.all(imagePromises);
-        setLoadingWallpapers(false);
-      } catch (error) {
-        console.error('Error loading wallpaper images:', error);
-        setLoadingWallpapers(false);
-      }
-    };
-
-    loadImages();
-  }, []);
+const SettingsContent: React.FC<SettingsContentProps> = ({ 
+  currentWallpaper, 
+  setWallpaper
+}) => {
+  const wallpapers = ['wallpaper1', 'wallpaper2', 'wallpaper3'];
 
   return (
-    <SettingsContainer
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 20 }}
-      transition={{ duration: 0.3 }}
-    >
-      <Title>Ajustes</Title>
+    <SettingsContainer>
+      <Title>Ajustes del Sistema</Title>
       <Section>
-        <SectionTitle>Fondo de pantalla</SectionTitle>
-        {loadingWallpapers ? (
-          <LoadingContainer>
-            <SpinnerIcon />
-          </LoadingContainer>
-        ) : (
-          <AnimatePresence>
-            <WallpaperOptions>
-              {wallpapers.map((wallpaper, index) => (
-                <WallpaperOption
-                  key={wallpaper}
-                  isSelected={currentWallpaper.startsWith(wallpaper)}
-                  onClick={() => setWallpaper(wallpaper)}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.8 }}
-                  transition={{ duration: 0.2, delay: index * 0.1 }}
-                >
-                  <Image src={`/${wallpaper}-day.jpg`} alt={`Wallpaper ${index + 1}`} layout="fill" objectFit="cover" />
-                </WallpaperOption>
-              ))}
-            </WallpaperOptions>
-          </AnimatePresence>
-        )}
-        <InfoText>
-          El fondo de pantalla cambia automáticamente entre versiones de día y noche según la hora del día.
-        </InfoText>
+        <SectionTitle><FaDesktop /> Fondo de Pantalla</SectionTitle>
+        <WallpaperGrid>
+          {wallpapers.map((wallpaper) => (
+            <WallpaperOption
+              key={wallpaper}
+              isSelected={currentWallpaper === wallpaper}
+              backgroundImage={`/${wallpaper}-day.jpg`}
+              onClick={() => setWallpaper(wallpaper)}
+            />
+          ))}
+        </WallpaperGrid>
       </Section>
     </SettingsContainer>
   );
