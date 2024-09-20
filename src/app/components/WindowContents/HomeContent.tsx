@@ -1,149 +1,64 @@
 import React from 'react';
 import styled from 'styled-components';
-import { FaDesktop, FaCamera, FaFilm, FaFigma, FaRobot, FaPalette } from 'react-icons/fa';
 
 const HomeContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 20px;
-  background-color: rgba(18, 18, 18, 0.95);
-  color: #e0e0e0;
+  justify-content: center;
   height: 100%;
+  padding: 20px;
+  background-color: rgba(30, 30, 30, 0.7);
+  backdrop-filter: blur(10px);
+  color: #e0e0e0;
   overflow-y: auto;
 `;
 
-const Title = styled.h1`
+const WelcomeMessage = styled.h1`
   font-size: 2.5rem;
   margin-bottom: 20px;
-  color: #4a90e2;
   text-align: center;
-  text-shadow: 0 0 10px rgba(74, 144, 226, 0.3);
 `;
 
-const Subtitle = styled.h2`
-  font-size: 1.5rem;
+const Description = styled.p`
+  font-size: 1.2rem;
+  text-align: center;
+  max-width: 600px;
   margin-bottom: 30px;
-  text-align: center;
-  color: #b0b0b0;
 `;
 
-const InterestsGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
-  width: 100%;
-  max-width: 1000px;
-`;
-
-const InterestCard = styled.div`
-  background-color: rgba(30, 30, 30, 0.7);
-  border-radius: 15px;
-  padding: 20px;
+const ButtonContainer = styled.div`
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  gap: 20px;
+`;
+
+const Button = styled.button`
+  padding: 10px 20px;
+  font-size: 1rem;
+  background-color: #0078d4;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
 
   &:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    background-color: #005a9e;
   }
 `;
 
-const InterestIcon = styled.div`
-  font-size: 3rem;
-  margin-bottom: 15px;
-  color: #4a90e2;
-`;
-
-const InterestTitle = styled.h3`
-  font-size: 1.2rem;
-  margin-bottom: 10px;
-  color: #ffffff;
-`;
-
-const InterestDescription = styled.p`
-  font-size: 0.9rem;
-  color: #b0b0b0;
-  line-height: 1.4;
-`;
-
-const GallerySection = styled.div`
-  width: 100%;
-  margin-top: 40px;
-`;
-
-const GalleryTitle = styled.h2`
-  font-size: 2rem;
-  color: #4a90e2;
-  text-align: center;
-  margin-bottom: 20px;
-`;
-
-const GalleryPlaceholder = styled.div`
-  background-color: rgba(30, 30, 30, 0.7);
-  border-radius: 15px;
-  padding: 20px;
-  text-align: center;
-  color: #b0b0b0;
-`;
-
 const HomeContent: React.FC = () => {
-  const interests = [
-    { 
-      icon: <FaDesktop />, 
-      title: "Desarrollo Web", 
-      description: "Creando experiencias digitales intuitivas y atractivas con las últimas tecnologías frontend.",
-    },
-    { 
-      icon: <FaCamera />, 
-      title: "Fotografía", 
-      description: "Capturando momentos y perspectivas únicas a través del lente.",
-    },
-    { 
-      icon: <FaFilm />, 
-      title: "Producción Audiovisual", 
-      description: "Narrando historias visualmente impactantes a través del cine y el vídeo.",
-    },
-    { 
-      icon: <FaFigma />, 
-      title: "Diseño UI/UX", 
-      description: "Diseñando y prototipando interfaces de usuario intuitivas y atractivas.",
-    },
-    { 
-      icon: <FaRobot />, 
-      title: "Inteligencia Artificial", 
-      description: "Explorando las fronteras de la IA y su aplicación en el desarrollo web y diseño.",
-    },
-    {
-      icon: <FaPalette />,
-      title: "Diseño Gráfico",
-      description: "Creando identidades visuales y gráficos que comunican de manera efectiva.",
-    }
-  ];
-
   return (
     <HomeContainer>
-      <Title>Bienvenid@ a mi portfolio</Title>
-      <Subtitle>Desarrollador FullStack | Creativo Digital | Entusiasta de la Tecnología y Arte</Subtitle>
-      <InterestsGrid>
-        {interests.map((interest, index) => (
-          <InterestCard key={index}>
-            <InterestIcon>{interest.icon}</InterestIcon>
-            <InterestTitle>{interest.title}</InterestTitle>
-            <InterestDescription>{interest.description}</InterestDescription>
-          </InterestCard>
-        ))}
-      </InterestsGrid>
-      {/* <GallerySection>
-        <GalleryTitle>Mi Galería</GalleryTitle>
-        <GalleryPlaceholder>
-          Aquí se mostrarán las fotos de la galería próximamente.
-        </GalleryPlaceholder>
-      </GallerySection> */}
+      <WelcomeMessage>Bienvenido a mi Portfolio</WelcomeMessage>
+      <Description>
+        Soy un desarrollador apasionado por crear experiencias web únicas y funcionales.
+        Explora mis proyectos y conoce más sobre mí.
+      </Description>
+      <ButtonContainer>
+        <Button>Ver Proyectos</Button>
+        <Button>Sobre Mí</Button>
+      </ButtonContainer>
     </HomeContainer>
   );
 };

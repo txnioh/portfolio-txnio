@@ -52,7 +52,7 @@ const WallpaperOption = styled.div<{ isSelected: boolean; backgroundImage: strin
   background-size: cover;
   background-position: center;
   cursor: pointer;
-  border: 3px solid ${props => props.isSelected ? '#0078d4' : 'transparent'};
+  border: 3px solid ${props => props.isSelected ? '#0078d4' : ''};
   transition: all 0.2s ease-in-out;
   position: relative;
   overflow: hidden;
