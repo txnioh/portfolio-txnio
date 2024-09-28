@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { createGlobalStyle } from 'styled-components';
 import Desktop from './components/Desktop';
 import MacLoading from './components/MacLoading';
+import WindowContainer from './components/WindowContainer';
 
 const GlobalStyles = createGlobalStyle<{ wallpaper: string }>`
   body {
@@ -53,14 +54,14 @@ export default function Home() {
     { id: 'LinkedIn', icon: '/icons/linkedin.png', url: 'https://www.linkedin.com/in/txnio/' },
     { id: 'GitHub', icon: '/icons/github.png', url: 'https://github.com/txnioh' },
     { id: 'Curriculum', icon: '/icons/pdf.png', url: '/CV.pdf' },
-    { id: 'Snake Game', icon: '/icons/game.png', url: '' },
+    { id: 'Snake Game', icon: '/icons/game.png', url: '' }, // Keep Snake Game in desktop icons
   ]);
 
   const [wallpaperBase, setWallpaperBase] = useState('wallpaper1');
   const [isNightTime, setIsNightTime] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  const [windowPositions, setWindowPositions] = useState({});
+  const [windowPositions, setWindowPositions] = useState<{ [key: string]: { x: number; y: number } }>({});
   const [windowSizes, setWindowSizes] = useState<{ [key: string]: { width: number; height: number } }>({});
 
   const [isPageLoading, setIsPageLoading] = useState(true);
@@ -147,8 +148,13 @@ export default function Home() {
 
   const closeWindow = (id: string) => {
     setWindows(prevWindows => 
-      prevWindows.map(window => window.id === id ? { ...window, isOpen: false } : window)
+      prevWindows.map(window => 
+        window.id === id ? { ...window, isOpen: false } : window
+      )
     );
+
+    // We no longer need to remove non-permanent windows
+    // The setTimeout block can be removed
   };
 
   const bringToFront = (id: string) => {
@@ -164,11 +170,8 @@ export default function Home() {
     if (url) {
       window.open(url, '_blank');
     } else {
-      // Si la URL está vacía, busca la ventana correspondiente y la abre
-      const window = windows.find(w => w.id === 'Snake Game');
-      if (window) {
-        toggleWindow(window.id);
-      }
+      // If the URL is empty, it's the Snake Game. Open its window.
+      toggleWindow('Snake Game');
     }
   };
 

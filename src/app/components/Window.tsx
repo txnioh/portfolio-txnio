@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import styled from 'styled-components';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import ProjectsContent from './WindowContents/ProjectsContent';
 import AboutMeContent from './WindowContents/AboutMeContent';
 import ContactContent from './WindowContents/ContactContent';
@@ -115,8 +115,9 @@ const Window: React.FC<WindowProps> = ({
   setWallpaper,
   isMobile
 }) => {
-  const { id, zIndex } = window;
-  
+  const { id, zIndex, isOpen } = window;
+  const [isClosing, setIsClosing] = useState(false);
+
   const windowSize = useMemo(() => {
     if (isMobile) {
       return { width: MOBILE_WINDOW_WIDTH, height: MOBILE_WINDOW_HEIGHT };
@@ -212,6 +213,14 @@ const Window: React.FC<WindowProps> = ({
     bringToFront(id);
   };
 
+  const handleClose = () => {
+    setIsClosing(true);
+    setTimeout(() => {
+      closeWindow(id);
+      setIsClosing(false);
+    }, 200);
+  };
+
   const renderContent = () => {
     switch (id) {
       case 'Home':
@@ -231,37 +240,60 @@ const Window: React.FC<WindowProps> = ({
     }
   };
 
+  const variants = {
+    hidden: { 
+      opacity: 0, 
+      filter: 'blur(10px)',
+      transition: { duration: 0.2 }
+    },
+    visible: { 
+      opacity: 1, 
+      filter: 'blur(0px)',
+      transition: { duration: 0.2 }
+    },
+    exit: { 
+      opacity: 0, 
+      filter: 'blur(10px)',
+      transition: { duration: 0.2 }
+    }
+  };
+
   return (
-    <WindowContainer
-      ref={windowRef}
-      style={{
-        left: isMobile ? '10px' : `${position.x}px`,
-        top: isMobile ? '60px' : `${position.y}px`,
-        width: isMobile ? MOBILE_WINDOW_WIDTH : `${windowSize.width}px`,
-        height: isMobile ? MOBILE_WINDOW_HEIGHT : `${windowSize.height}px`,
-        zIndex,
-      }}
-      onClick={() => bringToFront(id)}
-      initial={{ opacity: 0, scale: 0.8 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.2 }}
-      isMobile={isMobile}
-    >
-      <WindowHeader onMouseDown={isMobile ? undefined : handleMouseDown}>
-        <CloseButton onClick={() => closeWindow(id)} />
-        <WindowTitle>{id}</WindowTitle>
-      </WindowHeader>
-      <WindowContent>{renderContent()}</WindowContent>
-      {!isMobile && (
-        <>
-          <ResizeHandle position="right" onMouseDown={(e) => handleResizeMouseDown(e, 'right')} />
-          <ResizeHandle position="bottom" onMouseDown={(e) => handleResizeMouseDown(e, 'bottom')} />
-          <ResizeHandle position="left" onMouseDown={(e) => handleResizeMouseDown(e, 'left')} />
-          <ResizeHandle position="bottom-right" onMouseDown={(e) => handleResizeMouseDown(e, 'bottom-right')} />
-          <ResizeHandle position="bottom-left" onMouseDown={(e) => handleResizeMouseDown(e, 'bottom-left')} />
-        </>
+    <AnimatePresence>
+      {(isOpen || isClosing) && (
+        <WindowContainer
+          ref={windowRef}
+          style={{
+            left: isMobile ? '10px' : `${position.x}px`,
+            top: isMobile ? '60px' : `${position.y}px`,
+            width: isMobile ? MOBILE_WINDOW_WIDTH : `${windowSize.width}px`,
+            height: isMobile ? MOBILE_WINDOW_HEIGHT : `${windowSize.height}px`,
+            zIndex,
+          }}
+          onClick={() => bringToFront(id)}
+          variants={variants}
+          initial="hidden"
+          animate={isClosing ? "exit" : "visible"}
+          exit="exit"
+          isMobile={isMobile}
+        >
+          <WindowHeader onMouseDown={isMobile ? undefined : handleMouseDown}>
+            <CloseButton onClick={handleClose} />
+            <WindowTitle>{id}</WindowTitle>
+          </WindowHeader>
+          <WindowContent>{renderContent()}</WindowContent>
+          {!isMobile && (
+            <>
+              <ResizeHandle position="right" onMouseDown={(e) => handleResizeMouseDown(e, 'right')} />
+              <ResizeHandle position="bottom" onMouseDown={(e) => handleResizeMouseDown(e, 'bottom')} />
+              <ResizeHandle position="left" onMouseDown={(e) => handleResizeMouseDown(e, 'left')} />
+              <ResizeHandle position="bottom-right" onMouseDown={(e) => handleResizeMouseDown(e, 'bottom-right')} />
+              <ResizeHandle position="bottom-left" onMouseDown={(e) => handleResizeMouseDown(e, 'bottom-left')} />
+            </>
+          )}
+        </WindowContainer>
       )}
-    </WindowContainer>
+    </AnimatePresence>
   );
 };
 

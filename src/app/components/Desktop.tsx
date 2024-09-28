@@ -32,6 +32,7 @@ interface DesktopProps {
   windowSizes: { [key: string]: { width: number; height: number } };
   updateWindowPosition: (id: string, position: { x: number; y: number }) => void;
   updateWindowSize: (id: string, size: { width: number; height: number }) => void;
+  children?: React.ReactNode;
 }
 
 const Desktop: React.FC<DesktopProps> = ({
@@ -46,7 +47,8 @@ const Desktop: React.FC<DesktopProps> = ({
   windowPositions,
   windowSizes,
   updateWindowPosition,
-  updateWindowSize
+  updateWindowSize,
+  children
 }) => {
   const [isMobile, setIsMobile] = useState(false);
 
@@ -75,24 +77,27 @@ const Desktop: React.FC<DesktopProps> = ({
       <WindowContainerStyled>
         <DesktopIcons icons={desktopIcons} openUrl={openUrl} />
         {windows.map((window) => (
-          window.isOpen && (
-            <WindowContainer
-              key={window.id}
-              window={window}
-              closeWindow={closeWindow}
-              bringToFront={bringToFront}
-              position={windowPositions[window.id] || { x: 0, y: 0 }}
-              size={windowSizes[window.id] || { width: 800, height: 600 }}
-              updateWindowPosition={updateWindowPosition}
-              updateWindowSize={updateWindowSize}
-              currentWallpaper={currentWallpaper}
-              setWallpaper={setWallpaper}
-              isMobile={isMobile}
-            />
-          )
+          <WindowContainer
+            key={window.id}
+            window={window}
+            closeWindow={closeWindow}
+            bringToFront={bringToFront}
+            position={windowPositions[window.id] || { x: 0, y: 0 }}
+            size={windowSizes[window.id] || { width: 800, height: 600 }}
+            updateWindowPosition={updateWindowPosition}
+            updateWindowSize={updateWindowSize}
+            currentWallpaper={currentWallpaper}
+            setWallpaper={setWallpaper}
+            isMobile={isMobile}
+          />
         ))}
       </WindowContainerStyled>
-      <Dock windows={windows} toggleWindow={toggleWindow} isMobile={isMobile} />
+      <Dock 
+        windows={windows.filter(window => window.id !== 'Snake Game')} 
+        toggleWindow={toggleWindow} 
+        isMobile={isMobile} 
+      />
+      {children}
     </DesktopWrapper>
   );
 };

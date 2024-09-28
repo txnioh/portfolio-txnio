@@ -1,123 +1,92 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
-import { FaDesktop, FaCamera, FaFilm, FaFigma, FaRobot, FaPalette } from 'react-icons/fa';
 
-const HomeContainer = styled.div`
+interface ThemeProps {
+  isDarkMode: boolean;
+}
+
+const HomeContainer = styled.div<ThemeProps>`
   display: flex;
   flex-direction: column;
+  justify-content: flex-start;
   align-items: center;
-  padding: 20px;
-  background-color: rgba(18, 18, 18, 0.95);
-  color: #e0e0e0;
   height: 100%;
-  overflow-y: auto;
-`;
-
-const Title = styled.h1`
-  font-size: 2.5rem;
-  margin-bottom: 20px;
-  color: #4a90e2;
-  text-align: center;
-  text-shadow: 0 0 10px rgba(74, 144, 226, 0.3);
-`;
-
-const Subtitle = styled.h2`
-  font-size: 1.5rem;
-  margin-bottom: 30px;
-  text-align: center;
-  color: #b0b0b0;
-`;
-
-const InterestsGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
-  width: 100%;
-  max-width: 1000px;
-`;
-
-const InterestCard = styled.div`
-  background-color: rgba(30, 30, 30, 0.7);
-  border-radius: 15px;
+  background-color: ${props => props.isDarkMode ? '#121212' : '#f5f5f5'};
+  color: ${props => props.isDarkMode ? '#e0e0e0' : '#333'};
+  overflow: auto;
   padding: 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-
-  &:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-  }
+  transition: background-color 0.3s ease, color 0.3s ease;
 `;
 
-const InterestIcon = styled.div`
-  font-size: 3rem;
-  margin-bottom: 15px;
-  color: #4a90e2;
+const ImageWrapper = styled.div<ThemeProps>`
+  width: 100%;
+  max-width: 600px;
+  margin-bottom: 20px;
+  position: relative;
+  transform: rotate(-2deg);
+  padding: 10px;
+  background-color: ${props => props.isDarkMode ? '#1e1e1e' : '#fff'};
+  box-shadow: 0 2px 4px ${props => props.isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'};
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
 `;
 
-const InterestTitle = styled.h3`
-  font-size: 1.2rem;
-  margin-bottom: 10px;
-  color: #ffffff;
+const ProfileImage = styled.img`
+  width: 100%;
+  height: auto;
+  display: block;
 `;
 
-const InterestDescription = styled.p`
-  font-size: 0.9rem;
-  color: #b0b0b0;
-  line-height: 1.4;
+const TextContent = styled.div`
+  font-size: 1rem;
+  line-height: 1.6;
+  text-align: left;
+  max-width: 600px;
+  white-space: pre-wrap;
+  font-family: monospace;
+`;
+
+const UpdateText = styled.div<ThemeProps>`
+  font-size: 0.8rem;
+  color: ${props => props.isDarkMode ? '#888' : '#777'};
+  margin-top: 20px;
+  font-family: monospace;
+  transition: color 0.3s ease;
+`;
+
+const ThemeToggle = styled.button<ThemeProps>`
+  background: none;
+  border: none;
+  color: ${props => props.isDarkMode ? '#e0e0e0' : '#333'};
+  font-family: monospace;
+  cursor: pointer;
+  margin-top: 20px;
+  text-decoration: underline;
+  transition: color 0.3s ease;
 `;
 
 const HomeContent: React.FC = () => {
-  const interests = [
-    { 
-      icon: <FaDesktop />, 
-      title: "Desarrollo Web", 
-      description: "Creando experiencias digitales intuitivas y atractivas con las últimas tecnologías frontend.",
-    },
-    { 
-      icon: <FaCamera />, 
-      title: "Fotografía", 
-      description: "Capturando momentos y perspectivas únicas a través del lente.",
-    },
-    { 
-      icon: <FaFilm />, 
-      title: "Producción Audiovisual", 
-      description: "Narrando historias visualmente impactantes a través del cine y el vídeo.",
-    },
-    { 
-      icon: <FaFigma />, 
-      title: "Diseño UI/UX", 
-      description: "Diseñando y prototipando interfaces de usuario intuitivas y atractivas.",
-    },
-    { 
-      icon: <FaRobot />, 
-      title: "Inteligencia Artificial", 
-      description: "Explorando las fronteras de la IA y su aplicación en el desarrollo web y diseño.",
-    },
-    {
-      icon: <FaPalette />,
-      title: "Diseño Gráfico",
-      description: "Creando identidades visuales y gráficos que comunican de manera efectiva.",
-    }
-  ];
+  const [isDarkMode, setIsDarkMode] = useState(true);
+
+  const toggleTheme = () => {
+    setIsDarkMode(!isDarkMode);
+  };
+
+  const text = `hola! soy Tony, aunque mi pseudónimo es -- txnio --, ahora mismo estoy construyendo cosas para web,
+
+por ahora estudiando diferentes tecnologías para poder expresar arte en ventanas de navegadores. 
+
+me gusta el cine, fotografía y la música hipnagógica.`;
 
   return (
-    <HomeContainer>
-      <Title>Bienvenid@ a mi portfolio</Title>
-      <Subtitle>Desarrollador FullStack | Creativo Digital | Entusiasta de la Tecnología y Arte</Subtitle>
-      <InterestsGrid>
-        {interests.map((interest, index) => (
-          <InterestCard key={index}>
-            <InterestIcon>{interest.icon}</InterestIcon>
-            <InterestTitle>{interest.title}</InterestTitle>
-            <InterestDescription>{interest.description}</InterestDescription>
-          </InterestCard>
-        ))}
-      </InterestsGrid>
+    <HomeContainer isDarkMode={isDarkMode}>
+      <ImageWrapper isDarkMode={isDarkMode}>
+        <ProfileImage src="/profile.jpg" alt="Tony (txnio)" />
+      </ImageWrapper>
+      <TextContent>{text}</TextContent>
+      <UpdateText isDarkMode={isDarkMode}>Ultima edición: 16:04, Vier Sep 27 2024</UpdateText>
+      <ThemeToggle isDarkMode={isDarkMode} onClick={toggleTheme}>
+        {isDarkMode ? "enciende las luces" : "apaga las luces"}
+      </ThemeToggle>
     </HomeContainer>
   );
 };
