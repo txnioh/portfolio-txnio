@@ -199,7 +199,7 @@ const ProjectsContent: React.FC = () => {
       motionValues[numId].y.set(pos.y);
       motionValues[numId].rotation.set(pos.rotation);
     });
-  }, [positions]);
+  }, [positions, motionValues]);
 
   useEffect(() => {
     const checkIfMobile = () => {
@@ -249,7 +249,7 @@ const ProjectsContent: React.FC = () => {
       motionValues[numId].y.set(pos.y);
       motionValues[numId].rotation.set(pos.rotation);
     });
-  }, [positions]);
+  }, [positions, motionValues]);
 
   const handleTitleClick = (event: React.MouseEvent, demoUrl: string) => {
     event.stopPropagation();
