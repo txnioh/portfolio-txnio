@@ -194,7 +194,7 @@ export default function Home() {
     <>
       <GlobalStyles wallpaper={wallpaper} />
       {isPageLoading ? (
-        <MacLoading text="Welcome to txniOS" />
+        <MacLoading text="Bienvenido a TxniOS" />
       ) : isLoading ? (
         <MacLoading text="..." />
       ) : (

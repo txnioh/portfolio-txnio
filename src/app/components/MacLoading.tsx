@@ -53,7 +53,7 @@ interface MacLoadingProps {
   text?: string;
 }
 
-const MacLoading: React.FC<MacLoadingProps> = ({ fullScreen = true, text = "txniOS" }) => {
+const MacLoading: React.FC<MacLoadingProps> = ({ fullScreen = true, text = "Bienvenido a TxniOS" }) => {
   return (
     <LoadingContainer fullScreen={fullScreen}>
       <LoadingText>{text}</LoadingText>
