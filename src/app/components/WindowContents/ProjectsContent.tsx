@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import { FaGithub, FaExternalLinkAlt, FaArrowRight } from 'react-icons/fa';
 import { motion, useMotionValue, AnimatePresence } from 'framer-motion';
@@ -148,6 +148,24 @@ const projects: Project[] = [
   },
 ];
 
+const MobileProjectsList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px;
+  overflow-y: auto;
+  height: 100%;
+`;
+
+const MobileProjectCard = styled.div`
+  background-color: rgba(45, 45, 45, 0.3);
+  backdrop-filter: blur(5px);
+  border-radius: 12px;
+  padding: 15px;
+  width: 100%;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+`;
+
 const ProjectsContent: React.FC = () => {
   const [positions, setPositions] = useState<{ [key: number]: { x: number; y: number; rotation: number } }>({
     1: { x: 830, y: 362, rotation: 0 },
@@ -160,12 +178,35 @@ const ProjectsContent: React.FC = () => {
   const [hoveredProject, setHoveredProject] = useState<number | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-
   const [draggingProject, setDraggingProject] = useState<number | null>(null);
-
   const [zIndexOrder, setZIndexOrder] = useState<{ [key: number]: number }>(
     projects.reduce((acc, project, index) => ({ ...acc, [project.id]: index }), {})
   );
+  const [isHoveringList, setIsHoveringList] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Create motion values for all projects at the top level
+  const motionValues = projects.reduce((acc, project) => {
+    acc[project.id] = {
+      x: useMotionValue(positions[project.id].x),
+      y: useMotionValue(positions[project.id].y),
+      rotation: useMotionValue(positions[project.id].rotation)
+    };
+    return acc;
+  }, {} as { [key: number]: { x: any; y: any; rotation: any } });
+
+  useEffect(() => {
+    const checkIfMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    checkIfMobile();
+    window.addEventListener('resize', checkIfMobile);
+
+    return () => {
+      window.removeEventListener('resize', checkIfMobile);
+    };
+  }, []);
 
   const updateZIndex = (projectId: number) => {
     setZIndexOrder(prev => {
@@ -191,7 +232,6 @@ const ProjectsContent: React.FC = () => {
     }));
     setIsDragging(false);
     setDraggingProject(null);
-    // No necesitamos llamar a updateZIndex aquí porque ya se hizo en handleDragStart
   };
 
   const handleTitleClick = (event: React.MouseEvent, demoUrl: string) => {
@@ -209,8 +249,6 @@ const ProjectsContent: React.FC = () => {
     setHoveredProject(null);
   };
 
-  const [isHoveringList, setIsHoveringList] = useState(false);
-
   const handleListEnter = () => {
     setIsHoveringList(true);
   };
@@ -220,7 +258,26 @@ const ProjectsContent: React.FC = () => {
     setHoveredProject(null);
   };
 
-  return (
+  const renderMobileContent = () => (
+    <MobileProjectsList>
+      {projects.map(project => (
+        <MobileProjectCard key={project.id}>
+          <ProjectTitle onClick={(e) => handleTitleClick(e, project.demoUrl)}>
+            {project.title}
+            <ArrowIcon className="arrow" />
+          </ProjectTitle>
+          <ProjectImage 
+            src={project.imagePath} 
+            alt={project.title}
+            width={350}
+            height={230}
+          />
+        </MobileProjectCard>
+      ))}
+    </MobileProjectsList>
+  );
+
+  const renderDesktopContent = () => (
     <ProjectsContainer ref={containerRef}>
       <ProjectsList
         onMouseEnter={handleListEnter}
@@ -239,9 +296,7 @@ const ProjectsContent: React.FC = () => {
       </ProjectsList>
       <AnimatePresence>
         {projects.map(project => {
-          const x = useMotionValue(positions[project.id].x);
-          const y = useMotionValue(positions[project.id].y);
-          const rotation = useMotionValue(positions[project.id].rotation);
+          const { x, y, rotation } = motionValues[project.id];
 
           return (
             <ProjectCard 
@@ -287,6 +342,8 @@ const ProjectsContent: React.FC = () => {
       </AnimatePresence>
     </ProjectsContainer>
   );
+
+  return isMobile ? renderMobileContent() : renderDesktopContent();
 };
 
 export default ProjectsContent;
