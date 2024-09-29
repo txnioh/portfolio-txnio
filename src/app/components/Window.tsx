@@ -26,7 +26,6 @@ const MOBILE_WINDOW_WIDTH = 'calc(100% - 20px)';
 const MOBILE_WINDOW_HEIGHT = 'calc(100% - 160px)';
 const TOP_BAR_HEIGHT = 30; // Height of the top toolbar
 const DOCK_HEIGHT = 60; // Approximate height of the dock
-const WINDOW_PADDING = 20; // Padding for the window
 const BOTTOM_BUFFER = 65; // Updated buffer for the bottom
 
 const WindowContainer = styled(motion.div)<{ isMobile: boolean }>`

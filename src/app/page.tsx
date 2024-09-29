@@ -4,7 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { createGlobalStyle } from 'styled-components';
 import Desktop from './components/Desktop';
 import MacLoading from './components/MacLoading';
-import WindowContainer from './components/WindowContainer';
+// Remove this line
+// import WindowContainer from './components/WindowContainer';
 
 const GlobalStyles = createGlobalStyle<{ wallpaper: string }>`
   body {

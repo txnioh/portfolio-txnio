@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
-import { FaGithub, FaExternalLinkAlt, FaArrowRight } from 'react-icons/fa';
-import { motion, useMotionValue, AnimatePresence } from 'framer-motion';
+import { FaArrowRight } from 'react-icons/fa';
+import { motion, useMotionValue, AnimatePresence, MotionValue } from 'framer-motion';
 import Image from 'next/image';
 
 const ProjectsContainer = styled.div`
@@ -75,17 +75,6 @@ const ProjectTitle = styled.h3`
 const ArrowIcon = styled(FaArrowRight)`
   margin-left: 5px;
   transition: transform 0.3s ease;
-`;
-
-const ProjectNumber = styled.div`
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  font-size: 14px;
-  color: #FFA500;
-  background-color: rgba(0, 0, 0, 0.5);
-  padding: 2px 6px;
-  border-radius: 4px;
 `;
 
 const ProjectPosition = styled.div`
@@ -166,6 +155,15 @@ const MobileProjectCard = styled.div`
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 `;
 
+// Define a type for the motion values
+type MotionValues = {
+  [key: number]: {
+    x: MotionValue<number>;
+    y: MotionValue<number>;
+    rotation: MotionValue<number>;
+  }
+};
+
 const ProjectsContent: React.FC = () => {
   const [positions, setPositions] = useState<{ [key: number]: { x: number; y: number; rotation: number } }>({
     1: { x: 830, y: 362, rotation: 0 },
@@ -178,22 +176,30 @@ const ProjectsContent: React.FC = () => {
   const [hoveredProject, setHoveredProject] = useState<number | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [draggingProject, setDraggingProject] = useState<number | null>(null);
   const [zIndexOrder, setZIndexOrder] = useState<{ [key: number]: number }>(
     projects.reduce((acc, project, index) => ({ ...acc, [project.id]: index }), {})
   );
   const [isHoveringList, setIsHoveringList] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
-  // Create motion values for all projects at the top level
-  const motionValues = projects.reduce((acc, project) => {
-    acc[project.id] = {
-      x: useMotionValue(positions[project.id].x),
-      y: useMotionValue(positions[project.id].y),
-      rotation: useMotionValue(positions[project.id].rotation)
-    };
-    return acc;
-  }, {} as { [key: number]: { x: any; y: any; rotation: any } });
+  // Create motion values for each project
+  const motionValues: MotionValues = {
+    1: { x: useMotionValue(positions[1].x), y: useMotionValue(positions[1].y), rotation: useMotionValue(positions[1].rotation) },
+    2: { x: useMotionValue(positions[2].x), y: useMotionValue(positions[2].y), rotation: useMotionValue(positions[2].rotation) },
+    3: { x: useMotionValue(positions[3].x), y: useMotionValue(positions[3].y), rotation: useMotionValue(positions[3].rotation) },
+    4: { x: useMotionValue(positions[4].x), y: useMotionValue(positions[4].y), rotation: useMotionValue(positions[4].rotation) },
+    5: { x: useMotionValue(positions[5].x), y: useMotionValue(positions[5].y), rotation: useMotionValue(positions[5].rotation) },
+  };
+
+  // Update motion values when positions change
+  useEffect(() => {
+    Object.entries(positions).forEach(([id, pos]) => {
+      const numId = Number(id);
+      motionValues[numId].x.set(pos.x);
+      motionValues[numId].y.set(pos.y);
+      motionValues[numId].rotation.set(pos.rotation);
+    });
+  }, [positions]);
 
   useEffect(() => {
     const checkIfMobile = () => {
@@ -217,11 +223,10 @@ const ProjectsContent: React.FC = () => {
 
   const handleDragStart = (projectId: number) => {
     setIsDragging(true);
-    setDraggingProject(projectId);
     updateZIndex(projectId);
   };
 
-  const handleDragEnd = (projectId: number, info: any) => {
+  const handleDragEnd = (projectId: number, info: { point: { x: number; y: number } }) => {
     setPositions(prev => ({
       ...prev,
       [projectId]: {
@@ -231,7 +236,6 @@ const ProjectsContent: React.FC = () => {
       }
     }));
     setIsDragging(false);
-    setDraggingProject(null);
   };
 
   const handleTitleClick = (event: React.MouseEvent, demoUrl: string) => {
