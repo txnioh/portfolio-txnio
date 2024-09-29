@@ -171,11 +171,11 @@ type MotionValues = {
 
 const ProjectsContent: React.FC = () => {
   const [positions, setPositions] = useState<{ [key: number]: { x: number; y: number; rotation: number } }>({
-    1: { x: 830, y: 362, rotation: 0 },
-    2: { x: 57, y: 311, rotation: 0 },
-    3: { x: 461, y: 397, rotation: 0 },
-    4: { x: 302, y: 179, rotation: 0 },
-    5: { x: 617, y: 198, rotation: 0 }
+    1: { x: 602, y: 210, rotation: 0 },
+    2: { x: 783, y: -22, rotation: 0 },
+    3: { x: 202, y: 144, rotation: 0 },
+    4: { x: 69, y: 215, rotation: 0 },
+    5: { x: 379, y: -23, rotation: 0 }
   });
 
   const [hoveredProject, setHoveredProject] = useState<number | null>(null);
