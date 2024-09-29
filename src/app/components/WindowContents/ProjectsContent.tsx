@@ -226,17 +226,30 @@ const ProjectsContent: React.FC = () => {
     updateZIndex(projectId);
   };
 
-  const handleDragEnd = (projectId: number, info: { point: { x: number; y: number } }) => {
-    setPositions(prev => ({
-      ...prev,
-      [projectId]: {
-        ...prev[projectId],
-        x: info.point.x,
-        y: info.point.y,
-      }
-    }));
+  const handleDragEnd = (projectId: number, info: { offset: { x: number; y: number } }) => {
+    setPositions(prev => {
+      const currentPos = prev[projectId];
+      return {
+        ...prev,
+        [projectId]: {
+          ...currentPos,
+          x: currentPos.x + info.offset.x,
+          y: currentPos.y + info.offset.y,
+        }
+      };
+    });
     setIsDragging(false);
   };
+
+  // Keep motion values in sync with positions
+  useEffect(() => {
+    Object.entries(positions).forEach(([id, pos]) => {
+      const numId = Number(id);
+      motionValues[numId].x.set(pos.x);
+      motionValues[numId].y.set(pos.y);
+      motionValues[numId].rotation.set(pos.rotation);
+    });
+  }, [positions]);
 
   const handleTitleClick = (event: React.MouseEvent, demoUrl: string) => {
     event.stopPropagation();
