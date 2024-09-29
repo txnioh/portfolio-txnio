@@ -43,7 +43,7 @@ const ProjectCard = styled(motion.div)<{ isActive: boolean }>`
   padding: 15px;
   width: 350px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: box-shadow 0.3s ease, opacity 0.3s ease, filter 0.3s ease;
+  transition: box-shadow 0.3s ease;
   cursor: grab;
   user-select: none;
   display: flex;
@@ -60,6 +60,7 @@ const ProjectImage = styled(Image)`
   object-fit: cover;
   border-radius: 8px;
   pointer-events: none;
+  margin-bottom: 20px; // Add this line to create space below the image
 `;
 
 const ProjectTitle = styled.h3`
@@ -79,10 +80,14 @@ const ArrowIcon = styled(FaArrowRight)`
 
 const ProjectPosition = styled.div`
   position: absolute;
-  bottom: 5px;
-  right: 5px;
-  font-size: 12px;
+  bottom: 10px; // Increase this value to move it further from the bottom
+  right: 15px; // Increase this value to move it further from the right
+  font-size: 14px; // Increase font size slightly
   color: #FFA500;
+  font-weight: bold; // Make the text bold
+  background-color: rgba(0, 0, 0, 0.5); // Add a semi-transparent background
+  padding: 5px 10px; // Add some padding
+  border-radius: 4px; // Round the corners
 `;
 
 interface Project {
@@ -275,6 +280,10 @@ const ProjectsContent: React.FC = () => {
     setHoveredProject(null);
   };
 
+  const handleProjectClick = (demoUrl: string) => {
+    window.open(demoUrl, '_blank', 'noopener,noreferrer');
+  };
+
   const renderMobileContent = () => (
     <MobileProjectsList>
       {projects.map(project => (
@@ -306,6 +315,7 @@ const ProjectsContent: React.FC = () => {
             isActive={hoveredProject === project.id}
             onMouseEnter={() => handleProjectHover(project.id)}
             onMouseLeave={handleProjectLeave}
+            onClick={() => handleProjectClick(project.demoUrl)}
           >
             {project.title}
           </ProjectName>
@@ -326,8 +336,6 @@ const ProjectsContent: React.FC = () => {
                 x, 
                 y, 
                 rotate: rotation,
-                opacity: isHoveringList && hoveredProject !== project.id ? 0.3 : 1,
-                filter: isHoveringList && hoveredProject !== project.id ? 'blur(3px)' : 'none',
                 zIndex: zIndexOrder[project.id],
               }}
               isActive={hoveredProject === project.id}
@@ -335,8 +343,8 @@ const ProjectsContent: React.FC = () => {
               onMouseLeave={handleProjectLeave}
               initial={{ opacity: 1, filter: 'blur(0px)' }}
               animate={{ 
-                opacity: isHoveringList && hoveredProject !== project.id ? 0.3 : 1,
-                filter: isHoveringList && hoveredProject !== project.id ? 'blur(3px)' : 'none',
+                opacity: isHoveringList ? (hoveredProject === project.id ? 1 : 0) : 1,
+                filter: isHoveringList ? (hoveredProject === project.id ? 'blur(0px)' : 'blur(20px)') : 'blur(0px)',
               }}
               transition={{ duration: 0.3 }}
             >
