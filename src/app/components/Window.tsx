@@ -24,13 +24,17 @@ interface WindowProps {
 
 const MOBILE_WINDOW_WIDTH = 'calc(100% - 20px)';
 const MOBILE_WINDOW_HEIGHT = 'calc(100% - 160px)';
+const TOP_BAR_HEIGHT = 30; // Height of the top toolbar
+const DOCK_HEIGHT = 60; // Approximate height of the dock
+const WINDOW_PADDING = 20; // Padding for the window
+const BOTTOM_BUFFER = 65; // Updated buffer for the bottom
 
 const WindowContainer = styled(motion.div)<{ isMobile: boolean }>`
   position: ${({ isMobile }) => isMobile ? 'fixed' : 'absolute'};
-  background-color: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(10px);
+  background-color: rgba(0, 0, 0, 0.8); // Increased opacity for even darker effect
+  backdrop-filter: blur(15px); // Increased blur for a stronger glass effect
   border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); // Slightly stronger shadow
   display: flex;
   flex-direction: column;
   color: white;
@@ -49,7 +53,7 @@ const WindowHeader = styled.div`
   display: flex;
   align-items: center;
   padding: 8px;
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.03); // Even darker header
   cursor: move;
   user-select: none;
   height: 30px;
@@ -78,9 +82,11 @@ const WindowTitle = styled.span`
 
 const WindowContent = styled.div`
   flex: 1;
-  overflow: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
   display: flex;
   flex-direction: column;
+  padding: 16px;
 `;
 
 const ResizeHandle = styled.div<{ position: string }>`
@@ -104,7 +110,7 @@ const ResizeHandle = styled.div<{ position: string }>`
 `;
 
 const Window: React.FC<WindowProps> = ({
-  window,
+  window: windowProp, // Rename the prop to avoid confusion
   closeWindow,
   bringToFront,
   position,
@@ -115,16 +121,20 @@ const Window: React.FC<WindowProps> = ({
   setWallpaper,
   isMobile
 }) => {
-  const { id, zIndex, isOpen } = window;
+  const { id, zIndex, isOpen } = windowProp;
   const [isClosing, setIsClosing] = useState(false);
 
   const windowSize = useMemo(() => {
     if (isMobile) {
       return { width: MOBILE_WINDOW_WIDTH, height: MOBILE_WINDOW_HEIGHT };
     }
+    const maxHeight = globalThis.window.innerHeight - DOCK_HEIGHT - BOTTOM_BUFFER;
     return {
       width: typeof size.width === 'string' ? parseInt(size.width, 10) : size.width,
-      height: typeof size.height === 'string' ? parseInt(size.height, 10) : size.height
+      height: Math.min(
+        typeof size.height === 'string' ? parseInt(size.height, 10) : size.height,
+        maxHeight
+      )
     };
   }, [isMobile, size]);
 
@@ -137,9 +147,10 @@ const Window: React.FC<WindowProps> = ({
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (isDragging) {
+        const newY = e.clientY - dragOffset.y;
         updatePosition({
           x: e.clientX - dragOffset.x,
-          y: e.clientY - dragOffset.y,
+          y: Math.max(TOP_BAR_HEIGHT, newY), // Only limit the top position when dragging
         });
       } else if (isResizing) {
         let newWidth: number;
@@ -234,7 +245,7 @@ const Window: React.FC<WindowProps> = ({
       case 'Settings':
         return <SettingsContent currentWallpaper={currentWallpaper} setWallpaper={setWallpaper} />;
       case 'Snake Game':
-        return window.isOpen ? <SnakeGame /> : null;
+        return isOpen ? <SnakeGame /> : null;
       default:
         return <div>Contenido no disponible</div>;
     }
@@ -258,6 +269,32 @@ const Window: React.FC<WindowProps> = ({
     }
   };
 
+  useEffect(() => {
+    if (isOpen) {
+      // Ensure the window is below the toolbar when opened
+      updatePosition({
+        x: position.x,
+        y: Math.max(TOP_BAR_HEIGHT, position.y)
+      });
+    }
+  }, [isOpen, position.x, position.y, updatePosition]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const maxHeight = globalThis.window.innerHeight - DOCK_HEIGHT - BOTTOM_BUFFER;
+      updateSize({
+        width: typeof windowSize.width === 'number' ? windowSize.width : parseInt(windowSize.width, 10),
+        height: Math.min(
+          typeof windowSize.height === 'number' ? windowSize.height : parseInt(windowSize.height, 10),
+          maxHeight
+        )
+      });
+    };
+
+    globalThis.window.addEventListener('resize', handleResize);
+    return () => globalThis.window.removeEventListener('resize', handleResize);
+  }, [windowSize, updateSize]);
+
   return (
     <AnimatePresence>
       {(isOpen || isClosing) && (
@@ -268,6 +305,7 @@ const Window: React.FC<WindowProps> = ({
             top: isMobile ? '60px' : `${position.y}px`,
             width: isMobile ? MOBILE_WINDOW_WIDTH : `${windowSize.width}px`,
             height: isMobile ? MOBILE_WINDOW_HEIGHT : `${windowSize.height}px`,
+            maxHeight: `calc(100vh - ${DOCK_HEIGHT + BOTTOM_BUFFER}px)`,
             zIndex,
           }}
           onClick={() => bringToFront(id)}

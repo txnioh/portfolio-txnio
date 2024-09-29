@@ -1,11 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import styled from 'styled-components';
-import { FaGithub, FaExternalLinkAlt } from 'react-icons/fa';
+import { FaGithub, FaExternalLinkAlt, FaArrowRight } from 'react-icons/fa';
+import { motion, useMotionValue, AnimatePresence } from 'framer-motion';
+import Image from 'next/image';
 
 const ProjectsContainer = styled.div`
   position: relative;
   height: 100%;
-  background-color: #121212;
   color: #e0e0e0;
   overflow: hidden;
   padding: 20px;
@@ -34,57 +35,65 @@ const ProjectName = styled.div<{ isActive: boolean }>`
   }
 `;
 
-const ProjectCard = styled.div<{ x: number; y: number; rotation: number; isBlurred: boolean }>`
+const ProjectCard = styled(motion.div)<{ isActive: boolean }>`
   position: absolute;
-  left: ${props => props.x}px;
-  top: ${props => props.y}px;
-  transform: rotate(${props => props.rotation}deg);
-  background-color: rgba(45, 45, 45, 0.5);
+  background-color: rgba(45, 45, 45, 0.3);
   backdrop-filter: blur(5px);
-  border-radius: 8px;
-  padding: 20px;
-  width: 250px;
+  border-radius: 12px;
+  padding: 15px;
+  width: 350px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease, filter 0.3s ease;
-  filter: blur(${props => props.isBlurred ? '5px' : '0px'});
+  transition: box-shadow 0.3s ease, opacity 0.3s ease, filter 0.3s ease;
+  cursor: grab;
+  user-select: none;
+  display: flex;
+  flex-direction: column;
 
-  &:hover {
-    transform: rotate(${props => props.rotation}deg) scale(1.05);
-    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+  &:active {
+    cursor: grabbing;
   }
+`;
+
+const ProjectImage = styled(Image)`
+  width: 100%;
+  height: 230px;
+  object-fit: cover;
+  border-radius: 8px;
+  pointer-events: none;
 `;
 
 const ProjectTitle = styled.h3`
   color: #FFA500;
-  margin-top: 0;
-  margin-bottom: 10px;
-`;
-
-const ProjectDescription = styled.p`
-  font-size: 14px;
-  margin-bottom: 15px;
-`;
-
-const ProjectLinks = styled.div`
-  display: flex;
-  gap: 10px;
-`;
-
-const ProjectLink = styled.a`
+  margin: 0 0 15px 0;
+  font-size: 1.2em;
   display: flex;
   align-items: center;
-  color: #4a90e2;
-  text-decoration: none;
+  justify-content: space-between;
+  cursor: pointer;
+`;
+
+const ArrowIcon = styled(FaArrowRight)`
+  margin-left: 5px;
+  transition: transform 0.3s ease;
+`;
+
+const ProjectNumber = styled.div`
+  position: absolute;
+  top: 10px;
+  left: 10px;
   font-size: 14px;
-  transition: color 0.3s ease;
+  color: #FFA500;
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 2px 6px;
+  border-radius: 4px;
+`;
 
-  &:hover {
-    color: #FFA500;
-  }
-
-  svg {
-    margin-right: 5px;
-  }
+const ProjectPosition = styled.div`
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  font-size: 12px;
+  color: #FFA500;
 `;
 
 interface Project {
@@ -93,6 +102,7 @@ interface Project {
   description: string;
   githubUrl: string;
   demoUrl: string;
+  imagePath: string;
 }
 
 const projects: Project[] = [
@@ -101,82 +111,125 @@ const projects: Project[] = [
     title: "3D Crystal Effect", 
     description: "Un efecto visual de cristal 3D implementado con JavaScript.",
     githubUrl: "https://github.com/txnioh/3d-cristal-effect",
-    demoUrl: "https://3d-cristal-effect.vercel.app/"
+    demoUrl: "https://3d-cristal-effect.vercel.app/",
+    imagePath: "/projects-img/project-crystal-effect.png"
   },
   { 
     id: 2, 
     title: "Infinite Particles", 
     description: "Una animación de partículas infinitas creada con JavaScript.",
     githubUrl: "https://github.com/txnioh/infinite-particles",
-    demoUrl: "https://infinite-particles-txnio.vercel.app/"
+    demoUrl: "https://infinite-particles-txnio.vercel.app/",
+    imagePath: "/projects-img/project-infinite-particles.png"
   },
   { 
     id: 3, 
     title: "Floating Images", 
     description: "Una galería mínima con interacción del mouse para imágenes flotantes.",
     githubUrl: "https://github.com/txnioh/floating-images",
-    demoUrl: "https://floating-images.vercel.app/"
+    demoUrl: "https://floating-images.vercel.app/",
+    imagePath: "/projects-img/project-floating-images.png"
   },
   { 
     id: 4, 
     title: "Pixel Transition", 
     description: "Una transición de píxeles simple para la barra de menú.",
     githubUrl: "https://github.com/txnioh/pixel-transition",
-    demoUrl: "https://pixel-transition-eight.vercel.app/"
+    demoUrl: "https://pixel-transition-eight.vercel.app/",
+    imagePath: "/projects-img/project-pixel-transition.png"
   },
   { 
     id: 5, 
     title: "Gradient Generator", 
     description: "Un generador de gradientes implementado en JavaScript.",
     githubUrl: "https://github.com/txnioh/gradient-generator",
-    demoUrl: "https://gradient-generator-txnio.vercel.app/"
+    demoUrl: "https://gradient-generator-txnio.vercel.app/",
+    imagePath: "/projects-img/project-gradient-generator.png"
   },
 ];
 
 const ProjectsContent: React.FC = () => {
-  const [activeProject, setActiveProject] = useState<number | null>(null);
-  const [positions, setPositions] = useState<{ [key: number]: { x: number; y: number; rotation: number } }>({});
+  const [positions, setPositions] = useState<{ [key: number]: { x: number; y: number; rotation: number } }>({
+    1: { x: 830, y: 362, rotation: 0 },
+    2: { x: 57, y: 311, rotation: 0 },
+    3: { x: 461, y: 397, rotation: 0 },
+    4: { x: 302, y: 179, rotation: 0 },
+    5: { x: 617, y: 198, rotation: 0 }
+  });
+
+  const [hoveredProject, setHoveredProject] = useState<number | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const updatePositions = () => {
-      if (!containerRef.current) return;
+  const [draggingProject, setDraggingProject] = useState<number | null>(null);
 
-      const containerWidth = containerRef.current.clientWidth;
-      const containerHeight = containerRef.current.clientHeight;
+  const [zIndexOrder, setZIndexOrder] = useState<{ [key: number]: number }>(
+    projects.reduce((acc, project, index) => ({ ...acc, [project.id]: index }), {})
+  );
 
-      const newPositions: { [key: number]: { x: number; y: number; rotation: number } } = {};
-      projects.forEach((project) => {
-        const x = Math.random() * (containerWidth - 300) + 150;
-        const y = Math.random() * (containerHeight - 200) + 100;
-        const rotation = Math.random() * 20 - 10;
+  const updateZIndex = (projectId: number) => {
+    setZIndexOrder(prev => {
+      const highestZIndex = Math.max(...Object.values(prev)) + 1;
+      return { ...prev, [projectId]: highestZIndex };
+    });
+  };
 
-        newPositions[project.id] = { x, y, rotation };
-      });
-      setPositions(newPositions);
-    };
+  const handleDragStart = (projectId: number) => {
+    setIsDragging(true);
+    setDraggingProject(projectId);
+    updateZIndex(projectId);
+  };
 
-    updatePositions();
-    window.addEventListener('resize', updatePositions);
+  const handleDragEnd = (projectId: number, info: any) => {
+    setPositions(prev => ({
+      ...prev,
+      [projectId]: {
+        ...prev[projectId],
+        x: info.point.x,
+        y: info.point.y,
+      }
+    }));
+    setIsDragging(false);
+    setDraggingProject(null);
+    // No necesitamos llamar a updateZIndex aquí porque ya se hizo en handleDragStart
+  };
 
-    return () => window.removeEventListener('resize', updatePositions);
-  }, []);
+  const handleTitleClick = (event: React.MouseEvent, demoUrl: string) => {
+    event.stopPropagation();
+    if (!isDragging) {
+      window.open(demoUrl, '_blank', 'noopener,noreferrer');
+    }
+  };
 
   const handleProjectHover = (id: number) => {
-    setActiveProject(id);
+    setHoveredProject(id);
   };
 
   const handleProjectLeave = () => {
-    setActiveProject(null);
+    setHoveredProject(null);
+  };
+
+  const [isHoveringList, setIsHoveringList] = useState(false);
+
+  const handleListEnter = () => {
+    setIsHoveringList(true);
+  };
+
+  const handleListLeave = () => {
+    setIsHoveringList(false);
+    setHoveredProject(null);
   };
 
   return (
     <ProjectsContainer ref={containerRef}>
-      <ProjectsList>
+      <ProjectsList
+        onMouseEnter={handleListEnter}
+        onMouseLeave={handleListLeave}
+      >
         {projects.map(project => (
           <ProjectName 
             key={project.id}
-            isActive={activeProject === project.id}
+            isActive={hoveredProject === project.id}
             onMouseEnter={() => handleProjectHover(project.id)}
             onMouseLeave={handleProjectLeave}
           >
@@ -184,26 +237,54 @@ const ProjectsContent: React.FC = () => {
           </ProjectName>
         ))}
       </ProjectsList>
-      {projects.map(project => (
-        <ProjectCard 
-          key={project.id}
-          x={positions[project.id]?.x || 0}
-          y={positions[project.id]?.y || 0}
-          rotation={positions[project.id]?.rotation || 0}
-          isBlurred={activeProject !== null && activeProject !== project.id}
-        >
-          <ProjectTitle>{project.title}</ProjectTitle>
-          <ProjectDescription>{project.description}</ProjectDescription>
-          <ProjectLinks>
-            <ProjectLink href={project.githubUrl} target="_blank" rel="noopener noreferrer">
-              <FaGithub /> GitHub
-            </ProjectLink>
-            <ProjectLink href={project.demoUrl} target="_blank" rel="noopener noreferrer">
-              <FaExternalLinkAlt /> Demo
-            </ProjectLink>
-          </ProjectLinks>
-        </ProjectCard>
-      ))}
+      <AnimatePresence>
+        {projects.map(project => {
+          const x = useMotionValue(positions[project.id].x);
+          const y = useMotionValue(positions[project.id].y);
+          const rotation = useMotionValue(positions[project.id].rotation);
+
+          return (
+            <ProjectCard 
+              key={project.id}
+              drag
+              dragMomentum={false}
+              onDragStart={() => handleDragStart(project.id)}
+              onDragEnd={(_, info) => handleDragEnd(project.id, info)}
+              style={{ 
+                x, 
+                y, 
+                rotate: rotation,
+                opacity: isHoveringList && hoveredProject !== project.id ? 0.3 : 1,
+                filter: isHoveringList && hoveredProject !== project.id ? 'blur(3px)' : 'none',
+                zIndex: zIndexOrder[project.id],
+              }}
+              isActive={hoveredProject === project.id}
+              onMouseEnter={() => handleProjectHover(project.id)}
+              onMouseLeave={handleProjectLeave}
+              initial={{ opacity: 1, filter: 'blur(0px)' }}
+              animate={{ 
+                opacity: isHoveringList && hoveredProject !== project.id ? 0.3 : 1,
+                filter: isHoveringList && hoveredProject !== project.id ? 'blur(3px)' : 'none',
+              }}
+              transition={{ duration: 0.3 }}
+            >
+              <ProjectTitle onClick={(e) => handleTitleClick(e, project.demoUrl)}>
+                {project.title}
+                <ArrowIcon className="arrow" />
+              </ProjectTitle>
+              <ProjectImage 
+                src={project.imagePath} 
+                alt={project.title}
+                width={350}
+                height={230}
+              />
+              <ProjectPosition>
+                x: {Math.round(x.get())}, y: {Math.round(y.get())}
+              </ProjectPosition>
+            </ProjectCard>
+          );
+        })}
+      </AnimatePresence>
     </ProjectsContainer>
   );
 };
