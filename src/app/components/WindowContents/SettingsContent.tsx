@@ -4,52 +4,59 @@ import { FaDesktop, FaSpinner, FaUser, FaWifi, FaBluetooth, FaLock, FaKeyboard }
 
 const SettingsContainer = styled.div`
   display: flex;
+  flex-direction: column;
   height: 100%;
   width: 100%;
   background-color: #1e1e1e;
   color: #e0e0e0;
+
+  @media (min-width: 769px) {
+    flex-direction: row;
+  }
 `;
 
 const Sidebar = styled.div`
-  width: 250px;
-  background-color: #2c2c2c;
-  padding: 20px;
-  overflow-y: auto;
+  display: none;
 
-  @media (max-width: 768px) {
-    width: 100%;
-    height: 60px;
-    padding: 10px;
-    display: flex;
-    overflow-x: auto;
-    white-space: nowrap;
+  @media (min-width: 769px) {
+    display: block;
+    width: 250px;
+    height: 100%;
+    background-color: #2c2c2c;
+    padding: 20px;
+    overflow-y: auto;
   }
 `;
 
 const SidebarItem = styled.div<{ isActive: boolean }>`
-  padding: 10px;
-  margin-bottom: 10px;
+  display: inline-block;
+  padding: 8px 12px;
+  margin-right: 10px;
   cursor: pointer;
   background-color: ${props => props.isActive ? '#4a4a4a' : 'transparent'};
   border-radius: 8px;
   transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
+  white-space: nowrap;
 
   &:hover {
     background-color: #3a3a3a;
   }
 
   svg {
-    margin-right: 10px;
+    margin-right: 5px;
     font-size: 1.2em;
   }
 
-  @media (max-width: 768px) {
-    margin-right: 10px;
-    margin-bottom: 0;
-    padding: 8px 12px;
-    white-space: nowrap;
+  @media (min-width: 769px) {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    margin-right: 0;
+    padding: 10px;
+
+    svg {
+      margin-right: 10px;
+    }
   }
 `;
 
@@ -149,7 +156,7 @@ const SpinnerIcon = styled(FaSpinner)`
 const SearchInput = styled.input`
   width: 100%;
   padding: 10px;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
   background-color: #3a3a3a;
   border: none;
   border-radius: 5px;
@@ -159,6 +166,10 @@ const SearchInput = styled.input`
   &:focus {
     outline: none;
     box-shadow: 0 0 0 2px #0078d4;
+  }
+
+  @media (min-width: 769px) {
+    margin-bottom: 20px;
   }
 `;
 
