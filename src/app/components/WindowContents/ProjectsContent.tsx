@@ -1,39 +1,8 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import { FaArrowRight } from 'react-icons/fa';
-import { motion, useMotionValue, AnimatePresence, MotionValue } from 'framer-motion';
+import { motion } from 'framer-motion';
 import Image from 'next/image';
-
-const ProjectsContainer = styled.div`
-  position: relative;
-  height: 100%;
-  color: #e0e0e0;
-  overflow: hidden;
-  padding: 20px;
-  font-family: monospace;
-`;
-
-const ProjectsList = styled.div`
-  position: absolute;
-  top: 20px;
-  left: 20px;
-  display: flex;
-  flex-direction: column;
-  z-index: 10;
-`;
-
-const ProjectName = styled.div<{ isActive: boolean }>`
-  cursor: pointer;
-  padding: 5px 10px;
-  background-color: ${props => props.isActive ? '#FFA500' : 'transparent'};
-  color: ${props => props.isActive ? '#121212' : '#FFA500'};
-  transition: all 0.3s ease;
-
-  &:hover {
-    background-color: #FFA500;
-    color: #121212;
-  }
-`;
 
 const ProjectCard = styled(motion.div)<{ isActive?: boolean }>`
   background-color: rgba(45, 45, 45, 0.3);
@@ -74,18 +43,6 @@ const ProjectTitle = styled.h3`
 const ArrowIcon = styled(FaArrowRight)`
   margin-left: 5px;
   transition: transform 0.3s ease;
-`;
-
-const ProjectPosition = styled.div`
-  position: absolute;
-  bottom: 10px; // Increase this value to move it further from the bottom
-  right: 15px; // Increase this value to move it further from the right
-  font-size: 14px; // Increase font size slightly
-  color: #FFA500;
-  font-weight: bold; // Make the text bold
-  background-color: rgba(0, 0, 0, 0.5); // Add a semi-transparent background
-  padding: 5px 10px; // Add some padding
-  border-radius: 4px; // Round the corners
 `;
 
 const ProjectDescription = styled.p`
@@ -163,24 +120,6 @@ const projects: Project[] = [
   },
 ];
 
-const MobileProjectsList = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  padding: 20px;
-  overflow-y: auto;
-  height: 100%;
-`;
-
-const MobileProjectCard = styled.div`
-  background-color: rgba(45, 45, 45, 0.3);
-  backdrop-filter: blur(5px);
-  border-radius: 12px;
-  padding: 15px;
-  width: 100%;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-`;
-
 const ProjectsGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -190,31 +129,7 @@ const ProjectsGrid = styled.div`
   height: 100%;
 `;
 
-// Define a type for the motion values
-type MotionValues = {
-  [key: number]: {
-    x: MotionValue<number>;
-    y: MotionValue<number>;
-    rotation: MotionValue<number>;
-  }
-};
-
 const ProjectsContent: React.FC = () => {
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const checkIfMobile = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
-
-    checkIfMobile();
-    window.addEventListener('resize', checkIfMobile);
-
-    return () => {
-      window.removeEventListener('resize', checkIfMobile);
-    };
-  }, []);
-
   const handleProjectClick = (demoUrl: string) => {
     window.open(demoUrl, '_blank', 'noopener,noreferrer');
   };

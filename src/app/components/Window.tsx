@@ -284,10 +284,11 @@ const Window: React.FC<WindowProps> = ({
     const handleResize = () => {
       if (!isMobile) {
         const maxHeight = globalThis.window.innerHeight - DOCK_HEIGHT - BOTTOM_BUFFER;
-        const newHeight = Math.min(windowSize.height, maxHeight);
-        if (newHeight !== windowSize.height) {
+        const currentHeight = typeof windowSize.height === 'string' ? parseInt(windowSize.height, 10) : windowSize.height;
+        const newHeight = Math.min(currentHeight, maxHeight);
+        if (newHeight !== currentHeight) {
           updateSize({
-            width: windowSize.width,
+            width: typeof windowSize.width === 'string' ? parseInt(windowSize.width, 10) : windowSize.width,
             height: newHeight
           });
         }
