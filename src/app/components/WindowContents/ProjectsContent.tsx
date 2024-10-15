@@ -35,22 +35,20 @@ const ProjectName = styled.div<{ isActive: boolean }>`
   }
 `;
 
-const ProjectCard = styled(motion.div)<{ isActive: boolean }>`
-  position: absolute;
+const ProjectCard = styled(motion.div)<{ isActive?: boolean }>`
   background-color: rgba(45, 45, 45, 0.3);
   backdrop-filter: blur(5px);
   border-radius: 12px;
   padding: 15px;
-  width: 350px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: box-shadow 0.3s ease;
-  cursor: grab;
-  user-select: none;
   display: flex;
   flex-direction: column;
+  cursor: pointer;
+  transition: all 0.3s ease;
 
-  &:active {
-    cursor: grabbing;
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
   }
 `;
 
@@ -90,6 +88,13 @@ const ProjectPosition = styled.div`
   border-radius: 4px; // Round the corners
 `;
 
+const ProjectDescription = styled.p`
+  color: #e0e0e0;
+  font-size: 0.9em;
+  margin-top: 10px;
+  line-height: 1.4;
+`;
+
 interface Project {
   id: number;
   title: string;
@@ -100,6 +105,22 @@ interface Project {
 }
 
 const projects: Project[] = [
+  { 
+    id: 6, 
+    title: "Minder", 
+    description: "Una aplicación para subir imágenes, comentarios y proyectos utilizando Firebase, React, TypeScript, Next.js y autenticación de Google.",
+    githubUrl: "https://github.com/txnioh/minder",
+    demoUrl: "https://minder-txnio.vercel.app/",
+    imagePath: "/projects-img/project-minder.png"
+  },
+  { 
+    id: 7, 
+    title: "Second Portfolio", 
+    description: "Un portafolio inspirado en el trabajo de Yihui Hu, con un diseño tipo pegatina.",
+    githubUrl: "https://github.com/txnioh/second-portfolio",
+    demoUrl: "https://second-portfolio-txnio.vercel.app/",
+    imagePath: "/projects-img/project-second-portfolio.png"
+  },
   { 
     id: 1, 
     title: "3D Crystal Effect", 
@@ -160,6 +181,15 @@ const MobileProjectCard = styled.div`
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 `;
 
+const ProjectsGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  padding: 20px;
+  overflow-y: auto;
+  height: 100%;
+`;
+
 // Define a type for the motion values
 type MotionValues = {
   [key: number]: {
@@ -170,41 +200,7 @@ type MotionValues = {
 };
 
 const ProjectsContent: React.FC = () => {
-  const [positions, setPositions] = useState<{ [key: number]: { x: number; y: number; rotation: number } }>({
-    1: { x: 602, y: 210, rotation: 0 },
-    2: { x: 783, y: -22, rotation: 0 },
-    3: { x: 202, y: 144, rotation: 0 },
-    4: { x: 69, y: 215, rotation: 0 },
-    5: { x: 379, y: -23, rotation: 0 }
-  });
-
-  const [hoveredProject, setHoveredProject] = useState<number | null>(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [zIndexOrder, setZIndexOrder] = useState<{ [key: number]: number }>(
-    projects.reduce((acc, project, index) => ({ ...acc, [project.id]: index }), {})
-  );
-  const [isHoveringList, setIsHoveringList] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-
-  // Create motion values for each project
-  const motionValues: MotionValues = {
-    1: { x: useMotionValue(positions[1].x), y: useMotionValue(positions[1].y), rotation: useMotionValue(positions[1].rotation) },
-    2: { x: useMotionValue(positions[2].x), y: useMotionValue(positions[2].y), rotation: useMotionValue(positions[2].rotation) },
-    3: { x: useMotionValue(positions[3].x), y: useMotionValue(positions[3].y), rotation: useMotionValue(positions[3].rotation) },
-    4: { x: useMotionValue(positions[4].x), y: useMotionValue(positions[4].y), rotation: useMotionValue(positions[4].rotation) },
-    5: { x: useMotionValue(positions[5].x), y: useMotionValue(positions[5].y), rotation: useMotionValue(positions[5].rotation) },
-  };
-
-  // Update motion values when positions change
-  useEffect(() => {
-    Object.entries(positions).forEach(([id, pos]) => {
-      const numId = Number(id);
-      motionValues[numId].x.set(pos.x);
-      motionValues[numId].y.set(pos.y);
-      motionValues[numId].rotation.set(pos.rotation);
-    });
-  }, [positions, motionValues]);
 
   useEffect(() => {
     const checkIfMobile = () => {
@@ -219,156 +215,34 @@ const ProjectsContent: React.FC = () => {
     };
   }, []);
 
-  const updateZIndex = (projectId: number) => {
-    setZIndexOrder(prev => {
-      const highestZIndex = Math.max(...Object.values(prev)) + 1;
-      return { ...prev, [projectId]: highestZIndex };
-    });
-  };
-
-  const handleDragStart = (projectId: number) => {
-    setIsDragging(true);
-    updateZIndex(projectId);
-  };
-
-  const handleDragEnd = (projectId: number, info: { offset: { x: number; y: number } }) => {
-    setPositions(prev => {
-      const currentPos = prev[projectId];
-      return {
-        ...prev,
-        [projectId]: {
-          ...currentPos,
-          x: currentPos.x + info.offset.x,
-          y: currentPos.y + info.offset.y,
-        }
-      };
-    });
-    setIsDragging(false);
-  };
-
-  // Keep motion values in sync with positions
-  useEffect(() => {
-    Object.entries(positions).forEach(([id, pos]) => {
-      const numId = Number(id);
-      motionValues[numId].x.set(pos.x);
-      motionValues[numId].y.set(pos.y);
-      motionValues[numId].rotation.set(pos.rotation);
-    });
-  }, [positions, motionValues]);
-
-  const handleTitleClick = (event: React.MouseEvent, demoUrl: string) => {
-    event.stopPropagation();
-    if (!isDragging) {
-      window.open(demoUrl, '_blank', 'noopener,noreferrer');
-    }
-  };
-
-  const handleProjectHover = (id: number) => {
-    setHoveredProject(id);
-  };
-
-  const handleProjectLeave = () => {
-    setHoveredProject(null);
-  };
-
-  const handleListEnter = () => {
-    setIsHoveringList(true);
-  };
-
-  const handleListLeave = () => {
-    setIsHoveringList(false);
-    setHoveredProject(null);
-  };
-
   const handleProjectClick = (demoUrl: string) => {
     window.open(demoUrl, '_blank', 'noopener,noreferrer');
   };
 
-  const renderMobileContent = () => (
-    <MobileProjectsList>
-      {projects.map(project => (
-        <MobileProjectCard key={project.id}>
-          <ProjectTitle onClick={(e) => handleTitleClick(e, project.demoUrl)}>
-            {project.title}
-            <ArrowIcon className="arrow" />
-          </ProjectTitle>
-          <ProjectImage 
-            src={project.imagePath} 
-            alt={project.title}
-            width={350}
-            height={230}
-          />
-        </MobileProjectCard>
-      ))}
-    </MobileProjectsList>
+  const renderProjectCard = (project: Project) => (
+    <ProjectCard
+      key={project.id}
+      onClick={() => handleProjectClick(project.demoUrl)}
+    >
+      <ProjectTitle>
+        {project.title}
+        <ArrowIcon className="arrow" />
+      </ProjectTitle>
+      <ProjectImage 
+        src={project.imagePath} 
+        alt={project.title}
+        width={350}
+        height={230}
+      />
+      <ProjectDescription>{project.description}</ProjectDescription>
+    </ProjectCard>
   );
 
-  const renderDesktopContent = () => (
-    <ProjectsContainer ref={containerRef}>
-      <ProjectsList
-        onMouseEnter={handleListEnter}
-        onMouseLeave={handleListLeave}
-      >
-        {projects.map(project => (
-          <ProjectName 
-            key={project.id}
-            isActive={hoveredProject === project.id}
-            onMouseEnter={() => handleProjectHover(project.id)}
-            onMouseLeave={handleProjectLeave}
-            onClick={() => handleProjectClick(project.demoUrl)}
-          >
-            {project.title}
-          </ProjectName>
-        ))}
-      </ProjectsList>
-      <AnimatePresence>
-        {projects.map(project => {
-          const { x, y, rotation } = motionValues[project.id];
-
-          return (
-            <ProjectCard 
-              key={project.id}
-              drag
-              dragMomentum={false}
-              onDragStart={() => handleDragStart(project.id)}
-              onDragEnd={(_, info) => handleDragEnd(project.id, info)}
-              style={{ 
-                x, 
-                y, 
-                rotate: rotation,
-                zIndex: zIndexOrder[project.id],
-              }}
-              isActive={hoveredProject === project.id}
-              onMouseEnter={() => handleProjectHover(project.id)}
-              onMouseLeave={handleProjectLeave}
-              initial={{ opacity: 1, filter: 'blur(0px)' }}
-              animate={{ 
-                opacity: isHoveringList ? (hoveredProject === project.id ? 1 : 0) : 1,
-                filter: isHoveringList ? (hoveredProject === project.id ? 'blur(0px)' : 'blur(20px)') : 'blur(0px)',
-              }}
-              transition={{ duration: 0.3 }}
-            >
-              <ProjectTitle onClick={(e) => handleTitleClick(e, project.demoUrl)}>
-                {project.title}
-                <ArrowIcon className="arrow" />
-              </ProjectTitle>
-              <ProjectImage 
-                src={project.imagePath} 
-                alt={project.title}
-                width={350}
-                height={230}
-              />
-              <ProjectPosition>
-                x: {Math.round(x.get())}, y: {Math.round(y.get())}
-              </ProjectPosition>
-            </ProjectCard>
-          );
-        })}
-      </AnimatePresence>
-    </ProjectsContainer>
+  return (
+    <ProjectsGrid>
+      {projects.map(renderProjectCard)}
+    </ProjectsGrid>
   );
-
-  return isMobile ? renderMobileContent() : renderDesktopContent();
 };
 
 export default ProjectsContent;

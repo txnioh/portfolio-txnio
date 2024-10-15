@@ -110,7 +110,7 @@ export default function Home() {
     // Simula un tiempo de carga mínimo para la página completa
     const pageLoadTimer = setTimeout(() => {
       setIsPageLoading(false);
-    }, 3000); // Ajusta este tiempo según tus necesidades
+    }, 1000); // Ajusta este tiempo según tus necesidades
 
     return () => clearTimeout(pageLoadTimer);
   }, [windows, desktopIcons]);

@@ -109,7 +109,7 @@ const ResizeHandle = styled.div<{ position: string }>`
 `;
 
 const Window: React.FC<WindowProps> = ({
-  window: windowProp, // Rename the prop to avoid confusion
+  window: windowProp,
   closeWindow,
   bringToFront,
   position,
@@ -270,29 +270,33 @@ const Window: React.FC<WindowProps> = ({
 
   useEffect(() => {
     if (isOpen) {
-      // Ensure the window is below the toolbar when opened
-      updatePosition({
-        x: position.x,
-        y: Math.max(TOP_BAR_HEIGHT, position.y)
-      });
+      const newY = Math.max(TOP_BAR_HEIGHT, position.y);
+      if (newY !== position.y) {
+        updatePosition({
+          x: position.x,
+          y: newY
+        });
+      }
     }
   }, [isOpen, position.x, position.y, updatePosition]);
 
   useEffect(() => {
     const handleResize = () => {
-      const maxHeight = globalThis.window.innerHeight - DOCK_HEIGHT - BOTTOM_BUFFER;
-      updateSize({
-        width: typeof windowSize.width === 'number' ? windowSize.width : parseInt(windowSize.width, 10),
-        height: Math.min(
-          typeof windowSize.height === 'number' ? windowSize.height : parseInt(windowSize.height, 10),
-          maxHeight
-        )
-      });
+      if (!isMobile) {
+        const maxHeight = globalThis.window.innerHeight - DOCK_HEIGHT - BOTTOM_BUFFER;
+        const newHeight = Math.min(windowSize.height, maxHeight);
+        if (newHeight !== windowSize.height) {
+          updateSize({
+            width: windowSize.width,
+            height: newHeight
+          });
+        }
+      }
     };
 
     globalThis.window.addEventListener('resize', handleResize);
     return () => globalThis.window.removeEventListener('resize', handleResize);
-  }, [windowSize, updateSize]);
+  }, [windowSize, updateSize, isMobile]);
 
   return (
     <AnimatePresence>
