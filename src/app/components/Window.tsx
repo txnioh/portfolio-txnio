@@ -24,28 +24,29 @@ interface WindowProps {
 }
 
 const MOBILE_WINDOW_WIDTH = 'calc(100% - 20px)';
-const MOBILE_WINDOW_HEIGHT = 'calc(100% - 160px)';
-const TOP_BAR_HEIGHT = 30; // Height of the top toolbar
-const DOCK_HEIGHT = 60; // Approximate height of the dock
-const BOTTOM_BUFFER = 65; // Updated buffer for the bottom
+const MOBILE_WINDOW_HEIGHT = 'calc(100vh - 130px)';
+const TOP_BAR_HEIGHT = 35;
+const DOCK_HEIGHT = 60;
+const BOTTOM_BUFFER = 10;
 
 const WindowContainer = styled(motion.div)<{ isMobile: boolean }>`
   position: ${({ isMobile }) => isMobile ? 'fixed' : 'absolute'};
-  background-color: rgba(0, 0, 0, 0.8); // Increased opacity for even darker effect
-  backdrop-filter: blur(15px); // Increased blur for a stronger glass effect
+  background-color: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(15px);
   border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); // Slightly stronger shadow
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
   display: flex;
   flex-direction: column;
   color: white;
   overflow: hidden;
   ${({ isMobile }) => isMobile && `
-    top: 60px;
-    left: 10px;
-    right: 10px;
-    bottom: 60px;
+    top: 45px !important;
+    left: 10px !important;
+    right: 10px !important;
+    bottom: ${DOCK_HEIGHT + 10}px !important;
     width: ${MOBILE_WINDOW_WIDTH} !important;
     height: ${MOBILE_WINDOW_HEIGHT} !important;
+    max-height: calc(100vh - ${TOP_BAR_HEIGHT + DOCK_HEIGHT + BOTTOM_BUFFER}px) !important;
   `}
 `;
 
@@ -53,7 +54,7 @@ const WindowHeader = styled.div`
   display: flex;
   align-items: center;
   padding: 8px;
-  background-color: rgba(255, 255, 255, 0.03); // Even darker header
+  background-color: rgba(255, 255, 255, 0.03);
   cursor: move;
   user-select: none;
   height: 30px;
@@ -80,13 +81,17 @@ const WindowTitle = styled.span`
   letter-spacing: 1px;
 `;
 
-const WindowContent = styled.div`
+const WindowContent = styled.div<{ isMobile: boolean }>`
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
   display: flex;
   flex-direction: column;
   padding: 0;
+  ${({ isMobile }) => isMobile && `
+    height: 100%;
+    max-height: calc(100vh - ${TOP_BAR_HEIGHT + DOCK_HEIGHT + 50}px);
+  `}
 `;
 
 const ResizeHandle = styled.div<{ position: string }>`
@@ -150,7 +155,7 @@ const Window: React.FC<WindowProps> = ({
         const newY = e.clientY - dragOffset.y;
         updatePosition({
           x: e.clientX - dragOffset.x,
-          y: Math.max(TOP_BAR_HEIGHT, newY), // Only limit the top position when dragging
+          y: Math.max(TOP_BAR_HEIGHT, newY),
         });
       } else if (isResizing) {
         let newWidth: number;
@@ -326,7 +331,7 @@ const Window: React.FC<WindowProps> = ({
             <CloseButton onClick={handleClose} />
             <WindowTitle>{id}</WindowTitle>
           </WindowHeader>
-          <WindowContent>{renderContent()}</WindowContent>
+          <WindowContent isMobile={isMobile}>{renderContent()}</WindowContent>
           {!isMobile && (
             <>
               <ResizeHandle position="right" onMouseDown={(e) => handleResizeMouseDown(e, 'right')} />

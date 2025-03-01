@@ -12,11 +12,24 @@ const DesktopWrapper = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+
+  @media (max-width: 768px) {
+    height: 100%;
+    min-height: 100vh;
+  }
 `;
 
 const WindowContainerStyled = styled.div`
   position: relative;
   flex: 1;
+  overflow: hidden;
+
+  @media (max-width: 768px) {
+    height: calc(100vh - 95px); // Ajustado para la barra superior y el dock
+    margin-top: 35px; // Espacio para la barra superior
+  }
 `;
 
 interface DesktopProps {
