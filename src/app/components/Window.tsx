@@ -7,6 +7,7 @@ import ContactContent from './WindowContents/ContactContent';
 import HomeContent from './WindowContents/HomeContent';
 import SettingsContent from './WindowContents/SettingsContent';
 import SnakeGame from './WindowContents/SnakeGame';
+import IframeContent from './WindowContents/IframeContent';
 import { WindowState } from '../types';
 
 interface WindowProps {
@@ -85,7 +86,7 @@ const WindowContent = styled.div`
   overflow-x: hidden;
   display: flex;
   flex-direction: column;
-  padding: 16px;
+  padding: 0;
 `;
 
 const ResizeHandle = styled.div<{ position: string }>`
@@ -245,6 +246,8 @@ const Window: React.FC<WindowProps> = ({
         return <SettingsContent currentWallpaper={currentWallpaper} setWallpaper={setWallpaper} />;
       case 'Snake Game':
         return isOpen ? <SnakeGame /> : null;
+      case 'txniOS Old':
+        return windowProp.url ? <IframeContent url={windowProp.url} /> : null;
       default:
         return <div>Contenido no disponible</div>;
     }

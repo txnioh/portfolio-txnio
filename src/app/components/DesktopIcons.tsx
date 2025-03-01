@@ -11,38 +11,51 @@ const DesktopIconsWrapper = styled.div`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  z-index: 1; // Cambiamos el z-index a un valor bajo
+  z-index: 1;
 `;
 
 const DesktopIcon = styled(motion.div)`
-  width: 80px;
-  height: 80px;
+  width: 100px;
+  height: 100px;
   margin-bottom: 20px;
   cursor: pointer;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  font-size: 40px;
+  padding: 10px;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+`;
+
+const IconWrapper = styled.div`
+  width: 32px;
+  height: 32px;
+  position: relative;
+  margin-bottom: 8px;
 `;
 
 const DesktopIconLabel = styled.span`
-  font-size: 12px;
-  margin-top: 5px;
+  font-size: 13px;
   color: white;
-  text-shadow: 0 0 3px rgba(0,0,0,0.5);
+  text-shadow: 0 0 4px rgba(0,0,0,0.8);
   text-align: center;
+  max-width: 90px;
+  overflow-wrap: break-word;
+  line-height: 1.2;
 `;
 
-interface DesktopIcon {
-  id: string;
-  icon: string;
-  url: string;
-}
-
 interface DesktopIconsProps {
-  icons: DesktopIcon[];
-  openUrl: (url: string) => void;
+  icons: {
+    id: string;
+    icon: string;
+    url: string;
+  }[];
+  openUrl: (url: string, id?: string) => void;
 }
 
 const DesktopIcons: React.FC<DesktopIconsProps> = ({ icons, openUrl }) => {
@@ -51,11 +64,19 @@ const DesktopIcons: React.FC<DesktopIconsProps> = ({ icons, openUrl }) => {
       {icons.map((icon) => (
         <DesktopIcon
           key={icon.id}
-          whileHover={{ scale: 1.1 }}
+          whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          onClick={() => openUrl(icon.url)}
+          onClick={() => openUrl(icon.url, icon.id)}
         >
-          <Image src={icon.icon} alt={icon.id} width={60} height={60} />
+          <IconWrapper>
+            <Image 
+              src={icon.icon} 
+              alt={icon.id} 
+              fill
+              style={{ objectFit: 'contain' }}
+              quality={100}
+            />
+          </IconWrapper>
           <DesktopIconLabel>{icon.id}</DesktopIconLabel>
         </DesktopIcon>
       ))}

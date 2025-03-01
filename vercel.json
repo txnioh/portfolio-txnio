@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/proyecto/(.*)",
+      "destination": "https://txnio.com/$1"
+    }
+  ]
+} 

@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
-import { FaDesktop, FaSpinner, FaUser, FaWifi, FaBluetooth, FaLock, FaKeyboard } from 'react-icons/fa';
+import { FaDesktop, FaUser, FaWifi, FaBluetooth, FaLock, FaKeyboard } from 'react-icons/fa';
 
 const SettingsContainer = styled.div`
   display: flex;
@@ -96,60 +96,41 @@ const WallpaperGrid = styled.div`
   gap: 15px;
 `;
 
-const WallpaperOption = styled.div<{ isSelected: boolean; backgroundImage: string }>`
+const WallpaperWrapper = styled.div`
+  position: relative;
   aspect-ratio: 16 / 9;
   border-radius: 8px;
-  background-image: url(${props => props.backgroundImage});
-  background-size: cover;
-  background-position: center;
-  cursor: pointer;
-  border: 3px solid ${props => props.isSelected ? '#0078d4' : 'transparent'};
-  transition: all 0.2s ease-in-out;
-  position: relative;
   overflow: hidden;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
 
   &:hover {
     transform: scale(1.05);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
   }
-
-  &::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: ${props => props.isSelected ? 'rgba(0, 120, 212, 0.3)' : 'rgba(0, 0, 0, 0.1)'};
-    transition: background 0.2s ease-in-out;
-  }
-
-  &:hover::after {
-    background: rgba(0, 0, 0, 0.2);
-  }
 `;
 
-const LoadingOverlay = styled.div`
+const WallpaperImage = styled.img<{ isLoaded: boolean }>`
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: filter 0.3s ease-out;
+  filter: ${props => props.isLoaded ? 'blur(0)' : 'blur(20px)'};
+`;
+
+const WallpaperOverlay = styled.div<{ isSelected: boolean }>`
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.7);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-`;
+  border: 3px solid ${props => props.isSelected ? '#0078d4' : 'transparent'};
+  background: ${props => props.isSelected ? 'rgba(0, 120, 212, 0.3)' : 'rgba(0, 0, 0, 0.1)'};
+  transition: all 0.2s ease-in-out;
 
-const SpinnerIcon = styled(FaSpinner)`
-  font-size: 48px;
-  color: #ffffff;
-  animation: spin 1s linear infinite;
-
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+  &:hover {
+    background: rgba(0, 0, 0, 0.2);
   }
 `;
 
@@ -182,19 +163,10 @@ const SettingsContent: React.FC<SettingsContentProps> = ({
   currentWallpaper, 
   setWallpaper
 }) => {
-  const [isLoading, setIsLoading] = useState(true);
   const [activeSection, setActiveSection] = useState('wallpaper');
   const [searchTerm, setSearchTerm] = useState('');
 
   const wallpapers = ['wallpaper1', 'wallpaper2', 'wallpaper3'];
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1500);
-
-    return () => clearTimeout(timer);
-  }, []);
 
   const renderContent = () => {
     switch (activeSection) {
@@ -203,14 +175,24 @@ const SettingsContent: React.FC<SettingsContentProps> = ({
           <Section>
             <SectionTitle><FaDesktop /> Fondo de Pantalla</SectionTitle>
             <WallpaperGrid>
-              {wallpapers.map((wallpaper) => (
-                <WallpaperOption
-                  key={wallpaper}
-                  isSelected={currentWallpaper === wallpaper}
-                  backgroundImage={`/${wallpaper}-day.jpg`}
-                  onClick={() => setWallpaper(wallpaper)}
-                />
-              ))}
+              {wallpapers.map((wallpaper) => {
+                const [isLoaded, setIsLoaded] = useState(false);
+                
+                return (
+                  <WallpaperWrapper
+                    key={wallpaper}
+                    onClick={() => setWallpaper(wallpaper)}
+                  >
+                    <WallpaperImage
+                      src={`/${wallpaper}-day.jpg`}
+                      alt={`Wallpaper ${wallpaper}`}
+                      isLoaded={isLoaded}
+                      onLoad={() => setIsLoaded(true)}
+                    />
+                    <WallpaperOverlay isSelected={currentWallpaper === wallpaper} />
+                  </WallpaperWrapper>
+                );
+              })}
             </WallpaperGrid>
           </Section>
         );
@@ -285,11 +267,6 @@ const SettingsContent: React.FC<SettingsContentProps> = ({
         <Title>Ajustes del Sistema</Title>
         {renderContent()}
       </ContentArea>
-      {isLoading && (
-        <LoadingOverlay>
-          <SpinnerIcon />
-        </LoadingOverlay>
-      )}
     </SettingsContainer>
   );
 };

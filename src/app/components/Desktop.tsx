@@ -25,7 +25,7 @@ interface DesktopProps {
   closeWindow: (id: string) => void;
   bringToFront: (id: string) => void;
   desktopIcons: DesktopIcon[];
-  openUrl: (url: string) => void;
+  openUrl: (url: string, id?: string) => void;
   currentWallpaper: string;
   setWallpaper: (wallpaper: string) => void;
   windowPositions: { [key: string]: { x: number; y: number } };
@@ -75,7 +75,7 @@ const Desktop: React.FC<DesktopProps> = ({
         isMobile={isMobile}
       />
       <WindowContainerStyled>
-        <DesktopIcons icons={desktopIcons} openUrl={openUrl} />
+        <DesktopIcons icons={desktopIcons} openUrl={(url, id) => openUrl(url, id)} />
         {windows.map((window) => (
           <WindowContainer
             key={window.id}

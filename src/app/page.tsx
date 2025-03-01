@@ -4,8 +4,6 @@ import React, { useState, useEffect } from 'react';
 import { createGlobalStyle } from 'styled-components';
 import Desktop from './components/Desktop';
 import MacLoading from './components/MacLoading';
-// Remove this line
-// import WindowContainer from './components/WindowContainer';
 
 const GlobalStyles = createGlobalStyle<{ wallpaper: string }>`
   body {
@@ -45,17 +43,20 @@ const wallpapers = ['wallpaper1', 'wallpaper2', 'wallpaper3'];
 export default function Home() {
   const [windows, setWindows] = useState<WindowState[]>([
     { id: 'Home', isOpen: false, zIndex: 0, icon: '/icons/apple.png', position: { x: 0, y: 0 }, isPermanent: true },
-    { id: 'Proyectos', isOpen: false, zIndex: 0, icon: '/icons/notas.png', position: { x: 0, y: 0 }, isPermanent: true },
+    { id: 'Proyectos', isOpen: false, zIndex: 0, icon: '/icons/directory.png', position: { x: 0, y: 0 }, isPermanent: true },
     { id: 'Sobre Mí', isOpen: false, zIndex: 0, icon: '/icons/visualstudio.png', position: { x: 0, y: 0 }, isPermanent: true },
     { id: 'Contacto', isOpen: false, zIndex: 0, icon: '/icons/correo.png', position: { x: 0, y: 0 }, isPermanent: true },
     { id: 'Snake Game', isOpen: false, zIndex: 0, icon: '/icons/game.png', position: { x: 0, y: 0 }, isPermanent: false },
+    { id: 'txniOS Old', isOpen: false, zIndex: 0, icon: '/icons/mac.png', position: { x: 0, y: 0 }, url: 'https://txnios.vercel.app', isPermanent: true }
   ]);
 
   const [desktopIcons] = useState<DesktopIcon[]>([
     { id: 'LinkedIn', icon: '/icons/linkedin.png', url: 'https://www.linkedin.com/in/txnio/' },
     { id: 'GitHub', icon: '/icons/github.png', url: 'https://github.com/txnioh' },
-    { id: 'Curriculum', icon: '/icons/pdf.png', url: '/CV.pdf' },
-    { id: 'Snake Game', icon: '/icons/game.png', url: '' }, // Keep Snake Game in desktop icons
+    { id: 'Proyectos', icon: '/icons/directory.png', url: '' },
+    { id: 'Sobre Mí', icon: '/icons/visualstudio.png', url: '' },
+    { id: 'Snake Game', icon: '/icons/game.png', url: '' },
+    { id: 'txniOS Old', icon: '/icons/mac.png', url: 'https://txnios.vercel.app' }
   ]);
 
   const [wallpaperBase, setWallpaperBase] = useState('wallpaper1');
@@ -110,7 +111,7 @@ export default function Home() {
     // Simula un tiempo de carga mínimo para la página completa
     const pageLoadTimer = setTimeout(() => {
       setIsPageLoading(false);
-    }, 1000); // Ajusta este tiempo según tus necesidades
+    }, 1000); 
 
     return () => clearTimeout(pageLoadTimer);
   }, [windows, desktopIcons]);
@@ -153,9 +154,6 @@ export default function Home() {
         window.id === id ? { ...window, isOpen: false } : window
       )
     );
-
-    // We no longer need to remove non-permanent windows
-    // The setTimeout block can be removed
   };
 
   const bringToFront = (id: string) => {
@@ -167,11 +165,17 @@ export default function Home() {
     });
   };
 
-  const openUrl = (url: string) => {
-    if (url) {
+  const openUrl = (url: string, id?: string) => {
+    if (id === 'txniOS Old') {
+      toggleWindow('txniOS Old');
+    } else if (id === 'Proyectos') {
+      toggleWindow('Proyectos');
+    } else if (id === 'Sobre Mí') {
+      toggleWindow('Sobre Mí');
+    } else if (url) {
       window.open(url, '_blank');
     } else {
-      // If the URL is empty, it's the Snake Game. Open its window.
+      // If the URL is empty and no specific case, it's the Snake Game
       toggleWindow('Snake Game');
     }
   };

@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
-import { FaArrowRight } from 'react-icons/fa';
-import { motion } from 'framer-motion';
+import { FaArrowRight, FaArrowLeft } from 'react-icons/fa';
+import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 
 const ProjectCard = styled(motion.div)<{ isActive?: boolean }>`
@@ -52,6 +52,71 @@ const ProjectDescription = styled.p`
   line-height: 1.4;
 `;
 
+const BackButton = styled.button`
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: rgba(0, 0, 0, 0.5);
+  border: none;
+  color: #FFA500;
+  padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 10;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.7);
+  }
+`;
+
+const IframeContainer = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #000;
+  padding-top: 70px;
+`;
+
+const StyledIframe = styled.iframe`
+  width: 100%;
+  height: 100%;
+  border: none;
+`;
+
+const LoadingContainer = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #FFA500;
+  gap: 20px;
+`;
+
+const LoadingSpinner = styled(motion.div)`
+  width: 50px;
+  height: 50px;
+  border: 3px solid rgba(255, 165, 0, 0.3);
+  border-radius: 50%;
+  border-top-color: #FFA500;
+`;
+
+const LoadingText = styled.div`
+  font-size: 1.2em;
+  letter-spacing: 1px;
+`;
+
 interface Project {
   id: number;
   title: string;
@@ -62,6 +127,22 @@ interface Project {
 }
 
 const projects: Project[] = [
+  { 
+    id: 9, 
+    title: "txniOS Old", 
+    description: "Simulación interactiva de Mac OS 7 con ventanas funcionales y la estética clásica del sistema.",
+    githubUrl: "https://github.com/txnioh/portfolio-txnio",
+    demoUrl: "https://txnios.vercel.app",
+    imagePath: "/projects-img/project-macold.png"
+  },
+  { 
+    id: 8, 
+    title: "Cubes", 
+    description: "Una experiencia visual interactiva con cubos 3D utilizando Three.js y React Three Fiber.",
+    githubUrl: "https://github.com/txnioh/cubes",
+    demoUrl: "https://cubes-umber.vercel.app",
+    imagePath: "/projects-img/project-cubes.png"
+  },
   { 
     id: 6, 
     title: "Minder", 
@@ -127,17 +208,52 @@ const ProjectsGrid = styled.div`
   padding: 20px;
   overflow-y: auto;
   height: 100%;
+
+  /* Estilo para la barra de scroll */
+  &::-webkit-scrollbar {
+    width: 10px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 5px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.8);
+  }
 `;
 
 const ProjectsContent: React.FC = () => {
-  const handleProjectClick = (demoUrl: string) => {
-    window.open(demoUrl, '_blank', 'noopener,noreferrer');
+  const [currentProject, setCurrentProject] = useState<Project | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const handleProjectClick = (project: Project) => {
+    setCurrentProject(project);
+    setIsLoading(true);
+  };
+
+  const handleBack = () => {
+    setCurrentProject(null);
+    setIsLoading(true);
+  };
+
+  const handleIframeLoad = () => {
+    setIsLoading(false);
   };
 
   const renderProjectCard = (project: Project) => (
     <ProjectCard
       key={project.id}
-      onClick={() => handleProjectClick(project.demoUrl)}
+      onClick={() => handleProjectClick(project)}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.3 }}
     >
       <ProjectTitle>
         {project.title}
@@ -153,9 +269,38 @@ const ProjectsContent: React.FC = () => {
     </ProjectCard>
   );
 
+  if (currentProject) {
+    return (
+      <IframeContainer>
+        <BackButton onClick={handleBack}>
+          <FaArrowLeft /> Volver a proyectos
+        </BackButton>
+        {isLoading && (
+          <LoadingContainer>
+            <LoadingSpinner
+              animate={{ rotate: 360 }}
+              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+            />
+            <LoadingText>Cargando {currentProject.title}...</LoadingText>
+          </LoadingContainer>
+        )}
+        <StyledIframe 
+          src={currentProject.demoUrl}
+          title={currentProject.title}
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+          onLoad={handleIframeLoad}
+          style={{ visibility: isLoading ? 'hidden' : 'visible' }}
+        />
+      </IframeContainer>
+    );
+  }
+
   return (
     <ProjectsGrid>
-      {projects.map(renderProjectCard)}
+      <AnimatePresence>
+        {projects.map(renderProjectCard)}
+      </AnimatePresence>
     </ProjectsGrid>
   );
 };
