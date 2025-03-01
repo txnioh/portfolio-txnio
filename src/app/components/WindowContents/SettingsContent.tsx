@@ -165,8 +165,16 @@ const SettingsContent: React.FC<SettingsContentProps> = ({
 }) => {
   const [activeSection, setActiveSection] = useState('wallpaper');
   const [searchTerm, setSearchTerm] = useState('');
+  const [loadedWallpapers, setLoadedWallpapers] = useState<{ [key: string]: boolean }>({});
 
   const wallpapers = ['wallpaper1', 'wallpaper2', 'wallpaper3'];
+
+  const handleImageLoad = (wallpaper: string) => {
+    setLoadedWallpapers(prev => ({
+      ...prev,
+      [wallpaper]: true
+    }));
+  };
 
   const renderContent = () => {
     switch (activeSection) {
@@ -175,24 +183,20 @@ const SettingsContent: React.FC<SettingsContentProps> = ({
           <Section>
             <SectionTitle><FaDesktop /> Fondo de Pantalla</SectionTitle>
             <WallpaperGrid>
-              {wallpapers.map((wallpaper) => {
-                const [isLoaded, setIsLoaded] = useState(false);
-                
-                return (
-                  <WallpaperWrapper
-                    key={wallpaper}
-                    onClick={() => setWallpaper(wallpaper)}
-                  >
-                    <WallpaperImage
-                      src={`/${wallpaper}-day.jpg`}
-                      alt={`Wallpaper ${wallpaper}`}
-                      isLoaded={isLoaded}
-                      onLoad={() => setIsLoaded(true)}
-                    />
-                    <WallpaperOverlay isSelected={currentWallpaper === wallpaper} />
-                  </WallpaperWrapper>
-                );
-              })}
+              {wallpapers.map((wallpaper) => (
+                <WallpaperWrapper
+                  key={wallpaper}
+                  onClick={() => setWallpaper(wallpaper)}
+                >
+                  <WallpaperImage
+                    src={`/${wallpaper}-day.jpg`}
+                    alt={`Wallpaper ${wallpaper}`}
+                    isLoaded={!!loadedWallpapers[wallpaper]}
+                    onLoad={() => handleImageLoad(wallpaper)}
+                  />
+                  <WallpaperOverlay isSelected={currentWallpaper === wallpaper} />
+                </WallpaperWrapper>
+              ))}
             </WallpaperGrid>
           </Section>
         );
