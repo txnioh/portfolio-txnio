@@ -47,7 +47,7 @@ export default function Home() {
     { id: 'Sobre Mí', isOpen: false, zIndex: 0, icon: '/icons/visualstudio.png', position: { x: 0, y: 0 }, isPermanent: true },
     { id: 'Contacto', isOpen: false, zIndex: 0, icon: '/icons/correo.png', position: { x: 0, y: 0 }, isPermanent: true },
     { id: 'Snake Game', isOpen: false, zIndex: 0, icon: '/icons/game.png', position: { x: 0, y: 0 }, isPermanent: false },
-    { id: 'txniOS Old', isOpen: false, zIndex: 0, icon: '/icons/mac.png', position: { x: 0, y: 0 }, url: 'https://txnios.vercel.app', isPermanent: true }
+    { id: 'txniOS Old', isOpen: false, zIndex: 0, icon: '/icons/mac.png', position: { x: 0, y: 0 }, url: 'https://os.txnio.com', isPermanent: true }
   ]);
 
   const [desktopIcons] = useState<DesktopIcon[]>([
@@ -56,7 +56,7 @@ export default function Home() {
     { id: 'Proyectos', icon: '/icons/directory.png', url: '' },
     { id: 'Sobre Mí', icon: '/icons/visualstudio.png', url: '' },
     { id: 'Snake Game', icon: '/icons/game.png', url: '' },
-    { id: 'txniOS Old', icon: '/icons/mac.png', url: 'https://txnios.vercel.app' }
+    { id: 'txniOS Old', icon: '/icons/mac.png', url: 'https://os.txnio.com' }
   ]);
 
   const [wallpaperBase, setWallpaperBase] = useState('wallpaper1');

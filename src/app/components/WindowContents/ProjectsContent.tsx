@@ -132,7 +132,7 @@ const projects: Project[] = [
     title: "txniOS Old", 
     description: "Simulación interactiva de Mac OS 7 con ventanas funcionales y la estética clásica del sistema.",
     githubUrl: "https://github.com/txnioh/portfolio-txnio",
-    demoUrl: "https://txnios.vercel.app",
+    demoUrl: "https://os.txnio.com",
     imagePath: "/projects-img/project-macold.png"
   },
   { 
