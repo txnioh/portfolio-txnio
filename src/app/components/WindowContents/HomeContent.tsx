@@ -80,7 +80,7 @@ me gusta el cine, fotografía y la música hipnagógica.`;
   return (
     <HomeContainer isDarkMode={isDarkMode}>
       <ImageWrapper isDarkMode={isDarkMode}>
-        <ProfileImage src="/profile.jpg" alt="Tony (txnio)" />
+        <ProfileImage src="/profile.jpeg" alt="Tony (txnio)" />
       </ImageWrapper>
       <TextContent>{text}</TextContent>
       <UpdateText isDarkMode={isDarkMode}>Ultima edición: 16:04, Vier Sep 27 2024</UpdateText>
