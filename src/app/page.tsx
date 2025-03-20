@@ -66,8 +66,6 @@ export default function Home() {
   const [windowPositions, setWindowPositions] = useState<{ [key: string]: { x: number; y: number } }>({});
   const [windowSizes, setWindowSizes] = useState<{ [key: string]: { width: number; height: number } }>({});
 
-  const [isPageLoading, setIsPageLoading] = useState(true);
-
   useEffect(() => {
     const checkTime = () => {
       const currentHour = new Date().getHours();
@@ -107,13 +105,6 @@ export default function Home() {
     };
 
     preloadImages();
-
-    // Simula un tiempo de carga mínimo para la página completa
-    const pageLoadTimer = setTimeout(() => {
-      setIsPageLoading(false);
-    }, 1000); 
-
-    return () => clearTimeout(pageLoadTimer);
   }, [windows, desktopIcons]);
 
   const getCenterPosition = (index: number = 0) => {
@@ -197,9 +188,7 @@ export default function Home() {
   return (
     <>
       <GlobalStyles wallpaper={wallpaper} />
-      {isPageLoading ? (
-        <MacLoading text="Bienvenido a TxniOS" />
-      ) : isLoading ? (
+      {isLoading ? (
         <MacLoading text="..." />
       ) : (
         <Desktop
