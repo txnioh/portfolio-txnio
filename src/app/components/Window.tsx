@@ -23,11 +23,12 @@ interface WindowProps {
   isMobile: boolean;
 }
 
-const MOBILE_WINDOW_WIDTH = 'calc(100% - 20px)';
+const MOBILE_WINDOW_WIDTH = 'calc(100% - 40px)';
 const MOBILE_WINDOW_HEIGHT = 'calc(100vh - 130px)';
 const TOP_BAR_HEIGHT = 35;
 const DOCK_HEIGHT = 60;
-const BOTTOM_BUFFER = 10;
+const BOTTOM_BUFFER = 80;
+const SIDE_MARGIN = 20;
 
 const WindowContainer = styled(motion.div)<{ isMobile: boolean }>`
   position: ${({ isMobile }) => isMobile ? 'fixed' : 'absolute'};
@@ -41,10 +42,10 @@ const WindowContainer = styled(motion.div)<{ isMobile: boolean }>`
   overflow: hidden;
   ${({ isMobile }) => isMobile && `
     top: 45px !important;
-    left: 10px !important;
-    right: 10px !important;
-    bottom: ${DOCK_HEIGHT + 10}px !important;
-    width: ${MOBILE_WINDOW_WIDTH} !important;
+    left: ${SIDE_MARGIN}px !important;
+    right: ${SIDE_MARGIN}px !important;
+    bottom: ${DOCK_HEIGHT + BOTTOM_BUFFER}px !important;
+    width: calc(100% - ${SIDE_MARGIN * 2}px) !important;
     height: ${MOBILE_WINDOW_HEIGHT} !important;
     max-height: calc(100vh - ${TOP_BAR_HEIGHT + DOCK_HEIGHT + BOTTOM_BUFFER}px) !important;
   `}

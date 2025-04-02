@@ -19,6 +19,7 @@ const DockWrapper = styled.div<{ isMobile: boolean }>`
   transform: ${props => props.isMobile ? 'none' : 'translateX(-50%)'};
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
   border: 1px solid rgba(255, 255, 255, 0.1);
+  z-index: 1100;
 `;
 
 const DockSection = styled.div`
@@ -51,6 +52,7 @@ const IconLabel = styled(motion.span)`
   font-size: 12px;
   white-space: nowrap;
   pointer-events: none;
+  z-index: 1200;
 `;
 
 const OpenIndicator = styled.div`

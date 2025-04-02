@@ -59,7 +59,12 @@ export default function Home() {
     { id: 'txniOS Old', icon: '/icons/mac.png', url: 'https://os.txnio.com' }
   ]);
 
-  const [wallpaperBase, setWallpaperBase] = useState('wallpaper1');
+  const [wallpaperBase, setWallpaperBase] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('selectedWallpaper') || 'wallpaper3';
+    }
+    return 'wallpaper3';
+  });
   const [isNightTime, setIsNightTime] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -175,6 +180,9 @@ export default function Home() {
 
   const setWallpaper = (newWallpaperBase: string) => {
     setWallpaperBase(newWallpaperBase);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('selectedWallpaper', newWallpaperBase);
+    }
   };
 
   const updateWindowPosition = (id: string, newPosition: { x: number; y: number }) => {
