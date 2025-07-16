@@ -240,19 +240,19 @@ export default function Home() {
             <div className="flex-1 flex items-center justify-center">
               <div className="text-center">
                 <div className="space-y-1">
-                  <h1 className="text-4xl md:text-6xl font-bold font-renogare" style={{color: '#edeced'}}>
+                  <h1 className="text-4xl md:text-3xl font-bold font-renogare" style={{color: '#edeced'}}>
                     ANTONIO GONZALEZ
                   </h1>
-                  <h2 className="text-2xl md:text-3xl font-chicago" style={{color: '#edeced'}}>
+                  <h2 className="text-2xl md:text-4xl font-chicago" style={{color: '#edeced'}}>
                     (TXNIO)
                   </h2>
-                  <h3 className="text-xl md:text-2xl font-geneva" style={{color: '#edeced', opacity: 0.9}}>
-                    FRONTEND DEVELOPER
+                  <h3 className="text-xl md:text-4xl font-geneva" style={{color: '#edeced', opacity: 0.9}}>
+                    a FRONTEND DEVELOPER
                   </h3>
                   <h4 className="text-lg md:text-xl font-geneva" style={{color: '#edeced', opacity: 0.8}}>
-                    COOKING AT
+                    CURRENTLY DESIGNING IN
                   </h4>
-                  <h5 className="text-2xl md:text-3xl font-pixel font-bold" style={{color: '#edeced'}}>
+                  <h5 className="text-2xl md:text-4xl font-pixel font-bold" style={{color: '#edeced'}}>
                     CEMOSA
                   </h5>
                 </div>
