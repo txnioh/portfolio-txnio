@@ -21,12 +21,12 @@ export default function Home() {
   };
 
   useEffect(() => {
-    if (!hasInteracted) return;
-
     const pixelSize = 70;
     const holeDuration = 300; // 1 second in ms
 
     const handleMouseMove = (e: MouseEvent) => {
+      // Only add holes after first interaction
+      if (!hasInteracted) return;
       // Prevent single pixel effect during full reveal/hide animation
       if (isHoveringLink || radiusRef.current > 0) return;
 
@@ -100,11 +100,13 @@ export default function Home() {
         ctx.fillStyle = '#121212';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        holesRef.current.forEach(hole => {
-          const px = Math.floor(hole.x / pixelSize) * pixelSize;
-          const py = Math.floor(hole.y / pixelSize) * pixelSize;
-          ctx.clearRect(px, py, pixelSize, pixelSize);
-        });
+        if (hasInteracted) {
+          holesRef.current.forEach(hole => {
+            const px = Math.floor(hole.x / pixelSize) * pixelSize;
+            const py = Math.floor(hole.y / pixelSize) * pixelSize;
+            ctx.clearRect(px, py, pixelSize, pixelSize);
+          });
+        }
       }
       
       animationFrameId.current = requestAnimationFrame(animate);
@@ -141,7 +143,7 @@ export default function Home() {
         cancelAnimationFrame(animationFrameId.current);
       }
     };
-  }, [hasInteracted, isHoveringLink, revealOrigin]);
+  }, [isHoveringLink, revealOrigin, hasInteracted]);
 
   const content = {
     en: {
