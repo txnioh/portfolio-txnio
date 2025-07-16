@@ -1,3 +1,65 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@font-face {
+  font-family: 'ChicagoKare';
+  src: url('/fonts/ChicagoKare-Regular.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Renogare';
+  src: url('/fonts/Renogare-Regular.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geneva';
+  src: url('/fonts/geneva-12.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'ArkPixel';
+  src: url('/fonts/ark-pixel-zh_tw.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+html, body {
+  height: 100%;
+  overflow: visible;
+}
+
+.font-chicago {
+  font-family: 'ChicagoKare', monospace;
+}
+
+.font-renogare {
+  font-family: 'Renogare', serif;
+}
+
+.font-geneva {
+  font-family: 'Geneva', sans-serif;
+}
+
+.font-pixel {
+  font-family: 'ArkPixel', monospace;
+}
+
+.font-geist {
+  font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

@@ -32,13 +32,17 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <link rel="preload" href="/fonts/ChicagoKare-Regular.woff" as="font" type="font/woff" crossOrigin="anonymous" />
+        <link rel="preload" href="/fonts/Renogare-Regular.otf" as="font" type="font/otf" crossOrigin="anonymous" />
+        <link rel="preload" href="/fonts/geneva-12.otf" as="font" type="font/otf" crossOrigin="anonymous" />
+        <link rel="preload" href="/fonts/ark-pixel-zh_tw.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
         <style>{`
           body, html {
             margin: 0;
             padding: 0;
             height: 100%;
             width: 100%;
-            overflow: hidden;
+            overflow: visible;
             background-color: black;
           }
           #__next {
@@ -46,7 +50,7 @@ export default function RootLayout({
             width: 100%;
           }
           #content-wrapper {
-            opacity: 0;
+            opacity: 1;
             transition: opacity 0.3s ease-in;
           }
         `}</style>
