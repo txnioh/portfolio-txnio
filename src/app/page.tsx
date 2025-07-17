@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 export default function Home() {
   const [language, setLanguage] = useState<'en' | 'es'>('en');
@@ -16,11 +16,27 @@ export default function Home() {
   const [isHoveringLink, setIsHoveringLink] = useState(false);
   const [revealOrigin, setRevealOrigin] = useState<{ x: number, y: number } | null>(null);
   const [isRevealing, setIsRevealing] = useState(false);
-  const [isTouching, setIsTouching] = useState(false);
 
-  const toggleLanguage = () => {
-    setLanguage(prev => (prev === 'en' ? 'es' : 'en'));
-  };
+  const addHole = useCallback((clientX: number, clientY: number) => {
+    // Only add holes after first interaction
+    if (!hasInteracted) return;
+    // Prevent single pixel effect during full reveal/hide animation
+    if (isHoveringLink || radiusRef.current > 0) return;
+
+    // Exclude top and bottom areas where buttons and links are
+    const topExclusionZone = 100; // Top area height
+    const bottomExclusionZone = 100; // Bottom area height
+    
+    if (clientY < topExclusionZone || clientY > window.innerHeight - bottomExclusionZone) {
+      return;
+    }
+
+    holesRef.current.push({
+      x: clientX,
+      y: clientY,
+      timestamp: Date.now(),
+    });
+  }, [hasInteracted, isHoveringLink]);
 
   const handleInteractionStart = () => {
     // Set origin to center top of screen
@@ -46,27 +62,6 @@ export default function Home() {
     setIsHoveringLink(true);
   };
 
-  const addHole = (clientX: number, clientY: number) => {
-    // Only add holes after first interaction
-    if (!hasInteracted) return;
-    // Prevent single pixel effect during full reveal/hide animation
-    if (isHoveringLink || radiusRef.current > 0) return;
-
-    // Exclude top and bottom areas where buttons and links are
-    const topExclusionZone = 100; // Top area height
-    const bottomExclusionZone = 100; // Bottom area height
-    
-    if (clientY < topExclusionZone || clientY > window.innerHeight - bottomExclusionZone) {
-      return;
-    }
-
-    holesRef.current.push({
-      x: clientX,
-      y: clientY,
-      timestamp: Date.now(),
-    });
-  };
-
   useEffect(() => {
     const pixelSize = 70;
     const holeDuration = 300; // 1 second in ms
@@ -86,7 +81,6 @@ export default function Home() {
       }
       
       e.preventDefault();
-      setIsTouching(true);
       setHasInteracted(true);
       
       if (e.touches.length > 0) {
@@ -124,7 +118,6 @@ export default function Home() {
       }
       
       e.preventDefault();
-      setIsTouching(false);
     };
 
     let lastTime = 0;
@@ -243,7 +236,7 @@ export default function Home() {
         cancelAnimationFrame(animationFrameId.current);
       }
     };
-  }, [isHoveringLink, revealOrigin, hasInteracted, isRevealing]);
+  }, [isHoveringLink, revealOrigin, hasInteracted, isRevealing, addHole]);
 
   const content = {
     en: {
