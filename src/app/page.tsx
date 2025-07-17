@@ -11,6 +11,11 @@ const availableFonts = [
   'font-geist'
 ];
 
+// Available emojis for random selection
+const availableEmojis = [
+  '🚀', '💻', '⚡', '🔥', '✨', '🌟', '🌌', '🌊', '🐍', '👨‍💻', '😎', '😇', '🫧', '🪐', '🥶', '💀','👀', '👍', '🤓', '👌', '☀️', '🌙', '🌍'
+];
+
 // Function to get random font
 const getRandomFont = () => {
   return availableFonts[Math.floor(Math.random() * availableFonts.length)];
@@ -19,6 +24,17 @@ const getRandomFont = () => {
 // Function to get multiple random fonts (ensuring variety)
 const getRandomFonts = (count: number) => {
   const shuffled = [...availableFonts].sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, count);
+};
+
+// Function to get random emoji
+const getRandomEmoji = () => {
+  return availableEmojis[Math.floor(Math.random() * availableEmojis.length)];
+};
+
+// Function to get multiple random emojis
+const getRandomEmojis = (count: number) => {
+  const shuffled = [...availableEmojis].sort(() => 0.5 - Math.random());
   return shuffled.slice(0, count);
 };
 
@@ -37,7 +53,7 @@ export default function Home() {
   const [revealOrigin, setRevealOrigin] = useState<{ x: number, y: number } | null>(null);
   const [isRevealing, setIsRevealing] = useState(false);
 
-  // Random font assignments for this session
+  // Random font and emoji assignments for this session
   const [randomFonts, setRandomFonts] = useState(() => {
     const fonts = getRandomFonts(5); // Get 5 random fonts for different elements (link is always pixel)
     return {
@@ -48,6 +64,34 @@ export default function Home() {
       company: fonts[4]
     };
   });
+
+  const [randomEmojis, setRandomEmojis] = useState({
+    name: '',
+    nickname: '',
+    title: '',
+    subtitle: '',
+    company: ''
+  });
+
+  // Generate emojis only on client side to avoid hydration mismatch
+  useEffect(() => {
+    const generateEmojis = () => {
+      const emojiCount = Math.random() < 0.5 ? 1 : 2; // 50% chance for 1 or 2 emojis
+      const emojis = getRandomEmojis(emojiCount);
+      const positions = ['name', 'nickname', 'title', 'subtitle', 'company'];
+      const shuffledPositions = positions.sort(() => 0.5 - Math.random()).slice(0, emojiCount);
+      
+      setRandomEmojis({
+        name: shuffledPositions.includes('name') ? emojis[shuffledPositions.indexOf('name')] : '',
+        nickname: shuffledPositions.includes('nickname') ? emojis[shuffledPositions.indexOf('nickname')] : '',
+        title: shuffledPositions.includes('title') ? emojis[shuffledPositions.indexOf('title')] : '',
+        subtitle: shuffledPositions.includes('subtitle') ? emojis[shuffledPositions.indexOf('subtitle')] : '',
+        company: shuffledPositions.includes('company') ? emojis[shuffledPositions.indexOf('company')] : ''
+      });
+    };
+
+    generateEmojis();
+  }, []);
 
   const addHole = useCallback((clientX: number, clientY: number) => {
     // Only add holes after first interaction
@@ -105,8 +149,23 @@ export default function Home() {
       company: newFonts[4]
     };
     
-    // Force re-render with new fonts by updating state
+    // Generate new random emojis (1-2 emojis in random positions)
+    const emojiCount = Math.random() < 0.5 ? 1 : 2; // 50% chance for 1 or 2 emojis
+    const newEmojis = getRandomEmojis(emojiCount);
+    const positions = ['name', 'nickname', 'title', 'subtitle', 'company'];
+    const shuffledPositions = positions.sort(() => 0.5 - Math.random()).slice(0, emojiCount);
+    
+    const newRandomEmojis = {
+      name: shuffledPositions.includes('name') ? newEmojis[shuffledPositions.indexOf('name')] : '',
+      nickname: shuffledPositions.includes('nickname') ? newEmojis[shuffledPositions.indexOf('nickname')] : '',
+      title: shuffledPositions.includes('title') ? newEmojis[shuffledPositions.indexOf('title')] : '',
+      subtitle: shuffledPositions.includes('subtitle') ? newEmojis[shuffledPositions.indexOf('subtitle')] : '',
+      company: shuffledPositions.includes('company') ? newEmojis[shuffledPositions.indexOf('company')] : ''
+    };
+    
+    // Force re-render with new fonts and emojis by updating state
     setRandomFonts(newRandomFonts);
+    setRandomEmojis(newRandomEmojis);
   };
 
   useEffect(() => {
@@ -366,18 +425,23 @@ export default function Home() {
               <div className="text-center">
                 <div className="space-y-1 cursor-pointer" onClick={handleTextClick}>
                   <h1 className={`text-4xl md:text-3xl font-bold ${randomFonts.name} hover:opacity-80 transition-opacity`} style={{color: '#edeced'}}>
+                    {randomEmojis.name && <span className="font-emoji mr-2">{randomEmojis.name}</span>}
                     ANTONIO GONZALEZ
                   </h1>
                   <h2 className={`text-2xl md:text-4xl ${randomFonts.nickname} hover:opacity-80 transition-opacity`} style={{color: '#edeced'}}>
+                    {randomEmojis.nickname && <span className="font-emoji mr-2">{randomEmojis.nickname}</span>}
                     (TXNIO)
                   </h2>
                   <h3 className={`text-xl md:text-4xl ${randomFonts.title} hover:opacity-80 transition-opacity`} style={{color: '#edeced', opacity: 0.9}}>
+                    {randomEmojis.title && <span className="font-emoji mr-2">{randomEmojis.title}</span>}
                     a FRONTEND DEVELOPER
                   </h3>
                   <h4 className={`text-lg md:text-xl ${randomFonts.subtitle} hover:opacity-80 transition-opacity`} style={{color: '#edeced', opacity: 0.8}}>
+                    {randomEmojis.subtitle && <span className="font-emoji mr-2">{randomEmojis.subtitle}</span>}
                     CURRENTLY DESIGNING IN
                   </h4>
                   <h5 className={`text-2xl md:text-4xl ${randomFonts.company} font-bold hover:opacity-80 transition-opacity`} style={{color: '#edeced'}}>
+                    {randomEmojis.company && <span className="font-emoji mr-2">{randomEmojis.company}</span>}
                     CEMOSA
                   </h5>
                 </div>
