@@ -304,14 +304,17 @@ export default function Home() {
                     setIsRevealing(true);
                   }
                 }}
-                className="hover:opacity-80 transition-opacity cursor-pointer font-pixel text-sm shimmer-green"
+                className="hover:opacity-80 transition-all duration-300 ease-in-out cursor-pointer font-pixel text-sm shimmer-green"
                 style={{
                   background: 'linear-gradient(90deg, #edeced 0%, #90EE90 25%, #32CD32 50%, #90EE90 75%, #edeced 100%)',
                   backgroundSize: '200% 100%',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                   backgroundClip: 'text',
-                  animation: 'shimmer 10s ease-in-out infinite'
+                  animation: 'shimmer 10s ease-in-out infinite',
+                  opacity: isInteracting ? 0 : 1,
+                  transform: isInteracting ? 'translateY(-20px)' : 'translateY(0)',
+                  pointerEvents: isInteracting ? 'none' : 'auto'
                 }}
               >
                 os.txnio.com
@@ -377,21 +380,23 @@ export default function Home() {
         </>
       )}
 
-      {isInteracting && (
-        <button
-          onClick={() => {
-            setIsInteracting(false);
-            setIsHoveringLink(false);
-          }}
-          className="fixed top-0 left-1/2 transform -translate-x-1/2 z-30 px-20 py-1 rounded-b-xl text-sm transition-colors font-pixel hover:opacity-90"
-          style={{
-            backgroundColor: '#000000',
-            color: '#ffffff',
-          }}
-        >
-          X
-        </button>
-      )}
+      {/* Close Button - Always present but with visibility control */}
+      <button
+        onClick={() => {
+          setIsInteracting(false);
+          setIsHoveringLink(false);
+        }}
+        className="fixed top-0 left-1/2 transform -translate-x-1/2 z-30 px-20 py-1 rounded-b-xl text-sm transition-all duration-300 ease-in-out font-pixel hover:opacity-90"
+        style={{
+          backgroundColor: '#000000',
+          color: '#ffffff',
+          opacity: isInteracting ? 1 : 0,
+          transform: isInteracting ? 'translate(-50%, 0)' : 'translate(-50%, -20px)',
+          pointerEvents: isInteracting ? 'auto' : 'none'
+        }}
+      >
+        X
+      </button>
     </div>
   );
 }
