@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 export default function Home() {
-  const [language, setLanguage] = useState<'en' | 'es'>('en');
+  const [language] = useState<'en' | 'es'>('en');
   const [isInteracting, setIsInteracting] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const holesRef = useRef<{ x: number; y: number; timestamp: number }[]>([]);
