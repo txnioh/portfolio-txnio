@@ -2,6 +2,26 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 
+// Available fonts for random selection
+const availableFonts = [
+  'font-chicago',
+  'font-renogare', 
+  'font-geneva',
+  'font-pixel',
+  'font-geist'
+];
+
+// Function to get random font
+const getRandomFont = () => {
+  return availableFonts[Math.floor(Math.random() * availableFonts.length)];
+};
+
+// Function to get multiple random fonts (ensuring variety)
+const getRandomFonts = (count: number) => {
+  const shuffled = [...availableFonts].sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, count);
+};
+
 export default function Home() {
   const [language] = useState<'en' | 'es'>('en');
   const [isInteracting, setIsInteracting] = useState(false);
@@ -16,6 +36,18 @@ export default function Home() {
   const [isHoveringLink, setIsHoveringLink] = useState(false);
   const [revealOrigin, setRevealOrigin] = useState<{ x: number, y: number } | null>(null);
   const [isRevealing, setIsRevealing] = useState(false);
+
+  // Random font assignments for this session
+  const [randomFonts, setRandomFonts] = useState(() => {
+    const fonts = getRandomFonts(5); // Get 5 random fonts for different elements (link is always pixel)
+    return {
+      name: fonts[0],
+      nickname: fonts[1], 
+      title: fonts[2],
+      subtitle: fonts[3],
+      company: fonts[4]
+    };
+  });
 
   const addHole = useCallback((clientX: number, clientY: number) => {
     // Only add holes after first interaction
@@ -60,6 +92,21 @@ export default function Home() {
     maxRadiusRef.current = Math.max(d1, d2, d3, d4);
     
     setIsHoveringLink(true);
+  };
+
+  const handleTextClick = () => {
+    // Generate new random fonts
+    const newFonts = getRandomFonts(5);
+    const newRandomFonts = {
+      name: newFonts[0],
+      nickname: newFonts[1], 
+      title: newFonts[2],
+      subtitle: newFonts[3],
+      company: newFonts[4]
+    };
+    
+    // Force re-render with new fonts by updating state
+    setRandomFonts(newRandomFonts);
   };
 
   useEffect(() => {
@@ -317,29 +364,30 @@ export default function Home() {
             {/* Main Content - Centered */}
             <div className="flex-1 flex items-center justify-center">
               <div className="text-center">
-                <div className="space-y-1">
-                  <h1 className="text-4xl md:text-3xl font-bold font-renogare" style={{color: '#edeced'}}>
+                <div className="space-y-1 cursor-pointer" onClick={handleTextClick}>
+                  <h1 className={`text-4xl md:text-3xl font-bold ${randomFonts.name} hover:opacity-80 transition-opacity`} style={{color: '#edeced'}}>
                     ANTONIO GONZALEZ
                   </h1>
-                  <h2 className="text-2xl md:text-4xl font-chicago" style={{color: '#edeced'}}>
+                  <h2 className={`text-2xl md:text-4xl ${randomFonts.nickname} hover:opacity-80 transition-opacity`} style={{color: '#edeced'}}>
                     (TXNIO)
                   </h2>
-                  <h3 className="text-xl md:text-4xl font-geneva" style={{color: '#edeced', opacity: 0.9}}>
+                  <h3 className={`text-xl md:text-4xl ${randomFonts.title} hover:opacity-80 transition-opacity`} style={{color: '#edeced', opacity: 0.9}}>
                     a FRONTEND DEVELOPER
                   </h3>
-                  <h4 className="text-lg md:text-xl font-geneva" style={{color: '#edeced', opacity: 0.8}}>
+                  <h4 className={`text-lg md:text-xl ${randomFonts.subtitle} hover:opacity-80 transition-opacity`} style={{color: '#edeced', opacity: 0.8}}>
                     CURRENTLY DESIGNING IN
                   </h4>
-                  <h5 className="text-2xl md:text-4xl font-pixel font-bold" style={{color: '#edeced'}}>
+                  <h5 className={`text-2xl md:text-4xl ${randomFonts.company} font-bold hover:opacity-80 transition-opacity`} style={{color: '#edeced'}}>
                     CEMOSA
                   </h5>
                 </div>
+
               </div>
             </div>
 
             {/* Footer Links */}
             <div className="py-4 text-center">
-              <div className="flex justify-center space-x-8 text-sm font-geneva">
+              <div className={`flex justify-center space-x-8 text-sm ${randomFonts.subtitle}`}>
                 <a
                   href="https://blog.txnio.com"
                   target="_blank"
