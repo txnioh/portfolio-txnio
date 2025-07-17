@@ -15,9 +15,34 @@ export default function Home() {
   const [hasInteracted, setHasInteracted] = useState(false);
   const [isHoveringLink, setIsHoveringLink] = useState(false);
   const [revealOrigin, setRevealOrigin] = useState<{ x: number, y: number } | null>(null);
+  const [isRevealing, setIsRevealing] = useState(false);
 
   const toggleLanguage = () => {
     setLanguage(prev => (prev === 'en' ? 'es' : 'en'));
+  };
+
+  const handleInteractionStart = () => {
+    // Set origin to center top of screen
+    const origin = {
+      x: window.innerWidth / 2,
+      y: 0,
+    };
+
+    if (!revealOrigin) {
+      setRevealOrigin(origin);
+    }
+    
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    const x = origin.x;
+    const y = origin.y;
+    const d1 = Math.sqrt(x * x + y * y);
+    const d2 = Math.sqrt(Math.pow(w - x, 2) + y * y);
+    const d3 = Math.sqrt(x * x + Math.pow(h - y, 2));
+    const d4 = Math.sqrt(Math.pow(w - x, 2) + Math.pow(h - y, 2));
+    maxRadiusRef.current = Math.max(d1, d2, d3, d4);
+    
+    setIsHoveringLink(true);
   };
 
   useEffect(() => {
@@ -88,6 +113,10 @@ export default function Home() {
         
         if (radiusRef.current >= maxRadiusRef.current && isHoveringLink) {
           ctx.clearRect(0, 0, canvas.width, canvas.height);
+          if (isRevealing) {
+            setIsInteracting(true);
+            setIsRevealing(false);
+          }
         }
 
       } else {
@@ -143,7 +172,7 @@ export default function Home() {
         cancelAnimationFrame(animationFrameId.current);
       }
     };
-  }, [isHoveringLink, revealOrigin, hasInteracted]);
+  }, [isHoveringLink, revealOrigin, hasInteracted, isRevealing]);
 
   const content = {
     en: {
@@ -201,34 +230,18 @@ export default function Home() {
             <div className="text-center py-4">
               <button
                 ref={linkRef}
-                onMouseEnter={() => {
-                  if (linkRef.current) {
-                    const rect = linkRef.current.getBoundingClientRect();
-                    const origin = {
-                      x: rect.left + rect.width / 2,
-                      y: rect.top + rect.height / 2,
-                    };
-
-                    if (!revealOrigin) {
-                      setRevealOrigin(origin);
-                    }
-                    
-                    const w = window.innerWidth;
-                    const h = window.innerHeight;
-                    const x = origin.x;
-                    const y = origin.y;
-                    const d1 = Math.sqrt(x * x + y * y);
-                    const d2 = Math.sqrt(Math.pow(w - x, 2) + y * y);
-                    const d3 = Math.sqrt(x * x + Math.pow(h - y, 2));
-                    const d4 = Math.sqrt(Math.pow(w - x, 2) + Math.pow(h - y, 2));
-                    maxRadiusRef.current = Math.max(d1, d2, d3, d4);
-                  }
-                  setIsHoveringLink(true);
-                }}
+                onMouseEnter={handleInteractionStart}
                 onMouseLeave={() => {
-                  setIsHoveringLink(false);
+                  if (!isRevealing) {
+                    setIsHoveringLink(false);
+                  }
                 }}
-                onClick={() => setIsInteracting(true)}
+                onClick={() => {
+                  if (!isRevealing) {
+                    handleInteractionStart();
+                    setIsRevealing(true);
+                  }
+                }}
                 className="hover:opacity-80 transition-opacity cursor-pointer font-pixel text-sm"
                 style={{color: '#edeced'}}
               >
@@ -297,7 +310,10 @@ export default function Home() {
 
       {isInteracting && (
         <button
-          onClick={() => setIsInteracting(false)}
+          onClick={() => {
+            setIsInteracting(false);
+            setIsHoveringLink(false);
+          }}
           className="fixed top-4 left-1/2 transform -translate-x-1/2 z-30 px-3 rounded text-sm transition-colors font-pixel hover:opacity-80"
           style={{backgroundColor: '#2a2a2a', color: '#edeced'}}
         >
