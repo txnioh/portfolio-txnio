@@ -42,6 +42,7 @@ export default function Home() {
   const [isHoveringLink, setIsHoveringLink] = useState(false);
   const [revealOrigin, setRevealOrigin] = useState<{ x: number, y: number } | null>(null);
   const [isRevealing, setIsRevealing] = useState(false);
+  const [showComingSoon, setShowComingSoon] = useState(false);
 
   // Random font and emoji assignments for this session
   const [randomFonts, setRandomFonts] = useState(() => {
@@ -341,7 +342,8 @@ export default function Home() {
       linkedin: "LinkedIn",
       github: "GitHub",
       blogDesc: "Thoughts, insights, and experiences from my journey in tech and photography.",
-      close: "Close"
+      close: "Close",
+      comingSoon: "Coming Soon!"
     },
     es: {
       blog: "Blog",
@@ -349,7 +351,8 @@ export default function Home() {
       linkedin: "LinkedIn",
       github: "GitHub",
       blogDesc: "Pensamientos, perspectivas y experiencias de mi recorrido en tecnología y fotografía.",
-      close: "Cerrar"
+      close: "Cerrar",
+      comingSoon: "¡Próximamente!"
     }
   };
 
@@ -442,15 +445,16 @@ export default function Home() {
             {/* Footer Links */}
             <div className="py-4 text-center">
               <div className={`flex justify-center space-x-8 text-sm ${randomFonts.subtitle}`}>
-                <a
-                  href="https://blog.txnio.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:opacity-80 transition-opacity"
-                  style={{color: '#edeced'}}
+                <button
+                  onClick={() => {
+                    setShowComingSoon(true);
+                    setTimeout(() => setShowComingSoon(false), 2000);
+                  }}
+                  className="hover:opacity-80 transition-opacity cursor-pointer"
+                  style={{color: '#edeced', background: 'none', border: 'none', padding: 0, font: 'inherit'}}
                 >
                   {t.blog}
-                </a>
+                </button>
                 <a
                   href="https://www.linkedin.com/in/txnio/"
                   target="_blank"
@@ -473,6 +477,15 @@ export default function Home() {
             </div>
           </div>
         </>
+      )}
+
+      {/* Coming Soon Message */}
+      {showComingSoon && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
+          <div className="bg-black text-white px-6 py-3 rounded-lg font-pixel text-lg">
+            {t.comingSoon}
+          </div>
+        </div>
       )}
 
       {/* Close Button - Always present but with visibility control */}
