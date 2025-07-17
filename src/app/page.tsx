@@ -16,6 +16,7 @@ export default function Home() {
   const [isHoveringLink, setIsHoveringLink] = useState(false);
   const [revealOrigin, setRevealOrigin] = useState<{ x: number, y: number } | null>(null);
   const [isRevealing, setIsRevealing] = useState(false);
+  const [isTouching, setIsTouching] = useState(false);
 
   const toggleLanguage = () => {
     setLanguage(prev => (prev === 'en' ? 'es' : 'en'));
@@ -45,29 +46,85 @@ export default function Home() {
     setIsHoveringLink(true);
   };
 
+  const addHole = (clientX: number, clientY: number) => {
+    // Only add holes after first interaction
+    if (!hasInteracted) return;
+    // Prevent single pixel effect during full reveal/hide animation
+    if (isHoveringLink || radiusRef.current > 0) return;
+
+    // Exclude top and bottom areas where buttons and links are
+    const topExclusionZone = 100; // Top area height
+    const bottomExclusionZone = 100; // Bottom area height
+    
+    if (clientY < topExclusionZone || clientY > window.innerHeight - bottomExclusionZone) {
+      return;
+    }
+
+    holesRef.current.push({
+      x: clientX,
+      y: clientY,
+      timestamp: Date.now(),
+    });
+  };
+
   useEffect(() => {
     const pixelSize = 70;
     const holeDuration = 300; // 1 second in ms
 
     const handleMouseMove = (e: MouseEvent) => {
-      // Only add holes after first interaction
-      if (!hasInteracted) return;
-      // Prevent single pixel effect during full reveal/hide animation
-      if (isHoveringLink || radiusRef.current > 0) return;
+      addHole(e.clientX, e.clientY);
+    };
 
-      // Exclude top and bottom areas where buttons and links are
-      const topExclusionZone = 100; // Top area height
-      const bottomExclusionZone = 100; // Bottom area height
+    const handleTouchStart = (e: TouchEvent) => {
+      // Check if touching an interactive element
+      const target = e.target as HTMLElement;
+      const isInteractive = target.closest('a, button, [role="button"]');
       
-      if (e.clientY < topExclusionZone || e.clientY > window.innerHeight - bottomExclusionZone) {
+      if (isInteractive) {
+        // Don't prevent default for interactive elements
         return;
       }
+      
+      e.preventDefault();
+      setIsTouching(true);
+      setHasInteracted(true);
+      
+      if (e.touches.length > 0) {
+        const touch = e.touches[0];
+        addHole(touch.clientX, touch.clientY);
+      }
+    };
 
-      holesRef.current.push({
-        x: e.clientX,
-        y: e.clientY,
-        timestamp: Date.now(),
-      });
+    const handleTouchMove = (e: TouchEvent) => {
+      // Check if touching an interactive element
+      const target = e.target as HTMLElement;
+      const isInteractive = target.closest('a, button, [role="button"]');
+      
+      if (isInteractive) {
+        // Don't prevent default for interactive elements
+        return;
+      }
+      
+      e.preventDefault();
+      
+      if (e.touches.length > 0) {
+        const touch = e.touches[0];
+        addHole(touch.clientX, touch.clientY);
+      }
+    };
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      // Check if touching an interactive element
+      const target = e.target as HTMLElement;
+      const isInteractive = target.closest('a, button, [role="button"]');
+      
+      if (isInteractive) {
+        // Don't prevent default for interactive elements
+        return;
+      }
+      
+      e.preventDefault();
+      setIsTouching(false);
     };
 
     let lastTime = 0;
@@ -80,6 +137,9 @@ export default function Home() {
     };
 
     document.addEventListener('mousemove', throttledMouseMove);
+    document.addEventListener('touchstart', handleTouchStart, { passive: false });
+    document.addEventListener('touchmove', handleTouchMove, { passive: false });
+    document.addEventListener('touchend', handleTouchEnd, { passive: false });
 
     const animate = () => {
       const canvas = canvasRef.current;
@@ -175,6 +235,9 @@ export default function Home() {
 
     return () => {
       document.removeEventListener('mousemove', throttledMouseMove);
+      document.removeEventListener('touchstart', handleTouchStart);
+      document.removeEventListener('touchmove', handleTouchMove);
+      document.removeEventListener('touchend', handleTouchEnd);
       window.removeEventListener('resize', handleResize);
       if (animationFrameId.current) {
         cancelAnimationFrame(animationFrameId.current);
