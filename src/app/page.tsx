@@ -16,20 +16,10 @@ const availableEmojis = [
   '🚀', '💻', '⚡', '🔥', '✨', '🌟', '🌌', '🌊', '🐍', '👨‍💻', '😎', '😇', '🫧', '🪐', '🥶', '💀','👀', '👍', '🤓', '👌', '☀️', '🌙', '🌍'
 ];
 
-// Function to get random font
-const getRandomFont = () => {
-  return availableFonts[Math.floor(Math.random() * availableFonts.length)];
-};
-
 // Function to get multiple random fonts (ensuring variety)
 const getRandomFonts = (count: number) => {
   const shuffled = [...availableFonts].sort(() => 0.5 - Math.random());
   return shuffled.slice(0, count);
-};
-
-// Function to get random emoji
-const getRandomEmoji = () => {
-  return availableEmojis[Math.floor(Math.random() * availableEmojis.length)];
 };
 
 // Function to get multiple random emojis
