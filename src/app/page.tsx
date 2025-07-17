@@ -55,6 +55,14 @@ export default function Home() {
       // Prevent single pixel effect during full reveal/hide animation
       if (isHoveringLink || radiusRef.current > 0) return;
 
+      // Exclude top and bottom areas where buttons and links are
+      const topExclusionZone = 100; // Top area height
+      const bottomExclusionZone = 100; // Bottom area height
+      
+      if (e.clientY < topExclusionZone || e.clientY > window.innerHeight - bottomExclusionZone) {
+        return;
+      }
+
       holesRef.current.push({
         x: e.clientX,
         y: e.clientY,
@@ -215,19 +223,10 @@ export default function Home() {
 
           {/* Content Layer */}
           <div className="relative z-20 min-h-screen flex flex-col pointer-events-auto">
-            {/* Language Toggle */}
-            <div className="absolute top-4 right-4">
-              <button
-                onClick={toggleLanguage}
-                className="px-3 py-1 rounded text-sm transition-colors font-pixel"
-                style={{backgroundColor: '#2a2a2a', color: '#edeced'}}
-              >
-                {language === 'en' ? 'ES' : 'EN'}
-              </button>
-            </div>
+
 
             {/* Top Link */}
-            <div className="text-center py-4">
+            <div className="text-center py-1">
               <button
                 ref={linkRef}
                 onMouseEnter={handleInteractionStart}
@@ -242,8 +241,15 @@ export default function Home() {
                     setIsRevealing(true);
                   }
                 }}
-                className="hover:opacity-80 transition-opacity cursor-pointer font-pixel text-sm"
-                style={{color: '#edeced'}}
+                className="hover:opacity-80 transition-opacity cursor-pointer font-pixel text-sm shimmer-green"
+                style={{
+                  background: 'linear-gradient(90deg, #edeced 0%, #90EE90 25%, #32CD32 50%, #90EE90 75%, #edeced 100%)',
+                  backgroundSize: '200% 100%',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                  animation: 'shimmer 10s ease-in-out infinite'
+                }}
               >
                 os.txnio.com
               </button>
@@ -314,8 +320,11 @@ export default function Home() {
             setIsInteracting(false);
             setIsHoveringLink(false);
           }}
-          className="fixed top-4 left-1/2 transform -translate-x-1/2 z-30 px-3 rounded text-sm transition-colors font-pixel hover:opacity-80"
-          style={{backgroundColor: '#2a2a2a', color: '#edeced'}}
+          className="fixed top-0 left-1/2 transform -translate-x-1/2 z-30 px-20 py-1 rounded-b-xl text-sm transition-colors font-pixel hover:opacity-90"
+          style={{
+            backgroundColor: '#000000',
+            color: '#ffffff',
+          }}
         >
           X
         </button>
