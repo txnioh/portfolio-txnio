@@ -8,7 +8,6 @@ const availableFonts = [
   'font-renogare', 
   'font-geneva',
   'font-pixel',
-  'font-geist'
 ];
 
 // Available emojis for random selection
@@ -16,16 +15,33 @@ const availableEmojis = [
   '🚀', '💻', '⚡', '🔥', '✨', '🌟', '🌌', '🌊', '🐍', '👨‍💻', '😎', '😇', '🫧', '🪐', '🥶','👀', '👍', '🤓', '👌', '☀️', '🌙', '🌍'
 ];
 
+// Matrix characters for animation
+const matrixChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&*()_+-=[]{}|;:,.<>?';
+
 // Function to get multiple random fonts (ensuring variety)
 const getRandomFonts = (count: number) => {
   const shuffled = [...availableFonts].sort(() => 0.5 - Math.random());
-  return shuffled.slice(0, count);
+  // If we need more fonts than available, cycle through them
+  const result = [];
+  for (let i = 0; i < count; i++) {
+    result.push(shuffled[i % shuffled.length]);
+  }
+  return result;
 };
 
 // Function to get multiple random emojis
 const getRandomEmojis = (count: number) => {
   const shuffled = [...availableEmojis].sort(() => 0.5 - Math.random());
   return shuffled.slice(0, count);
+};
+
+// Function to generate random matrix characters
+const generateRandomChars = (length: number) => {
+  let result = '';
+  for (let i = 0; i < length; i++) {
+    result += matrixChars.charAt(Math.floor(Math.random() * matrixChars.length));
+  }
+  return result;
 };
 
 export default function Home() {
@@ -43,6 +59,23 @@ export default function Home() {
   const [revealOrigin, setRevealOrigin] = useState<{ x: number, y: number } | null>(null);
   const [isRevealing, setIsRevealing] = useState(false);
   const [showComingSoon, setShowComingSoon] = useState(false);
+
+  // Matrix animation states
+  const [isAnimatingText, setIsAnimatingText] = useState(false);
+  const [matrixText, setMatrixText] = useState({
+    name: '',
+    nickname: '',
+    title: '',
+    subtitle: '',
+    company: ''
+  });
+  const [originalText, setOriginalText] = useState({
+    name: 'ANTONIO GONZALEZ',
+    nickname: '(TXNIO)',
+    title: 'a FRONTEND DEVELOPER',
+    subtitle: 'CURRENTLY DESIGNING IN',
+    company: 'CEMOSA'
+  });
 
   // Random font and emoji assignments for this session
   const [randomFonts, setRandomFonts] = useState(() => {
@@ -130,33 +163,67 @@ export default function Home() {
   };
 
   const handleTextClick = () => {
-    // Generate new random fonts
-    const newFonts = getRandomFonts(5);
-    const newRandomFonts = {
-      name: newFonts[0],
-      nickname: newFonts[1], 
-      title: newFonts[2],
-      subtitle: newFonts[3],
-      company: newFonts[4]
-    };
+    // Start Matrix animation
+    setIsAnimatingText(true);
     
-    // Generate new random emojis (1-2 emojis in random positions)
-    const emojiCount = Math.random() < 0.5 ? 1 : 2; // 50% chance for 1 or 2 emojis
-    const newEmojis = getRandomEmojis(emojiCount);
-    const positions = ['name', 'nickname', 'title', 'subtitle', 'company'];
-    const shuffledPositions = positions.sort(() => 0.5 - Math.random()).slice(0, emojiCount);
-    
-    const newRandomEmojis = {
-      name: shuffledPositions.includes('name') ? newEmojis[shuffledPositions.indexOf('name')] : '',
-      nickname: shuffledPositions.includes('nickname') ? newEmojis[shuffledPositions.indexOf('nickname')] : '',
-      title: shuffledPositions.includes('title') ? newEmojis[shuffledPositions.indexOf('title')] : '',
-      subtitle: shuffledPositions.includes('subtitle') ? newEmojis[shuffledPositions.indexOf('subtitle')] : '',
-      company: shuffledPositions.includes('company') ? newEmojis[shuffledPositions.indexOf('company')] : ''
-    };
-    
-    // Force re-render with new fonts and emojis by updating state
-    setRandomFonts(newRandomFonts);
-    setRandomEmojis(newRandomEmojis);
+    // Generate initial matrix text
+    setMatrixText({
+      name: generateRandomChars(originalText.name.length),
+      nickname: generateRandomChars(originalText.nickname.length),
+      title: generateRandomChars(originalText.title.length),
+      subtitle: generateRandomChars(originalText.subtitle.length),
+      company: generateRandomChars(originalText.company.length)
+    });
+
+    // Matrix animation loop
+    let animationCount = 0;
+    const maxAnimations = 2; // 6 frames over 300ms (50ms each)
+    const animationInterval = setInterval(() => {
+      animationCount++;
+      
+      // Update matrix text with new random characters
+      setMatrixText({
+        name: generateRandomChars(originalText.name.length),
+        nickname: generateRandomChars(originalText.nickname.length),
+        title: generateRandomChars(originalText.title.length),
+        subtitle: generateRandomChars(originalText.subtitle.length),
+        company: generateRandomChars(originalText.company.length)
+      });
+
+      // Stop animation after 300ms
+      if (animationCount >= maxAnimations) {
+        clearInterval(animationInterval);
+        setIsAnimatingText(false);
+        
+        // Generate new random fonts
+        const newFonts = getRandomFonts(5);
+        const newRandomFonts = {
+          name: newFonts[0],
+          nickname: newFonts[1], 
+          title: newFonts[2],
+          subtitle: newFonts[3],
+          company: newFonts[4]
+        };
+        
+        // Generate new random emojis (1-2 emojis in random positions)
+        const emojiCount = Math.random() < 0.5 ? 1 : 2; // 50% chance for 1 or 2 emojis
+        const newEmojis = getRandomEmojis(emojiCount);
+        const positions = ['name', 'nickname', 'title', 'subtitle', 'company'];
+        const shuffledPositions = positions.sort(() => 0.5 - Math.random()).slice(0, emojiCount);
+        
+        const newRandomEmojis = {
+          name: shuffledPositions.includes('name') ? newEmojis[shuffledPositions.indexOf('name')] : '',
+          nickname: shuffledPositions.includes('nickname') ? newEmojis[shuffledPositions.indexOf('nickname')] : '',
+          title: shuffledPositions.includes('title') ? newEmojis[shuffledPositions.indexOf('title')] : '',
+          subtitle: shuffledPositions.includes('subtitle') ? newEmojis[shuffledPositions.indexOf('subtitle')] : '',
+          company: shuffledPositions.includes('company') ? newEmojis[shuffledPositions.indexOf('company')] : ''
+        };
+        
+        // Force re-render with new fonts and emojis by updating state
+        setRandomFonts(newRandomFonts);
+        setRandomEmojis(newRandomEmojis);
+      }
+    }, 50); // 50ms interval for smooth animation
   };
 
   useEffect(() => {
@@ -381,7 +448,7 @@ export default function Home() {
 
 
             {/* Top Link */}
-            <div className="text-center py-1">
+            <div className="text-center py-6">
               <button
                 ref={linkRef}
                 onMouseEnter={handleInteractionStart}
@@ -396,7 +463,7 @@ export default function Home() {
                     setIsRevealing(true);
                   }
                 }}
-                className="hover:opacity-80 transition-all duration-300 ease-in-out cursor-pointer font-pixel text-sm shimmer-green"
+                className="hover:opacity-80 transition-all duration-300 ease-in-out cursor-pointer font-pixel text-lg md:text-sm shimmer-green px-4 py-2 rounded-lg"
                 style={{
                   background: 'linear-gradient(90deg, #edeced 0%, #90EE90 25%, #32CD32 50%, #90EE90 75%, #edeced 100%)',
                   backgroundSize: '200% 100%',
@@ -406,7 +473,9 @@ export default function Home() {
                   animation: 'shimmer 10s ease-in-out infinite',
                   opacity: isInteracting ? 0 : 1,
                   transform: isInteracting ? 'translateY(-20px)' : 'translateY(0)',
-                  pointerEvents: isInteracting ? 'none' : 'auto'
+                  pointerEvents: isInteracting ? 'none' : 'auto',
+                  minHeight: '44px',
+                  minWidth: '200px'
                 }}
               >
                 os.txnio.com
@@ -419,23 +488,23 @@ export default function Home() {
                 <div className="space-y-1 cursor-pointer" onClick={handleTextClick}>
                   <h1 className={`text-4xl md:text-3xl font-bold ${randomFonts.name} hover:opacity-80 transition-opacity`} style={{color: '#edeced'}}>
                     {randomEmojis.name && <span className="font-emoji mr-2">{randomEmojis.name}</span>}
-                    ANTONIO GONZALEZ
+                    {isAnimatingText ? matrixText.name : originalText.name}
                   </h1>
                   <h2 className={`text-2xl md:text-4xl ${randomFonts.nickname} hover:opacity-80 transition-opacity`} style={{color: '#edeced'}}>
                     {randomEmojis.nickname && <span className="font-emoji mr-2">{randomEmojis.nickname}</span>}
-                    (TXNIO)
+                    {isAnimatingText ? matrixText.nickname : originalText.nickname}
                   </h2>
                   <h3 className={`text-xl md:text-4xl ${randomFonts.title} hover:opacity-80 transition-opacity`} style={{color: '#edeced', opacity: 0.9}}>
                     {randomEmojis.title && <span className="font-emoji mr-2">{randomEmojis.title}</span>}
-                    a FRONTEND DEVELOPER
+                    {isAnimatingText ? matrixText.title : originalText.title}
                   </h3>
                   <h4 className={`text-lg md:text-xl ${randomFonts.subtitle} hover:opacity-80 transition-opacity`} style={{color: '#edeced', opacity: 0.8}}>
                     {randomEmojis.subtitle && <span className="font-emoji mr-2">{randomEmojis.subtitle}</span>}
-                    CURRENTLY DESIGNING IN
+                    {isAnimatingText ? matrixText.subtitle : originalText.subtitle}
                   </h4>
                   <h5 className={`text-2xl md:text-4xl ${randomFonts.company} font-bold hover:opacity-80 transition-opacity`} style={{color: '#edeced'}}>
                     {randomEmojis.company && <span className="font-emoji mr-2">{randomEmojis.company}</span>}
-                    CEMOSA
+                    {isAnimatingText ? matrixText.company : originalText.company}
                   </h5>
                 </div>
 
