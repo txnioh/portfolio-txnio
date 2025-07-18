@@ -9,7 +9,6 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "caniuse-lite": "^1.0.30001727",
     "framer-motion": "^11.5.4",
     "next": "14.2.11",
     "react": "^18",
