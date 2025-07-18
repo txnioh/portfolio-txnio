@@ -84,3 +84,11 @@ html, body {
     background-position: 200% 0;
   }
 }
+
+/* Emoji image styles */
+.emoji-image {
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+  filter: contrast(1.1) brightness(1.1);
+}

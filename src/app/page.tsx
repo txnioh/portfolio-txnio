@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import Image from 'next/image';
 
 // Available fonts for random selection
 const availableFonts = [
@@ -14,6 +15,38 @@ const availableFonts = [
 const availableEmojis = [
   '🚀', '💻', '⚡', '🔥', '✨', '🌟', '🌌', '🌊', '🐍', '👨‍💻', '😎', '😇', '🫧', '🪐', '🥶','👀', '👍', '🤓', '👌', '☀️', '🌙', '🌍'
 ];
+
+// Emoji to image file mapping for mobile
+const emojiToImageMap: { [key: string]: string } = {
+  '🚀': 'U+1F680.png',
+  '💻': 'U+1F4BB.png',
+  '⚡': 'U+26A1.png',
+  '🔥': 'U+1F525.png',
+  '✨': 'U+2728.png',
+  '🌟': 'U+1F31F.png',
+  '🌌': 'U+1F30C.png',
+  '🌊': 'U+1F30A.png',
+  '🐍': 'U+1F40D.png',
+  '👨‍💻': 'U+1F468_U+200D_U+1F4BB.png',
+  '😎': 'U+1F60E.png',
+  '😇': 'U+1F607.png',
+  '🫧': 'U+1FAE7.png',
+  '🪐': 'U+1FA90.png',
+  '🥶': 'U+1F976.png',
+  '👀': 'U+1F440.png',
+  '👍': 'U+1F44D.png',
+  '🤓': 'U+1F913.png',
+  '👌': 'U+1F44C.png',
+  '☀️': 'U+2600_U+FE0F.png',
+  '🌙': 'U+1F319.png',
+  '🌍': 'U+1F30D.png'
+};
+
+// Function to detect mobile devices
+const isMobile = () => {
+  if (typeof window === 'undefined') return false;
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
+};
 
 // Matrix characters for animation
 const matrixChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&*()_+-=[]{}|;:,.<>?';
@@ -59,6 +92,7 @@ export default function Home() {
   const [revealOrigin, setRevealOrigin] = useState<{ x: number, y: number } | null>(null);
   const [isRevealing, setIsRevealing] = useState(false);
   const [showComingSoon, setShowComingSoon] = useState(false);
+  const [isMobileDevice, setIsMobileDevice] = useState(false);
 
   // Matrix animation states
   const [isAnimatingText, setIsAnimatingText] = useState(false);
@@ -69,7 +103,7 @@ export default function Home() {
     subtitle: '',
     company: ''
   });
-  const [originalText, setOriginalText] = useState({
+  const [originalText] = useState({
     name: 'ANTONIO GONZALEZ',
     nickname: '(TXNIO)',
     title: 'a FRONTEND DEVELOPER',
@@ -116,6 +150,39 @@ export default function Home() {
 
     generateEmojis();
   }, []);
+
+  // Detect mobile device on mount and handle resize
+  useEffect(() => {
+    const checkMobile = () => setIsMobileDevice(isMobile());
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Component to render emoji (text or image based on device)
+  const EmojiRenderer = ({ emoji }: { emoji: string }) => {
+    const [imageError, setImageError] = useState(false);
+    
+    if (!emoji) return null;
+    
+    if (isMobileDevice && emojiToImageMap[emoji] && !imageError) {
+      return (
+        <Image 
+          src={`/emojis/${emojiToImageMap[emoji]}`}
+          alt={emoji}
+          width={24}
+          height={24}
+          className="inline-block mr-2 emoji-image"
+          style={{ verticalAlign: 'middle' }}
+          onError={() => setImageError(true)}
+        />
+      );
+    }
+    
+    return <span className="font-emoji mr-2">{emoji}</span>;
+  };
 
   const addHole = useCallback((clientX: number, clientY: number) => {
     // Only add holes after first interaction
@@ -487,23 +554,23 @@ export default function Home() {
               <div className="text-center">
                 <div className="space-y-1 cursor-pointer" onClick={handleTextClick}>
                   <h1 className={`text-4xl md:text-3xl font-bold ${randomFonts.name} hover:opacity-80 transition-opacity`} style={{color: '#edeced'}}>
-                    {randomEmojis.name && <span className="font-emoji mr-2">{randomEmojis.name}</span>}
+                    <EmojiRenderer emoji={randomEmojis.name} />
                     {isAnimatingText ? matrixText.name : originalText.name}
                   </h1>
                   <h2 className={`text-2xl md:text-4xl ${randomFonts.nickname} hover:opacity-80 transition-opacity`} style={{color: '#edeced'}}>
-                    {randomEmojis.nickname && <span className="font-emoji mr-2">{randomEmojis.nickname}</span>}
+                    <EmojiRenderer emoji={randomEmojis.nickname} />
                     {isAnimatingText ? matrixText.nickname : originalText.nickname}
                   </h2>
                   <h3 className={`text-xl md:text-4xl ${randomFonts.title} hover:opacity-80 transition-opacity`} style={{color: '#edeced', opacity: 0.9}}>
-                    {randomEmojis.title && <span className="font-emoji mr-2">{randomEmojis.title}</span>}
+                    <EmojiRenderer emoji={randomEmojis.title} />
                     {isAnimatingText ? matrixText.title : originalText.title}
                   </h3>
                   <h4 className={`text-lg md:text-xl ${randomFonts.subtitle} hover:opacity-80 transition-opacity`} style={{color: '#edeced', opacity: 0.8}}>
-                    {randomEmojis.subtitle && <span className="font-emoji mr-2">{randomEmojis.subtitle}</span>}
+                    <EmojiRenderer emoji={randomEmojis.subtitle} />
                     {isAnimatingText ? matrixText.subtitle : originalText.subtitle}
                   </h4>
                   <h5 className={`text-2xl md:text-4xl ${randomFonts.company} font-bold hover:opacity-80 transition-opacity`} style={{color: '#edeced'}}>
-                    {randomEmojis.company && <span className="font-emoji mr-2">{randomEmojis.company}</span>}
+                    <EmojiRenderer emoji={randomEmojis.company} />
                     {isAnimatingText ? matrixText.company : originalText.company}
                   </h5>
                 </div>
