@@ -518,7 +518,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen relative" onMouseMove={() => !hasInteracted && setHasInteracted(true)}>
-      <Glitter buttonPosition={buttonPosition} isInteracting={isInteracting} isRevealing={isRevealing || isHoveringLink} />
+      <Glitter buttonPosition={buttonPosition} isInteracting={isInteracting} isRevealing={isHoveringLink} />
       {/* Background iframe */}
       <iframe
         src="https://os.txnio.com"

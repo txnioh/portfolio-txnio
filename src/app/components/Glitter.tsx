@@ -80,11 +80,11 @@ const Glitter: React.FC<GlitterProps> = ({ buttonPosition, isInteracting, isReve
     };
   }, [buttonPosition]);
 
-  if (isInteracting || isRevealing) {
-    return null;
-  }
-
-  return <canvas ref={canvasRef} className="fixed top-0 left-0 w-full h-full pointer-events-none" style={{ zIndex: 11 }} />;
+  return <canvas ref={canvasRef} className="fixed top-0 left-0 w-full h-full pointer-events-none" style={{ 
+    zIndex: 11,
+    opacity: (isInteracting || isRevealing) ? 0 : 1,
+    transition: 'opacity 0.3s ease-in-out'
+  }} />;
 };
 
 export default Glitter; 
