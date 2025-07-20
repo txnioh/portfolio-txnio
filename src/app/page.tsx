@@ -226,8 +226,11 @@ export default function Home() {
   }, [hasInteracted, isHoveringLink]);
 
   const handleInteractionStart = () => {
-    // Set origin to center top of screen
-    const origin = {
+    // Use button position if available, otherwise center top of screen
+    const origin = buttonPosition ? {
+      x: buttonPosition.x + buttonPosition.width / 2,
+      y: buttonPosition.y + buttonPosition.height / 2,
+    } : {
       x: window.innerWidth / 2,
       y: 0,
     };
