@@ -1,6 +1,14 @@
 
 import React, { useEffect, useRef } from 'react';
 
+interface Pixel {
+  x: number;
+  y: number;
+  size: number;
+  life: number;
+  initialLife: number;
+}
+
 interface GlitterProps {
   buttonPosition: {
     x: number;
@@ -14,7 +22,7 @@ interface GlitterProps {
 
 const Glitter: React.FC<GlitterProps> = ({ buttonPosition, isInteracting, isRevealing }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const pixelsRef = useRef<any[]>([]);
+  const pixelsRef = useRef<Pixel[]>([]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
