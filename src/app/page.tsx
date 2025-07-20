@@ -573,7 +573,7 @@ export default function Home() {
                   minWidth: '200px'
                 }}
               >
-                os.txnio.com
+                ↗ New OS experience
               </button>
             </div>
 
