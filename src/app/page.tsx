@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Image from 'next/image';
+import Glitter from './components/Glitter';
 
 // Available fonts for random selection
 const availableFonts = [
@@ -123,6 +124,25 @@ export default function Home() {
     };
   });
 
+  const [buttonPosition, setButtonPosition] = useState<{ x: number, y: number, width: number, height: number } | null>(null);
+
+  useEffect(() => {
+    const updatePosition = () => {
+      if (linkRef.current) {
+        const rect = linkRef.current.getBoundingClientRect();
+        setButtonPosition({
+          x: rect.left,
+          y: rect.top,
+          width: rect.width,
+          height: rect.height
+        });
+      }
+    }
+    updatePosition();
+    window.addEventListener('resize', updatePosition);
+    return () => window.removeEventListener('resize', updatePosition);
+  }, []);
+
   const [randomEmojis, setRandomEmojis] = useState({
     name: '',
     nickname: '',
@@ -228,6 +248,10 @@ export default function Home() {
     
     setIsHoveringLink(true);
   };
+
+  const handleInteractionEnd = () => {
+    setIsHoveringLink(false);
+  }
 
   const handleTextClick = () => {
     // Start Matrix animation
@@ -375,9 +399,9 @@ export default function Home() {
       }
       
       ctx.imageSmoothingEnabled = false;
-      const isAnimating = isHoveringLink || radiusRef.current > 0;
+      const isAnimatingReveal = isHoveringLink || radiusRef.current > 0;
 
-      if (isAnimating && revealOrigin) {
+      if (isAnimatingReveal && revealOrigin) {
         const revealSpeed = 25;
         
         if (isHoveringLink) {
@@ -494,10 +518,12 @@ export default function Home() {
 
   return (
     <div className="min-h-screen relative" onMouseMove={() => !hasInteracted && setHasInteracted(true)}>
+      <Glitter buttonPosition={buttonPosition} isInteracting={isInteracting} isRevealing={isRevealing || isHoveringLink} />
       {/* Background iframe */}
       <iframe
         src="https://os.txnio.com"
-        className="fixed inset-0 w-full h-full border-0 z-0"
+        className="fixed inset-0 w-full h-full border-0"
+        style={{ zIndex: isInteracting ? 25 : 1 }}
         title="txniOS Background"
       />
       
@@ -511,7 +537,10 @@ export default function Home() {
           />
 
           {/* Content Layer */}
-          <div className="relative z-20 min-h-screen flex flex-col pointer-events-auto">
+          <div 
+            className="relative z-20 min-h-screen flex flex-col pointer-events-auto transition-opacity duration-300"
+            style={{ opacity: (isHoveringLink || isRevealing) ? 0 : 1 }}
+          >
 
 
             {/* Top Link */}
@@ -519,11 +548,7 @@ export default function Home() {
               <button
                 ref={linkRef}
                 onMouseEnter={handleInteractionStart}
-                onMouseLeave={() => {
-                  if (!isRevealing) {
-                    setIsHoveringLink(false);
-                  }
-                }}
+                onMouseLeave={handleInteractionEnd}
                 onClick={() => {
                   if (!isRevealing) {
                     handleInteractionStart();
@@ -629,6 +654,7 @@ export default function Home() {
         onClick={() => {
           setIsInteracting(false);
           setIsHoveringLink(false);
+          setIsRevealing(false);
         }}
         className="fixed top-0 left-1/2 transform -translate-x-1/2 z-30 px-20 py-1 rounded-b-xl text-sm transition-all duration-300 ease-in-out font-pixel hover:opacity-90"
         style={{
