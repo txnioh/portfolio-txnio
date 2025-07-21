@@ -92,6 +92,7 @@ export default function Home() {
   const [isHoveringLink, setIsHoveringLink] = useState(false);
   const [revealOrigin, setRevealOrigin] = useState<{ x: number, y: number } | null>(null);
   const [isRevealing, setIsRevealing] = useState(false);
+  const [isClicking, setIsClicking] = useState(false);
   const [showComingSoon, setShowComingSoon] = useState(false);
   const [isMobileDevice, setIsMobileDevice] = useState(false);
 
@@ -226,29 +227,6 @@ export default function Home() {
   }, [hasInteracted, isHoveringLink]);
 
   const handleInteractionStart = () => {
-    // Use button position if available, otherwise center top of screen
-    const origin = buttonPosition ? {
-      x: buttonPosition.x + buttonPosition.width / 2,
-      y: buttonPosition.y + buttonPosition.height / 2,
-    } : {
-      x: window.innerWidth / 2,
-      y: 0,
-    };
-
-    if (!revealOrigin) {
-      setRevealOrigin(origin);
-    }
-    
-    const w = window.innerWidth;
-    const h = window.innerHeight;
-    const x = origin.x;
-    const y = origin.y;
-    const d1 = Math.sqrt(x * x + y * y);
-    const d2 = Math.sqrt(Math.pow(w - x, 2) + y * y);
-    const d3 = Math.sqrt(x * x + Math.pow(h - y, 2));
-    const d4 = Math.sqrt(Math.pow(w - x, 2) + Math.pow(h - y, 2));
-    maxRadiusRef.current = Math.max(d1, d2, d3, d4);
-    
     setIsHoveringLink(true);
   };
 
@@ -402,12 +380,12 @@ export default function Home() {
       }
       
       ctx.imageSmoothingEnabled = false;
-      const isAnimatingReveal = isHoveringLink || radiusRef.current > 0;
+      const isAnimatingReveal = isRevealing || radiusRef.current > 0;
 
       if (isAnimatingReveal && revealOrigin) {
         const revealSpeed = 25;
         
-        if (isHoveringLink) {
+        if (isRevealing) {
           radiusRef.current = Math.min(radiusRef.current + revealSpeed, maxRadiusRef.current);
         } else {
           radiusRef.current = Math.max(radiusRef.current - revealSpeed, 0);
@@ -430,12 +408,11 @@ export default function Home() {
           }
         }
         
-        if (radiusRef.current >= maxRadiusRef.current && isHoveringLink) {
+        if (radiusRef.current >= maxRadiusRef.current && isRevealing) {
           ctx.clearRect(0, 0, canvas.width, canvas.height);
-          if (isRevealing) {
-            setIsInteracting(true);
-            setIsRevealing(false);
-          }
+          setIsInteracting(true);
+          setIsRevealing(false);
+          setIsClicking(false);
         }
 
       } else {
@@ -494,7 +471,7 @@ export default function Home() {
         cancelAnimationFrame(animationFrameId.current);
       }
     };
-  }, [isHoveringLink, revealOrigin, hasInteracted, isRevealing, addHole]);
+  }, [isRevealing, revealOrigin, hasInteracted, isClicking, addHole]);
 
   const content = {
     en: {
@@ -521,7 +498,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen relative" onMouseMove={() => !hasInteracted && setHasInteracted(true)}>
-      <Glitter buttonPosition={buttonPosition} isInteracting={isInteracting} isRevealing={isHoveringLink} />
+      <Glitter buttonPosition={buttonPosition} isInteracting={isHoveringLink} isRevealing={isRevealing} />
       {/* Background iframe */}
       <iframe
         src="https://os.txnio.com"
@@ -542,7 +519,7 @@ export default function Home() {
           {/* Content Layer */}
           <div 
             className="relative z-20 min-h-screen flex flex-col pointer-events-auto transition-opacity duration-300"
-            style={{ opacity: (isHoveringLink || isRevealing) ? 0 : 1 }}
+            style={{ opacity: isRevealing ? 0 : 1 }}
           >
 
 
@@ -550,12 +527,31 @@ export default function Home() {
             <div className="text-center py-6">
               <button
                 ref={linkRef}
-                onMouseEnter={handleInteractionStart}
-                onMouseLeave={handleInteractionEnd}
-                onClick={() => {
-                  if (!isRevealing) {
-                    handleInteractionStart();
+                onMouseEnter={() => setIsHoveringLink(true)}
+                onMouseLeave={() => setIsHoveringLink(false)}
+                onClick={(e) => {
+                  if (!isRevealing && !isClicking && !isInteracting) {
+                    setIsClicking(true);
+                    
+                    // Set reveal origin to mouse click position
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    const clickX = e.clientX;
+                    const clickY = e.clientY;
+                    
+                    setRevealOrigin({ x: clickX, y: clickY });
+                    
+                    // Calculate max radius from click position
+                    const w = window.innerWidth;
+                    const h = window.innerHeight;
+                    const d1 = Math.sqrt(clickX * clickX + clickY * clickY);
+                    const d2 = Math.sqrt(Math.pow(w - clickX, 2) + clickY * clickY);
+                    const d3 = Math.sqrt(clickX * clickX + Math.pow(h - clickY, 2));
+                    const d4 = Math.sqrt(Math.pow(w - clickX, 2) + Math.pow(h - clickY, 2));
+                    maxRadiusRef.current = Math.max(d1, d2, d3, d4);
+                    
                     setIsRevealing(true);
+                    // Prevent multiple rapid clicks
+                    setTimeout(() => setIsClicking(false), 1000);
                   }
                 }}
                 className="hover:opacity-80 transition-all duration-300 ease-in-out cursor-pointer font-pixel text-lg md:text-sm shimmer-green px-4 py-2 rounded-lg"
