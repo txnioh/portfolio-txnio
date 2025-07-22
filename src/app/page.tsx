@@ -226,13 +226,7 @@ export default function Home() {
     });
   }, [hasInteracted, isHoveringLink]);
 
-  const handleInteractionStart = () => {
-    setIsHoveringLink(true);
-  };
 
-  const handleInteractionEnd = () => {
-    setIsHoveringLink(false);
-  }
 
   const handleTextClick = () => {
     // Start Matrix animation
@@ -534,7 +528,6 @@ export default function Home() {
                     setIsClicking(true);
                     
                     // Set reveal origin to mouse click position
-                    const rect = e.currentTarget.getBoundingClientRect();
                     const clickX = e.clientX;
                     const clickY = e.clientY;
                     
