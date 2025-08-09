@@ -1,6 +1,8 @@
 import React from 'react';
 import styled, { keyframes } from 'styled-components';
 import { FaEnvelope, FaLinkedin, FaGithub } from 'react-icons/fa';
+import { useTranslation } from 'react-i18next';
+import '../../../i18n/config';
 
 const gradientAnimation = keyframes`
   0% {
@@ -117,17 +119,18 @@ const Description = styled.p`
 `;
 
 const ContactContent: React.FC = () => {
+  const { t } = useTranslation();
+  
   return (
     <ContactContainer>
-      <Title>¡Hablemos!</Title>
+      <Title>{t('contact.title')}</Title>
       <Description>
-        Si tienes alguna pregunta, propuesta de colaboración o simplemente quieres charlar,
-        no dudes en contactarme a través de cualquiera de estos medios.
+        {t('contact.description')}
       </Description>
       <ContactGrid>
         <ContactCard href="mailto:txniodev@gmail.com">
           <FaEnvelope />
-          <ContactLabel>Email</ContactLabel>
+          <ContactLabel>{t('contact.email')}</ContactLabel>
           <ContactValue>txniodev@gmail.com</ContactValue>
         </ContactCard>
         <ContactCard 
@@ -136,7 +139,7 @@ const ContactContent: React.FC = () => {
           rel="noopener noreferrer"
         >
           <FaLinkedin />
-          <ContactLabel>LinkedIn</ContactLabel>
+          <ContactLabel>{t('contact.linkedin')}</ContactLabel>
           <ContactValue>linkedin.com/in/txnio</ContactValue>
         </ContactCard>
         <ContactCard 
@@ -145,7 +148,7 @@ const ContactContent: React.FC = () => {
           rel="noopener noreferrer"
         >
           <FaGithub />
-          <ContactLabel>GitHub</ContactLabel>
+          <ContactLabel>{t('contact.github')}</ContactLabel>
           <ContactValue>github.com/txnioh</ContactValue>
         </ContactCard>
       </ContactGrid>

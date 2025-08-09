@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { FaDesktop, FaUser, FaWifi, FaBluetooth, FaLock, FaKeyboard } from 'react-icons/fa';
+import { useTranslation } from 'react-i18next';
+import '../../../i18n/config';
 
 const SettingsContainer = styled.div`
   display: flex;
   flex-direction: column;
   height: 100%;
   width: 100%;
-  background-color: #1e1e1e;
-  color: #e0e0e0;
+  background-color: rgba(30, 30, 30, 0.95);
+  color: #ffffff;
+  backdrop-filter: blur(10px);
 
   @media (min-width: 769px) {
     flex-direction: row;
@@ -19,74 +21,106 @@ const Sidebar = styled.div`
   display: none;
 
   @media (min-width: 769px) {
-    display: block;
-    width: 250px;
+    display: flex;
+    flex-direction: column;
+    width: 200px;
     height: 100%;
-    background-color: #2c2c2c;
-    padding: 20px;
+    background-color: rgba(40, 40, 40, 0.6);
+    padding: 16px;
     overflow-y: auto;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    
+    /* Webkit scrollbar styling */
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    &::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 3px;
+      
+      &:hover {
+        background: rgba(255, 255, 255, 0.5);
+      }
+    }
   }
 `;
 
 const SidebarItem = styled.div<{ isActive: boolean }>`
   display: inline-block;
-  padding: 8px 12px;
-  margin-right: 10px;
+  padding: 6px 10px;
+  margin-right: 8px;
   cursor: pointer;
-  background-color: ${props => props.isActive ? '#4a4a4a' : 'transparent'};
-  border-radius: 8px;
-  transition: all 0.3s ease;
+  background-color: ${props => props.isActive ? 'rgba(0, 122, 255, 0.2)' : 'transparent'};
+  border-radius: 6px;
+  transition: all 0.2s ease;
   white-space: nowrap;
+  font-size: 14px;
+  border: ${props => props.isActive ? '1px solid rgba(0, 122, 255, 0.3)' : '1px solid transparent'};
 
   &:hover {
-    background-color: #3a3a3a;
+    background-color: rgba(255, 255, 255, 0.1);
   }
 
-  svg {
-    margin-right: 5px;
-    font-size: 1.2em;
+  .icon {
+    margin-right: 6px;
+    width: 16px;
+    height: 16px;
+    object-fit: contain;
   }
 
   @media (min-width: 769px) {
     display: flex;
     align-items: center;
-    margin-bottom: 10px;
+    margin-bottom: 6px;
     margin-right: 0;
-    padding: 10px;
+    padding: 8px 12px;
 
-    svg {
-      margin-right: 10px;
+    .icon {
+      margin-right: 8px;
+      width: 16px;
+      height: 16px;
     }
   }
 `;
 
 const ContentArea = styled.div`
   flex: 1;
-  padding: 20px;
+  padding: 24px;
   overflow-y: auto;
 `;
 
 const Title = styled.h2`
   color: #ffffff;
-  margin-bottom: 20px;
-  font-size: 1.8rem;
-  border-bottom: 1px solid #444;
-  padding-bottom: 10px;
+  margin-bottom: 24px;
+  font-size: 24px;
+  font-weight: 600;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 12px;
 `;
 
 const Section = styled.div`
-  margin-bottom: 30px;
+  margin-bottom: 32px;
 `;
 
 const SectionTitle = styled.h3`
-  color: #0078d4;
-  margin-bottom: 15px;
-  font-size: 1.4rem;
+  color: #007AFF;
+  margin-bottom: 16px;
+  font-size: 18px;
+  font-weight: 500;
   display: flex;
   align-items: center;
   
-  svg {
-    margin-right: 10px;
+  .icon {
+    margin-right: 8px;
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
   }
 `;
 
@@ -136,21 +170,27 @@ const WallpaperOverlay = styled.div<{ isSelected: boolean }>`
 
 const SearchInput = styled.input`
   width: 100%;
-  padding: 10px;
-  margin-bottom: 10px;
-  background-color: #3a3a3a;
-  border: none;
-  border-radius: 5px;
+  padding: 8px 12px;
+  margin-bottom: 12px;
+  background-color: rgba(60, 60, 60, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
   color: #ffffff;
-  font-size: 1rem;
+  font-size: 14px;
+  backdrop-filter: blur(10px);
+
+  &::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+  }
 
   &:focus {
     outline: none;
-    box-shadow: 0 0 0 2px #0078d4;
+    border-color: #007AFF;
+    box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.2);
   }
 
   @media (min-width: 769px) {
-    margin-bottom: 20px;
+    margin-bottom: 16px;
   }
 `;
 
@@ -163,6 +203,7 @@ const SettingsContent: React.FC<SettingsContentProps> = ({
   currentWallpaper, 
   setWallpaper
 }) => {
+  const { t } = useTranslation();
   const [activeSection, setActiveSection] = useState('wallpaper');
   const [searchTerm, setSearchTerm] = useState('');
   const [loadedWallpapers, setLoadedWallpapers] = useState<{ [key: string]: boolean }>({});
@@ -181,7 +222,7 @@ const SettingsContent: React.FC<SettingsContentProps> = ({
       case 'wallpaper':
         return (
           <Section>
-            <SectionTitle><FaDesktop /> Fondo de Pantalla</SectionTitle>
+            <SectionTitle><img src="/icons/mac.png" alt="Display" className="icon" /> {t('settings.wallpaper.title')}</SectionTitle>
             <WallpaperGrid>
               {wallpapers.map((wallpaper) => (
                 <WallpaperWrapper
@@ -203,36 +244,36 @@ const SettingsContent: React.FC<SettingsContentProps> = ({
       case 'user':
         return (
           <Section>
-            <SectionTitle><FaUser /> Usuario y Cuentas</SectionTitle>
-            <p>Gestiona tus cuentas de usuario y ajustes de inicio de sesión.</p>
+            <SectionTitle><img src="/icons/apple.png" alt="User" className="icon" /> {t('settings.user.title')}</SectionTitle>
+            <p>{t('settings.user.description')}</p>
           </Section>
         );
       case 'network':
         return (
           <Section>
-            <SectionTitle><FaWifi /> Red e Internet</SectionTitle>
-            <p>Configura tus conexiones Wi-Fi y ajustes de red.</p>
+            <SectionTitle><img src="/icons/cdrom.png" alt="Network" className="icon" /> {t('settings.network.title')}</SectionTitle>
+            <p>{t('settings.network.description')}</p>
           </Section>
         );
       case 'bluetooth':
         return (
           <Section>
-            <SectionTitle><FaBluetooth /> Bluetooth</SectionTitle>
-            <p>Administra tus dispositivos Bluetooth y conexiones.</p>
+            <SectionTitle><img src="/icons/directory.png" alt="Bluetooth" className="icon" /> {t('settings.bluetooth.title')}</SectionTitle>
+            <p>{t('settings.bluetooth.description')}</p>
           </Section>
         );
       case 'security':
         return (
           <Section>
-            <SectionTitle><FaLock /> Seguridad y Privacidad</SectionTitle>
-            <p>Ajusta la configuración de seguridad y privacidad de tu sistema.</p>
+            <SectionTitle><img src="/icons/pdf.png" alt="Security" className="icon" /> {t('settings.security.title')}</SectionTitle>
+            <p>{t('settings.security.description')}</p>
           </Section>
         );
       case 'keyboard':
         return (
           <Section>
-            <SectionTitle><FaKeyboard /> Teclado</SectionTitle>
-            <p>Personaliza la configuración de tu teclado y atajos.</p>
+            <SectionTitle><img src="/icons/notas.png" alt="Keyboard" className="icon" /> {t('settings.keyboard.title')}</SectionTitle>
+            <p>{t('settings.keyboard.description')}</p>
           </Section>
         );
       default:
@@ -245,30 +286,30 @@ const SettingsContent: React.FC<SettingsContentProps> = ({
       <Sidebar>
         <SearchInput 
           type="text" 
-          placeholder="Buscar ajustes..." 
+          placeholder={t('settings.search')}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
         {[
-          { id: 'wallpaper', icon: FaDesktop, label: 'Fondo de pantalla' },
-          { id: 'user', icon: FaUser, label: 'Usuario y Cuentas' },
-          { id: 'network', icon: FaWifi, label: 'Red e Internet' },
-          { id: 'bluetooth', icon: FaBluetooth, label: 'Bluetooth' },
-          { id: 'security', icon: FaLock, label: 'Seguridad y Privacidad' },
-          { id: 'keyboard', icon: FaKeyboard, label: 'Teclado' }
-        ].map(({ id, icon: Icon, label }) => (
+          { id: 'wallpaper', icon: '/icons/mac.png', labelKey: 'settings.wallpaper.label' },
+          { id: 'user', icon: '/icons/apple.png', labelKey: 'settings.user.label' },
+          { id: 'network', icon: '/icons/cdrom.png', labelKey: 'settings.network.label' },
+          { id: 'bluetooth', icon: '/icons/directory.png', labelKey: 'settings.bluetooth.label' },
+          { id: 'security', icon: '/icons/pdf.png', labelKey: 'settings.security.label' },
+          { id: 'keyboard', icon: '/icons/notas.png', labelKey: 'settings.keyboard.label' }
+        ].map(({ id, icon, labelKey }) => (
           <SidebarItem 
             key={id}
             isActive={activeSection === id}
             onClick={() => setActiveSection(id)}
           >
-            <Icon />
-            {label}
+            <img src={icon} alt={t(labelKey)} className="icon" />
+            {t(labelKey)}
           </SidebarItem>
         ))}
       </Sidebar>
       <ContentArea>
-        <Title>Ajustes del Sistema</Title>
+        <Title>{t('settings.title')}</Title>
         {renderContent()}
       </ContentArea>
     </SettingsContainer>

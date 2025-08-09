@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import { useTranslation } from 'react-i18next';
+import '../../../i18n/config';
 
 interface ThemeProps {
   isDarkMode: boolean;
@@ -65,27 +67,22 @@ const ThemeToggle = styled.button<ThemeProps>`
 `;
 
 const HomeContent: React.FC = () => {
+  const { t } = useTranslation();
   const [isDarkMode, setIsDarkMode] = useState(true);
 
   const toggleTheme = () => {
     setIsDarkMode(!isDarkMode);
   };
 
-  const text = `hola! soy Tony, aunque mi pseudónimo es -- txnio --, ahora mismo estoy construyendo cosas para web,
-
-por ahora estudiando diferentes tecnologías para poder expresar arte en ventanas de navegadores. 
-
-me gusta el cine, fotografía y la música hipnagógica.`;
-
   return (
     <HomeContainer isDarkMode={isDarkMode}>
       <ImageWrapper isDarkMode={isDarkMode}>
         <ProfileImage src="/profile.jpeg" alt="Tony (txnio)" />
       </ImageWrapper>
-      <TextContent>{text}</TextContent>
-      <UpdateText isDarkMode={isDarkMode}>Ultima edición: 16:04, Vier Sep 27 2024</UpdateText>
+      <TextContent>{t('home.introduction')}</TextContent>
+      <UpdateText isDarkMode={isDarkMode}>{t('home.lastEdited')}</UpdateText>
       <ThemeToggle isDarkMode={isDarkMode} onClick={toggleTheme}>
-        {isDarkMode ? "enciende las luces" : "apaga las luces"}
+        {isDarkMode ? t('home.toggleLights.turnOn') : t('home.toggleLights.turnOff')}
       </ThemeToggle>
     </HomeContainer>
   );

@@ -2,6 +2,8 @@ import React from 'react';
 import styled from 'styled-components';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { useTranslation } from 'react-i18next';
+import '../../../i18n/config';
 
 const VSCodeContainer = styled.div`
   background-color: rgba(30, 30, 30, 0.5);
@@ -38,46 +40,61 @@ const VSCodeContent = styled.div`
 `;
 
 const AboutMeContent: React.FC = () => {
-  const aboutMeCode = `
-const sobreAntonioGonzalez = {
-  nombre: "Antonio J. González",
-  alias: "Txnio",
-  rol: "Desarrollador para uso humano",
-  experiencia: {
-    "Empresa": "1.5+ años",
-    "Por mi": "2+ años"
+  const { t } = useTranslation();
+  
+  const generateCodeFromTranslations = () => {
+    const skills = t('aboutMe.skills', { returnObjects: true }) as string[];
+    const interests = t('aboutMe.interests', { returnObjects: true }) as string[];
+    const currentlyLearning = t('aboutMe.currentlyLearning', { returnObjects: true }) as string[];
+    const aiTools = t('aboutMe.aiTools', { returnObjects: true }) as string[];
+    const currentStack = t('aboutMe.currentStack', { returnObjects: true }) as {
+      frontend: string[];
+      styling: string[];
+      stateManagement: string[];
+      backend: string[];
+      database: string[];
+      deployment: string[];
+    };
+
+    const isSpanish = t('aboutMe.role') === 'Desarrollador para uso humano';
+
+    return `
+const ${isSpanish ? 'sobreAntonioGonzalez' : 'aboutAntonioGonzalez'} = {
+  ${isSpanish ? 'nombre' : 'name'}: "${t('aboutMe.name')}",
+  alias: "${t('aboutMe.alias')}",
+  ${isSpanish ? 'rol' : 'role'}: "${t('aboutMe.role')}",
+  ${isSpanish ? 'experiencia' : 'experience'}: {
+    "${isSpanish ? 'Empresa' : 'Company'}": "${t('aboutMe.experience.company')}",
+    "${isSpanish ? 'Por mi' : 'Personal'}": "${t('aboutMe.experience.personal')}"
   },
-  habilidades: [
-    "JavaScript", "TypeScript", ".NET", "NextJS",
-    "Node.js", "Python", "HTML5", "CSS3",
-    "Power Platform", "Integración de IA"
+  ${isSpanish ? 'habilidades' : 'skills'}: [
+    ${skills.map(skill => `"${skill}"`).join(', ')}
   ],
-  stackActual: {
-    frontend: ["React", "NextJS", "TypeScript"],
-    estilos: ["Framer-Motion", "TailwindCSS"],
-    gestionEstado: ["Redux", "Context API"],
-    backend: ["Node.js", "Express", "Firebase"],
-    baseDeDatos: ["MongoDB", "GraphQL"],
-    despliegue: ["Vercel", "Netlify", "Docker"]
+  ${isSpanish ? 'stackActual' : 'currentStack'}: {
+    frontend: [${currentStack.frontend.map((tech: string) => `"${tech}"`).join(', ')}],
+    ${isSpanish ? 'estilos' : 'styling'}: [${currentStack.styling.map((tech: string) => `"${tech}"`).join(', ')}],
+    ${isSpanish ? 'gestionEstado' : 'stateManagement'}: [${currentStack.stateManagement.map((tech: string) => `"${tech}"`).join(', ')}],
+    backend: [${currentStack.backend.map((tech: string) => `"${tech}"`).join(', ')}],
+    ${isSpanish ? 'baseDeDatos' : 'database'}: [${currentStack.database.map((tech: string) => `"${tech}"`).join(', ')}],
+    ${isSpanish ? 'despliegue' : 'deployment'}: [${currentStack.deployment.map((tech: string) => `"${tech}"`).join(', ')}]
   },
-  intereses: [
-    "Desarrollo Frontend", "Diseño minimalista",
-    "Integración de Machine Learning"
+  ${isSpanish ? 'intereses' : 'interests'}: [
+    ${interests.map(interest => `"${interest}"`).join(', ')}
   ],
-  aprendiendoActualmente: ["Swift", "NextJS Avanzado", "GraphQL"],
-  herramientasIA: [
-    "ChatGPT, Claude para optimización de código",
-    "Midjourney para inspiración en UI/UX"
+  ${isSpanish ? 'aprendiendoActualmente' : 'currentlyLearning'}: [${currentlyLearning.map(tech => `"${tech}"`).join(', ')}],
+  ${isSpanish ? 'herramientasIA' : 'aiTools'}: [
+    ${aiTools.map(tool => `"${tool}"`).join(', ')}
   ]
 };
 
-console.log(JSON.stringify(sobreAntonioGonzalez, null, 2));
-  `.trim();
+console.log(JSON.stringify(${isSpanish ? 'sobreAntonioGonzalez' : 'aboutAntonioGonzalez'}, null, 2));
+    `.trim();
+  };
 
   return (
     <VSCodeContainer>
       <VSCodeHeader>
-        <VSCodeTab>sobreTxnio.ts</VSCodeTab>
+        <VSCodeTab>{t('aboutMe.fileName')}</VSCodeTab>
       </VSCodeHeader>
       <VSCodeContent>
         <SyntaxHighlighter
@@ -91,7 +108,7 @@ console.log(JSON.stringify(sobreAntonioGonzalez, null, 2));
             margin: 0,
           }}
         >
-          {aboutMeCode}
+          {generateCodeFromTranslations()}
         </SyntaxHighlighter>
       </VSCodeContent>
     </VSCodeContainer>

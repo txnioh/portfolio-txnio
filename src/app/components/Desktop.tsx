@@ -80,6 +80,21 @@ const Desktop: React.FC<DesktopProps> = ({
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  const getCenterPosition = (windowId: string) => {
+    if (isMobile || windowPositions[windowId]) return windowPositions[windowId];
+    
+    const defaultSize = windowSizes[windowId] || { width: 800, height: 600 };
+    const centerX = (window.innerWidth - defaultSize.width) / 2;
+    const centerY = (window.innerHeight - defaultSize.height) / 2;
+    
+    // Account for top bar and dock
+    const topBarHeight = 35;
+    const dockHeight = 60;
+    const adjustedCenterY = Math.max(topBarHeight, Math.min(centerY, window.innerHeight - defaultSize.height - dockHeight - 20));
+    
+    return { x: Math.max(0, centerX), y: adjustedCenterY };
+  };
+
   return (
     <DesktopWrapper $wallpaper={currentWallpaper}>
       <TopBar 
@@ -99,7 +114,7 @@ const Desktop: React.FC<DesktopProps> = ({
             window={window}
             closeWindow={closeWindow}
             bringToFront={bringToFront}
-            position={windowPositions[window.id] || { x: 0, y: 0 }}
+            position={getCenterPosition(window.id) || { x: 0, y: 0 }}
             size={windowSizes[window.id] || { width: 800, height: 600 }}
             updateWindowPosition={updateWindowPosition}
             updateWindowSize={updateWindowSize}

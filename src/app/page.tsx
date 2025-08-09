@@ -1,5 +1,8 @@
 'use client'
 
+import '../i18n/config';
+import { useTranslation } from 'react-i18next';
+
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import Glitter from './components/Glitter';
@@ -79,7 +82,30 @@ const generateRandomChars = (length: number) => {
 };
 
 export default function Home() {
-  const [language] = useState<'en' | 'es'>('en');
+  const { t, i18n } = useTranslation();
+
+  const setLanguage = (languageCode: 'en' | 'es') => {
+    i18n.changeLanguage(languageCode);
+    if (typeof window !== 'undefined') {
+      try {
+        window.localStorage.setItem('lng', languageCode);
+      } catch {}
+    }
+  };
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const savedLanguage = window.localStorage.getItem('lng');
+        if (savedLanguage && savedLanguage !== i18n.language) {
+          i18n.changeLanguage(savedLanguage);
+        }
+      } catch {}
+    }
+  }, [i18n]);
+
+  const currentLanguage = (i18n.language || 'en').split('-')[0] as 'en' | 'es';
+  // Language is handled by i18n configuration
   const [isInteracting, setIsInteracting] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const holesRef = useRef<{ x: number; y: number; timestamp: number }[]>([]);
@@ -467,30 +493,7 @@ export default function Home() {
     };
   }, [isRevealing, revealOrigin, hasInteracted, isClicking, addHole]);
 
-  const content = {
-    en: {
-      blog: "Blog",
-      social: "Social",
-      linkedin: "LinkedIn",
-      github: "GitHub",
-      macFolio: "Mac-Folio",
-      blogDesc: "Thoughts, insights, and experiences from my journey in tech and photography.",
-      close: "Close",
-      comingSoon: "Coming Soon!"
-    },
-    es: {
-      blog: "Blog",
-      social: "Social",
-      linkedin: "LinkedIn",
-      github: "GitHub",
-      macFolio: "Mac-Folio",
-      blogDesc: "Pensamientos, perspectivas y experiencias de mi recorrido en tecnología y fotografía.",
-      close: "Cerrar",
-      comingSoon: "¡Próximamente!"
-    }
-  };
-
-  const t = content[language];
+  // i18n now provides translations
 
   return (
     <div className="min-h-screen relative" onMouseMove={() => !hasInteracted && setHasInteracted(true)}>
@@ -564,7 +567,7 @@ export default function Home() {
                   minWidth: '200px'
                 }}
               >
-                ↗ New OS experience
+                ↗ {t('common.newOSExperience')}
               </button>
             </div>
 
@@ -582,11 +585,11 @@ export default function Home() {
                   </h2>
                   <h3 className={`text-xl md:text-4xl ${randomFonts.title} hover:opacity-80 transition-opacity`} style={{color: '#edeced', opacity: 0.9}}>
                     <EmojiRenderer emoji={randomEmojis.title} />
-                    {isAnimatingText ? matrixText.title : originalText.title}
+                    {t('landing.title')}
                   </h3>
                   <h4 className={`text-lg md:text-xl ${randomFonts.subtitle} hover:opacity-80 transition-opacity`} style={{color: '#edeced', opacity: 0.8}}>
                     <EmojiRenderer emoji={randomEmojis.subtitle} />
-                    {isAnimatingText ? matrixText.subtitle : originalText.subtitle}
+                    {t('landing.subtitle')}
                   </h4>
                   <h5 className={`text-2xl md:text-4xl ${randomFonts.company} font-bold hover:opacity-80 transition-opacity`} style={{color: '#edeced'}}>
                     <EmojiRenderer emoji={randomEmojis.company} />
@@ -608,14 +611,14 @@ export default function Home() {
                   className="hover:opacity-80 transition-opacity cursor-pointer"
                   style={{color: '#edeced', background: 'none', border: 'none', padding: 0, font: 'inherit'}}
                 >
-                  {t.blog}
+                  {t('common.blog')}
                 </button>
                 <a
                   href="/mac-folio"
                   className="hover:opacity-80 transition-opacity"
                   style={{color: '#edeced'}}
                 >
-                  {t.macFolio}
+                  {t('common.macFolio')}
                 </a>
                 <a
                   href="https://www.linkedin.com/in/txnio/"
@@ -624,7 +627,7 @@ export default function Home() {
                   className="hover:opacity-80 transition-opacity"
                   style={{color: '#edeced'}}
                 >
-                  {t.linkedin}
+                  {t('common.linkedin')}
                 </a>
                 <a
                   href="https://github.com/txnioh"
@@ -633,7 +636,7 @@ export default function Home() {
                   className="hover:opacity-80 transition-opacity"
                   style={{color: '#edeced'}}
                 >
-                  {t.github}
+                  {t('common.github')}
                 </a>
               </div>
             </div>
@@ -645,10 +648,26 @@ export default function Home() {
       {showComingSoon && (
         <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
           <div className="bg-black text-white px-6 py-3 rounded-lg font-pixel text-lg">
-            {t.comingSoon}
+            {t('common.comingSoon')}
           </div>
         </div>
       )}
+
+      {/* Language Switcher */}
+      <div className="fixed top-4 right-4 z-50 flex gap-2 pointer-events-auto">
+        <button
+          onClick={() => setLanguage('en')}
+          className={`px-3 py-1 rounded-md text-xs font-pixel transition-opacity ${currentLanguage === 'en' ? 'bg-white text-black' : 'bg-black/70 text-white hover:opacity-80'}`}
+        >
+          EN
+        </button>
+        <button
+          onClick={() => setLanguage('es')}
+          className={`px-3 py-1 rounded-md text-xs font-pixel transition-opacity ${currentLanguage === 'es' ? 'bg-white text-black' : 'bg-black/70 text-white hover:opacity-80'}`}
+        >
+          ES
+        </button>
+      </div>
 
       {/* Close Button - Always present but with visibility control */}
       <button

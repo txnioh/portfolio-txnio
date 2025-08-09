@@ -3,6 +3,8 @@ import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import { WindowState } from '../types';
+import { useTranslation } from 'react-i18next';
+import '../../i18n/config';
 
 const DockWrapper = styled.div<{ isMobile: boolean }>`
   background-color: rgba(0, 0, 0, 0.5);
@@ -85,10 +87,39 @@ interface DockProps {
 }
 
 const Dock: React.FC<DockProps> = ({ windows, toggleWindow, isMobile }) => {
+  const { t } = useTranslation();
   const [hoveredIcon, setHoveredIcon] = useState<string | null>(null);
 
   // Filtrar solo las ventanas que están abiertas o son aplicaciones permanentes del Dock
   const dockIcons = windows.filter(window => window.isOpen || window.isPermanent);
+
+  const getDisplayName = (windowId: string) => {
+    // Map the current window ID to the appropriate translation key
+    const aboutMeKey = t('windows.aboutMe');
+    const projectsKey = t('windows.projects');
+    const contactKey = t('windows.contact');
+    const settingsKey = t('windows.settings');
+    const snakeGameKey = t('windows.snakeGame');
+    const homeKey = t('windows.home');
+    const oldTxniOSKey = t('windows.oldTxniOS');
+
+    if (windowId === aboutMeKey || windowId === 'Sobre Mí') {
+      return t('windows.aboutMe');
+    } else if (windowId === projectsKey || windowId === 'Proyectos') {
+      return t('windows.projects');
+    } else if (windowId === contactKey || windowId === 'Contacto') {
+      return t('windows.contact');
+    } else if (windowId === settingsKey || windowId === 'Settings') {
+      return t('windows.settings');
+    } else if (windowId === snakeGameKey || windowId === 'Snake Game') {
+      return t('windows.snakeGame');
+    } else if (windowId === homeKey || windowId === 'Home') {
+      return t('windows.home');
+    } else if (windowId === oldTxniOSKey || windowId === 'txniOS Old') {
+      return t('windows.oldTxniOS');
+    }
+    return windowId; // Fallback to original ID
+  };
 
   return (
     <DockWrapper isMobile={isMobile}>
@@ -118,7 +149,7 @@ const Dock: React.FC<DockProps> = ({ windows, toggleWindow, isMobile }) => {
                     exit={{ opacity: 0, y: 10 }}
                     transition={{ duration: 0.1 }}
                   >
-                    {item.id}
+                    {getDisplayName(item.id)}
                   </IconLabel>
                 )}
               </AnimatePresence>

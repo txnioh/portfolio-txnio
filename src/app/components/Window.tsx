@@ -9,6 +9,8 @@ import SettingsContent from './WindowContents/SettingsContent';
 import SnakeGame from './WindowContents/SnakeGame';
 import IframeContent from './WindowContents/IframeContent';
 import { WindowState } from '../types';
+import { useTranslation } from 'react-i18next';
+import '../../i18n/config';
 
 interface WindowProps {
   window: WindowState;
@@ -127,6 +129,7 @@ const Window: React.FC<WindowProps> = ({
   setWallpaper,
   isMobile
 }) => {
+  const { t } = useTranslation();
   const { id, zIndex, isOpen } = windowProp;
   const [isClosing, setIsClosing] = useState(false);
 
@@ -239,23 +242,31 @@ const Window: React.FC<WindowProps> = ({
   };
 
   const renderContent = () => {
-    switch (id) {
-      case 'Home':
-        return <HomeContent />;
-      case 'Proyectos':
-        return <ProjectsContent />;
-      case 'Sobre Mí':
-        return <AboutMeContent />;
-      case 'Contacto':
-        return <ContactContent />;
-      case 'Settings':
-        return <SettingsContent currentWallpaper={currentWallpaper} setWallpaper={setWallpaper} />;
-      case 'Snake Game':
-        return isOpen ? <SnakeGame /> : null;
-      case 'txniOS Old':
-        return windowProp.url ? <IframeContent url={windowProp.url} /> : null;
-      default:
-        return <div>Contenido no disponible</div>;
+    // Get the English key for comparison since we need to match components
+    const aboutMeKey = t('windows.aboutMe');
+    const projectsKey = t('windows.projects'); 
+    const contactKey = t('windows.contact');
+    const settingsKey = t('windows.settings');
+    const snakeGameKey = t('windows.snakeGame');
+    const homeKey = t('windows.home');
+    const oldTxniOSKey = t('windows.oldTxniOS');
+
+    if (id === homeKey || id === 'Home') {
+      return <HomeContent />;
+    } else if (id === projectsKey || id === 'Proyectos') {
+      return <ProjectsContent />;
+    } else if (id === aboutMeKey || id === 'Sobre Mí') {
+      return <AboutMeContent />;
+    } else if (id === contactKey || id === 'Contacto') {
+      return <ContactContent />;
+    } else if (id === settingsKey || id === 'Settings') {
+      return <SettingsContent currentWallpaper={currentWallpaper} setWallpaper={setWallpaper} />;
+    } else if (id === snakeGameKey || id === 'Snake Game') {
+      return isOpen ? <SnakeGame /> : null;
+    } else if (id === oldTxniOSKey || id === 'txniOS Old') {
+      return windowProp.url ? <IframeContent url={windowProp.url} /> : null;
+    } else {
+      return <div>{t('common.unavailableContent')}</div>;
     }
   };
 

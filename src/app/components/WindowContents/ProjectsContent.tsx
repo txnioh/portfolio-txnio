@@ -3,6 +3,8 @@ import styled from 'styled-components';
 import { FaArrowRight, FaArrowLeft } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
+import { useTranslation } from 'react-i18next';
+import '../../../i18n/config';
 
 const ProjectCard = styled(motion.div)<{ isActive?: boolean }>`
   background-color: rgba(45, 45, 45, 0.3);
@@ -229,6 +231,7 @@ const ProjectsGrid = styled.div`
 `;
 
 const ProjectsContent: React.FC = () => {
+  const { t } = useTranslation();
   const [currentProject, setCurrentProject] = useState<Project | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -265,7 +268,7 @@ const ProjectsContent: React.FC = () => {
         width={350}
         height={230}
       />
-      <ProjectDescription>{project.description}</ProjectDescription>
+      <ProjectDescription>{t(`projectDescriptions.${project.title}`) || project.description}</ProjectDescription>
     </ProjectCard>
   );
 
@@ -273,7 +276,7 @@ const ProjectsContent: React.FC = () => {
     return (
       <IframeContainer>
         <BackButton onClick={handleBack}>
-          <FaArrowLeft /> Volver a proyectos
+          <FaArrowLeft /> {t('projects.backToProjects')}
         </BackButton>
         {isLoading && (
           <LoadingContainer>
@@ -281,7 +284,7 @@ const ProjectsContent: React.FC = () => {
               animate={{ rotate: 360 }}
               transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
             />
-            <LoadingText>Cargando {currentProject.title}...</LoadingText>
+            <LoadingText>{t('projects.loadingProject')} {currentProject.title}...</LoadingText>
           </LoadingContainer>
         )}
         <StyledIframe 
