@@ -473,6 +473,7 @@ export default function Home() {
       social: "Social",
       linkedin: "LinkedIn",
       github: "GitHub",
+      macFolio: "Mac-Folio",
       blogDesc: "Thoughts, insights, and experiences from my journey in tech and photography.",
       close: "Close",
       comingSoon: "Coming Soon!"
@@ -482,6 +483,7 @@ export default function Home() {
       social: "Social",
       linkedin: "LinkedIn",
       github: "GitHub",
+      macFolio: "Mac-Folio",
       blogDesc: "Pensamientos, perspectivas y experiencias de mi recorrido en tecnología y fotografía.",
       close: "Cerrar",
       comingSoon: "¡Próximamente!"
@@ -608,6 +610,13 @@ export default function Home() {
                 >
                   {t.blog}
                 </button>
+                <a
+                  href="/mac-folio"
+                  className="hover:opacity-80 transition-opacity"
+                  style={{color: '#edeced'}}
+                >
+                  {t.macFolio}
+                </a>
                 <a
                   href="https://www.linkedin.com/in/txnio/"
                   target="_blank"

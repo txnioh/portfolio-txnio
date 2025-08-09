@@ -6,7 +6,7 @@ import Dock from './Dock';
 import DesktopIcons from './DesktopIcons';
 import { WindowState, DesktopIcon } from '../types';
 
-const DesktopWrapper = styled.div`
+const DesktopWrapper = styled.div<{ $wallpaper: string }>`
   height: 100vh;
   width: 100vw;
   display: flex;
@@ -14,6 +14,10 @@ const DesktopWrapper = styled.div`
   justify-content: space-between;
   position: relative;
   overflow: hidden;
+  background-image: url(${props => props.$wallpaper});
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 
   @media (max-width: 768px) {
     height: 100%;
@@ -77,7 +81,7 @@ const Desktop: React.FC<DesktopProps> = ({
   }, []);
 
   return (
-    <DesktopWrapper>
+    <DesktopWrapper $wallpaper={currentWallpaper}>
       <TopBar 
         windows={windows}
         desktopIcons={desktopIcons}

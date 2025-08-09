@@ -58,10 +58,19 @@ const DesktopIcon = styled(motion.div)`
 
   &:hover {
     background-color: rgba(255, 255, 255, 0.1);
+    
+    img {
+      filter: contrast(1.3) brightness(1.2) saturate(1.3) drop-shadow(0 2px 4px rgba(0,0,0,0.9));
+      transform: scale(1.05);
+    }
   }
 
   &:active {
     transform: scale(0.95);
+    
+    img {
+      transform: scale(1.0);
+    }
   }
 `;
 
@@ -75,6 +84,14 @@ const IconWrapper = styled.div`
     width: 28px;
     height: 28px;
     margin-bottom: 4px;
+  }
+  
+  img {
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+    filter: contrast(1.2) brightness(1.1) saturate(1.2) drop-shadow(0 1px 2px rgba(0,0,0,0.8));
+    transition: all 0.2s ease;
   }
 `;
 
@@ -96,6 +113,7 @@ const DesktopIconLabel = styled.span`
 interface DesktopIconsProps {
   icons: {
     id: string;
+    name: string;
     icon: string;
     url: string;
   }[];
@@ -119,9 +137,10 @@ const DesktopIcons: React.FC<DesktopIconsProps> = ({ icons, openUrl }) => {
               fill
               style={{ objectFit: 'contain' }}
               quality={100}
+              className="mac-icon"
             />
           </IconWrapper>
-          <DesktopIconLabel>{icon.id}</DesktopIconLabel>
+          <DesktopIconLabel>{icon.name}</DesktopIconLabel>
         </DesktopIcon>
       ))}
     </DesktopIconsWrapper>

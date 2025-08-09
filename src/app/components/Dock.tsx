@@ -40,6 +40,18 @@ const DockIcon = styled(motion.div)`
   justify-content: center;
   align-items: center;
   position: relative;
+  
+  img {
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+    filter: contrast(1.2) brightness(1.1) saturate(1.2);
+    transition: all 0.2s ease;
+  }
+  
+  &:hover img {
+    filter: contrast(1.3) brightness(1.2) saturate(1.3);
+  }
 `;
 
 const IconLabel = styled(motion.span)`
@@ -89,7 +101,13 @@ const Dock: React.FC<DockProps> = ({ windows, toggleWindow, isMobile }) => {
             onHoverStart={() => !isMobile && setHoveredIcon(item.id)}
             onHoverEnd={() => !isMobile && setHoveredIcon(null)}
           >
-            <Image src={item.icon} alt={item.id} width={40} height={40} />
+            <Image 
+              src={item.icon || '/emojis/U+1F4BB.png'} 
+              alt={item.id} 
+              width={40} 
+              height={40} 
+              className="mac-icon"
+            />
             {item.isOpen && <OpenIndicator />}
             {!isMobile && (
               <AnimatePresence>

@@ -120,7 +120,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
 
   useEffect(() => {
     const allItems: SearchItem[] = [
-      ...windows.map(w => ({ id: w.id, icon: w.icon, type: 'window' as const })),
+      ...windows.map(w => ({ id: w.id, icon: w.icon || '/emojis/U+1F4BB.png', type: 'window' as const })),
       ...desktopIcons.map(d => ({ id: d.id, icon: d.icon, type: 'desktopIcon' as const, url: d.url }))
     ];
 

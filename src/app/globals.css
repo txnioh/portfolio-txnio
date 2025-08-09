@@ -92,3 +92,17 @@ html, body {
   image-rendering: crisp-edges;
   filter: contrast(1.1) brightness(1.1);
 }
+
+/* Mac-style icon rendering */
+.mac-icon {
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+  filter: contrast(1.2) brightness(1.1) saturate(1.2);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mac-icon:hover {
+  filter: contrast(1.3) brightness(1.2) saturate(1.3);
+  transform: scale(1.05);
+}
