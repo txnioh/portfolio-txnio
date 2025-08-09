@@ -654,16 +654,16 @@ export default function Home() {
       )}
 
       {/* Language Switcher */}
-      <div className="fixed top-4 right-4 z-50 flex gap-2 pointer-events-auto">
+      <div className="fixed top-4 right-4 z-50 flex gap-3 pointer-events-auto">
         <button
           onClick={() => setLanguage('en')}
-          className={`px-3 py-1 rounded-md text-xs font-pixel transition-opacity ${currentLanguage === 'en' ? 'bg-white text-black' : 'bg-black/70 text-white hover:opacity-80'}`}
+          className={`px-4 py-2 text-sm font-pixel transition-opacity ${currentLanguage === 'en' ? 'text-white opacity-100' : 'text-white/60 hover:text-white/80'}`}
         >
           EN
         </button>
         <button
           onClick={() => setLanguage('es')}
-          className={`px-3 py-1 rounded-md text-xs font-pixel transition-opacity ${currentLanguage === 'es' ? 'bg-white text-black' : 'bg-black/70 text-white hover:opacity-80'}`}
+          className={`px-4 py-2 text-sm font-pixel transition-opacity ${currentLanguage === 'es' ? 'text-white opacity-100' : 'text-white/60 hover:text-white/80'}`}
         >
           ES
         </button>
