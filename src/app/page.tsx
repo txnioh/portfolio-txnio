@@ -614,6 +614,13 @@ export default function Home() {
                   {t('common.blog')}
                 </button>
                 <a
+                  href="/projects"
+                  className="hover:opacity-80 transition-opacity"
+                  style={{color: '#edeced'}}
+                >
+                  {t('common.projects') || 'Projects'}
+                </a>
+                <a
                   href="/mac-folio"
                   className="hover:opacity-80 transition-opacity"
                   style={{color: '#edeced'}}
