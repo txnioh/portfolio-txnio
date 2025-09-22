@@ -2,7 +2,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Globe } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
 
 interface LanguageSelectorProps {
   onLanguageChange: (languageCode: 'en' | 'es') => void;
@@ -17,7 +16,6 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const { t } = useTranslation();
 
   // Close dropdown when clicking outside
   useEffect(() => {
