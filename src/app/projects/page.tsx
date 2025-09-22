@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useTranslation } from 'react-i18next';
 import '../../i18n/config';
+import ProjectsNavbar from '../components/ProjectsNavbar';
 
 interface Project {
   id: number;
@@ -197,77 +198,31 @@ const ProjectsPage = () => {
 
   return (
     <div className="min-h-screen bg-black text-white" style={{ backgroundColor: '#121212' }}>
-      {/* Language Switcher */}
-      <div className="fixed top-4 right-4 z-50 flex gap-3">
-        <button
-          onClick={() => setLanguage('en')}
-          className={`px-4 py-2 text-sm font-pixel transition-opacity ${currentLanguage === 'en' ? 'text-white opacity-100' : 'text-white/60 hover:text-white/80'}`}
-        >
-          EN
-        </button>
-        <button
-          onClick={() => setLanguage('es')}
-          className={`px-4 py-2 text-sm font-pixel transition-opacity ${currentLanguage === 'es' ? 'text-white opacity-100' : 'text-white/60 hover:text-white/80'}`}
-        >
-          ES
-        </button>
-      </div>
-
-      {/* Top Navigation */}
-      <div className="text-center py-4">
-        <div className="flex justify-center space-x-8 text-sm font-pixel mb-6">
-          <a
-            href="/"
-            className="hover:opacity-80 transition-opacity"
-            style={{ color: '#edeced' }}
-          >
-            {isAnimatingNav ? navTexts.home : (t('common.home') || 'Home')}
-          </a>
-          <a
-            href="/mac-folio"
-            className="hover:opacity-80 transition-opacity"
-            style={{ color: '#edeced' }}
-          >
-            {isAnimatingNav ? navTexts.macFolio : (t('common.macFolio') || 'Mac-Folio')}
-          </a>
-          <a
-            href="https://www.linkedin.com/in/txnio/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:opacity-80 transition-opacity"
-            style={{ color: '#edeced' }}
-          >
-            {isAnimatingNav ? navTexts.linkedin : (t('common.linkedin') || 'LinkedIn')}
-          </a>
-          <a
-            href="https://github.com/txnioh"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:opacity-80 transition-opacity"
-            style={{ color: '#edeced' }}
-          >
-            {isAnimatingNav ? navTexts.github : (t('common.github') || 'GitHub')}
-          </a>
-        </div>
-      </div>
+      {/* Navbar */}
+      <ProjectsNavbar 
+        currentLanguage={currentLanguage}
+        onLanguageChange={setLanguage}
+        isAnimatingNav={isAnimatingNav}
+        navTexts={navTexts}
+      />
 
       {/* Header */}
-      <div className="text-center py-4">
+      <div className="text-center py-8 px-4 mt-4">
         <h1 
-          className={`text-4xl md:text-5xl font-bold ${randomFont} cursor-pointer hover:opacity-80 transition-opacity`}
+          className={`text-3xl md:text-4xl lg:text-5xl font-bold ${randomFont} cursor-pointer hover:opacity-80 transition-opacity`}
           style={{ color: '#edeced' }}
           onClick={handleTitleClick}
         >
           {t('projects.title')}
         </h1>
-        <p className="text-lg md:text-xl font-pixel mt-2" style={{ color: '#edeced', opacity: 0.8 }}>
+        <p className="text-base md:text-lg lg:text-xl font-pixel mt-2" style={{ color: '#edeced', opacity: 0.8 }}>
           {t('projects.subtitle')}
         </p>
       </div>
 
       {/* Projects Grid */}
-      <div className="max-w-7xl mx-auto px-6 pb-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 pb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
           {projects.map((project) => (
             <div
               key={project.id}

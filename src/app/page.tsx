@@ -5,7 +5,9 @@ import { useTranslation } from 'react-i18next';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Image from 'next/image';
+import { Github, Linkedin } from 'lucide-react';
 import Glitter from './components/Glitter';
+import LanguageSelector from './components/LanguageSelector';
 
 // Available fonts for random selection
 const availableFonts = [
@@ -610,7 +612,15 @@ export default function Home() {
 
 
             {/* Top Link */}
-            <div className="text-center py-6">
+            <div className="relative text-center py-4 md:py-6 px-4">
+              {/* Language Switcher */}
+              <div className="absolute top-1/2 right-2 md:right-4 transform -translate-y-1/2 z-10">
+                <LanguageSelector 
+                  currentLanguage={currentLanguage}
+                  onLanguageChange={setLanguage}
+                />
+              </div>
+              
               <button
                 ref={linkRef}
                 onMouseEnter={() => setIsHoveringLink(true)}
@@ -639,7 +649,7 @@ export default function Home() {
                     setTimeout(() => setIsClicking(false), 1000);
                   }
                 }}
-                className="hover:opacity-80 transition-all duration-300 ease-in-out cursor-pointer font-pixel text-lg md:text-sm shimmer-green px-4 py-2 rounded-lg"
+                className="hover:opacity-80 transition-all duration-300 ease-in-out cursor-pointer font-pixel text-sm md:text-lg shimmer-green px-4 py-2 rounded-lg"
                 style={{
                   background: 'linear-gradient(90deg, #edeced 0%, #90EE90 25%, #32CD32 50%, #90EE90 75%, #edeced 100%)',
                   backgroundSize: '200% 100%',
@@ -651,7 +661,7 @@ export default function Home() {
                   transform: isInteracting ? 'translateY(-20px)' : 'translateY(0)',
                   pointerEvents: isInteracting ? 'none' : 'auto',
                   minHeight: '44px',
-                  minWidth: '200px'
+                  minWidth: '180px'
                 }}
               >
                 ↗ {isAnimatingButton ? buttonText : t('common.newOSExperience')}
@@ -659,26 +669,26 @@ export default function Home() {
             </div>
 
             {/* Main Content - Centered */}
-            <div className="flex-1 flex items-center justify-center">
-              <div className="text-center">
+            <div className="flex-1 flex items-center justify-center px-4">
+              <div className="text-center max-w-lg mx-auto">
                 <div className="space-y-1 cursor-pointer" onClick={handleTextClick}>
-                  <h1 className={`text-4xl md:text-3xl font-bold ${randomFonts.name} hover:opacity-80 transition-opacity`} style={{color: '#edeced'}}>
+                  <h1 className={`text-2xl md:text-4xl font-bold ${randomFonts.name} hover:opacity-80 transition-opacity`} style={{color: '#edeced'}}>
                     <EmojiRenderer emoji={randomEmojis.name} />
                     {isAnimatingText ? matrixText.name : originalText.name}
                   </h1>
-                  <h2 className={`text-2xl md:text-4xl ${randomFonts.nickname} hover:opacity-80 transition-opacity`} style={{color: '#edeced'}}>
+                  <h2 className={`text-xl md:text-2xl ${randomFonts.nickname} hover:opacity-80 transition-opacity`} style={{color: '#edeced'}}>
                     <EmojiRenderer emoji={randomEmojis.nickname} />
                     {isAnimatingText ? matrixText.nickname : originalText.nickname}
                   </h2>
-                  <h3 className={`text-xl md:text-4xl ${randomFonts.title} hover:opacity-80 transition-opacity`} style={{color: '#edeced', opacity: 0.9}}>
+                  <h3 className={`text-lg md:text-xl ${randomFonts.title} hover:opacity-80 transition-opacity`} style={{color: '#edeced', opacity: 0.9}}>
                     <EmojiRenderer emoji={randomEmojis.title} />
                     {isAnimatingCenter ? centerTexts.title : t('landing.title')}
                   </h3>
-                  <h4 className={`text-lg md:text-xl ${randomFonts.subtitle} hover:opacity-80 transition-opacity`} style={{color: '#edeced', opacity: 0.8}}>
+                  <h4 className={`text-base md:text-lg ${randomFonts.subtitle} hover:opacity-80 transition-opacity`} style={{color: '#edeced', opacity: 0.8}}>
                     <EmojiRenderer emoji={randomEmojis.subtitle} />
                     {isAnimatingCenter ? centerTexts.subtitle : t('landing.subtitle')}
                   </h4>
-                  <h5 className={`text-2xl md:text-4xl ${randomFonts.company} font-bold hover:opacity-80 transition-opacity`} style={{color: '#edeced'}}>
+                  <h5 className={`text-xl md:text-2xl ${randomFonts.company} font-bold hover:opacity-80 transition-opacity`} style={{color: '#edeced'}}>
                     <EmojiRenderer emoji={randomEmojis.company} />
                     {isAnimatingText ? matrixText.company : originalText.company}
                   </h5>
@@ -688,28 +698,28 @@ export default function Home() {
             </div>
 
             {/* Footer Links */}
-            <div className="py-4 text-center">
-              <div className={`flex justify-center space-x-8 text-sm ${randomFonts.subtitle}`}>
+            <div className="py-4 text-center px-4">
+              <div className={`flex items-center justify-between md:justify-center md:space-x-8 text-xs md:text-sm ${randomFonts.subtitle}`}>
                 <button
                   onClick={() => {
                     setShowComingSoon(true);
                     setTimeout(() => setShowComingSoon(false), 2000);
                   }}
-                  className="hover:opacity-80 transition-opacity cursor-pointer"
+                  className="hover:opacity-80 transition-opacity cursor-pointer min-h-[44px] flex items-center justify-center"
                   style={{color: '#edeced', background: 'none', border: 'none', padding: 0, font: 'inherit'}}
                 >
                   {isAnimatingFooter ? footerTexts.blog : (t('common.blog') || 'Blog')}
                 </button>
                 <a
                   href="/projects"
-                  className="hover:opacity-80 transition-opacity"
+                  className="hover:opacity-80 transition-opacity min-h-[44px] flex items-center justify-center"
                   style={{color: '#edeced'}}
                 >
                   {isAnimatingFooter ? footerTexts.projects : (t('common.projects') || 'Projects')}
                 </a>
                 <a
                   href="/mac-folio"
-                  className="hover:opacity-80 transition-opacity"
+                  className="hover:opacity-80 transition-opacity min-h-[44px] flex items-center justify-center"
                   style={{color: '#edeced'}}
                 >
                   {isAnimatingFooter ? footerTexts.macFolio : (t('common.macFolio') || 'Mac-Folio')}
@@ -718,19 +728,27 @@ export default function Home() {
                   href="https://www.linkedin.com/in/txnio/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:opacity-80 transition-opacity"
+                  className="hover:opacity-80 transition-opacity min-h-[44px] flex items-center justify-center"
                   style={{color: '#edeced'}}
+                  title="LinkedIn"
                 >
-                  {isAnimatingFooter ? footerTexts.linkedin : (t('common.linkedin') || 'LinkedIn')}
+                  <Linkedin size={16} className="md:hidden" />
+                  <span className="hidden md:inline">
+                    {isAnimatingFooter ? footerTexts.linkedin : (t('common.linkedin') || 'LinkedIn')}
+                  </span>
                 </a>
                 <a
                   href="https://github.com/txnioh"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:opacity-80 transition-opacity"
+                  className="hover:opacity-80 transition-opacity min-h-[44px] flex items-center justify-center"
                   style={{color: '#edeced'}}
+                  title="GitHub"
                 >
-                  {isAnimatingFooter ? footerTexts.github : (t('common.github') || 'GitHub')}
+                  <Github size={16} className="md:hidden" />
+                  <span className="hidden md:inline">
+                    {isAnimatingFooter ? footerTexts.github : (t('common.github') || 'GitHub')}
+                  </span>
                 </a>
               </div>
             </div>
@@ -747,28 +765,6 @@ export default function Home() {
         </div>
       )}
 
-      {/* Language Switcher */}
-      <div 
-        className="fixed top-4 right-4 z-50 flex gap-3 pointer-events-auto transition-all duration-300 ease-in-out"
-        style={{
-          opacity: isInteracting ? 0 : 1,
-          transform: isInteracting ? 'translateY(-20px)' : 'translateY(0)',
-          pointerEvents: isInteracting ? 'none' : 'auto'
-        }}
-      >
-        <button
-          onClick={() => setLanguage('en')}
-          className={`px-4 py-2 text-sm font-pixel transition-opacity ${currentLanguage === 'en' ? 'text-white opacity-100' : 'text-white/60 hover:text-white/80'}`}
-        >
-          EN
-        </button>
-        <button
-          onClick={() => setLanguage('es')}
-          className={`px-4 py-2 text-sm font-pixel transition-opacity ${currentLanguage === 'es' ? 'text-white opacity-100' : 'text-white/60 hover:text-white/80'}`}
-        >
-          ES
-        </button>
-      </div>
 
       {/* Close Button - Always present but with visibility control */}
       <button
