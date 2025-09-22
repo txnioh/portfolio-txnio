@@ -132,7 +132,7 @@ const projects: Project[] = [
   { 
     id: 9, 
     title: "txniOS Old", 
-    description: "Simulación interactiva de Mac OS 7 con ventanas funcionales y la estética clásica del sistema.",
+    description: "", // Will be populated from translations
     githubUrl: "https://github.com/txnioh/portfolio-txnio",
     demoUrl: "https://os.txnio.com",
     imagePath: "/projects-img/project-macold.png"
@@ -140,7 +140,7 @@ const projects: Project[] = [
   { 
     id: 8, 
     title: "Cubes", 
-    description: "Una experiencia visual interactiva con cubos 3D utilizando Three.js y React Three Fiber.",
+    description: "", // Will be populated from translations
     githubUrl: "https://github.com/txnioh/cubes",
     demoUrl: "https://cubes-umber.vercel.app",
     imagePath: "/projects-img/project-cubes.png"
@@ -148,7 +148,7 @@ const projects: Project[] = [
   { 
     id: 6, 
     title: "Minder", 
-    description: "Una aplicación para subir imágenes, comentarios y proyectos utilizando Firebase, React, TypeScript, Next.js y autenticación de Google.",
+    description: "", // Will be populated from translations
     githubUrl: "https://github.com/txnioh/minder",
     demoUrl: "https://minder-txnio.vercel.app/",
     imagePath: "/projects-img/project-minder.png"
@@ -156,7 +156,7 @@ const projects: Project[] = [
   { 
     id: 7, 
     title: "Second Portfolio", 
-    description: "Un portafolio inspirado en el trabajo de Yihui Hu, con un diseño tipo pegatina.",
+    description: "", // Will be populated from translations
     githubUrl: "https://github.com/txnioh/second-portfolio",
     demoUrl: "https://second-portfolio-txnio.vercel.app/",
     imagePath: "/projects-img/project-second-portfolio.png"
@@ -164,7 +164,7 @@ const projects: Project[] = [
   { 
     id: 1, 
     title: "3D Crystal Effect", 
-    description: "Un efecto visual de cristal 3D implementado con JavaScript.",
+    description: "", // Will be populated from translations
     githubUrl: "https://github.com/txnioh/3d-cristal-effect",
     demoUrl: "https://3d-cristal-effect.vercel.app/",
     imagePath: "/projects-img/project-crystal-effect.png"
@@ -172,7 +172,7 @@ const projects: Project[] = [
   { 
     id: 2, 
     title: "Infinite Particles", 
-    description: "Una animación de partículas infinitas creada con JavaScript.",
+    description: "", // Will be populated from translations
     githubUrl: "https://github.com/txnioh/infinite-particles",
     demoUrl: "https://infinite-particles-txnio.vercel.app/",
     imagePath: "/projects-img/project-infinite-particles.png"
@@ -180,7 +180,7 @@ const projects: Project[] = [
   { 
     id: 3, 
     title: "Floating Images", 
-    description: "Una galería mínima con interacción del mouse para imágenes flotantes.",
+    description: "", // Will be populated from translations
     githubUrl: "https://github.com/txnioh/floating-images",
     demoUrl: "https://floating-images.vercel.app/",
     imagePath: "/projects-img/project-floating-images.png"
@@ -188,7 +188,7 @@ const projects: Project[] = [
   { 
     id: 4, 
     title: "Pixel Transition", 
-    description: "Una transición de píxeles simple para la barra de menú.",
+    description: "", // Will be populated from translations
     githubUrl: "https://github.com/txnioh/pixel-transition",
     demoUrl: "https://pixel-transition-eight.vercel.app/",
     imagePath: "/projects-img/project-pixel-transition.png"
@@ -196,7 +196,7 @@ const projects: Project[] = [
   { 
     id: 5, 
     title: "Gradient Generator", 
-    description: "Un generador de gradientes implementado en JavaScript.",
+    description: "", // Will be populated from translations
     githubUrl: "https://github.com/txnioh/gradient-generator",
     demoUrl: "https://gradient-generator-txnio.vercel.app/",
     imagePath: "/projects-img/project-gradient-generator.png"
@@ -268,7 +268,7 @@ const ProjectsContent: React.FC = () => {
         width={350}
         height={230}
       />
-      <ProjectDescription>{t(`projectDescriptions.${project.title}`) || project.description}</ProjectDescription>
+      <ProjectDescription>{t(`projectDescriptions.${project.title}`)}</ProjectDescription>
     </ProjectCard>
   );
 

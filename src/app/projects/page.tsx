@@ -18,7 +18,7 @@ const projects: Project[] = [
   { 
     id: 9, 
     title: "txniOS Old", 
-    description: "Simulación interactiva de Mac OS 7 con ventanas funcionales y la estética clásica del sistema.",
+    description: "", // Will be populated from translations
     githubUrl: "https://github.com/txnioh/portfolio-txnio",
     demoUrl: "https://os.txnio.com",
     imagePath: "/projects-img/project-macold.png"
@@ -26,7 +26,7 @@ const projects: Project[] = [
   { 
     id: 8, 
     title: "Cubes", 
-    description: "Una experiencia visual interactiva con cubos 3D utilizando Three.js y React Three Fiber.",
+    description: "", // Will be populated from translations
     githubUrl: "https://github.com/txnioh/cubes",
     demoUrl: "https://cubes-umber.vercel.app",
     imagePath: "/projects-img/project-cubes.png"
@@ -34,7 +34,7 @@ const projects: Project[] = [
   { 
     id: 6, 
     title: "Minder", 
-    description: "Una aplicación para subir imágenes, comentarios y proyectos utilizando Firebase, React, TypeScript, Next.js y autenticación de Google.",
+    description: "", // Will be populated from translations
     githubUrl: "https://github.com/txnioh/minder",
     demoUrl: "https://minder-txnio.vercel.app/",
     imagePath: "/projects-img/project-minder.png"
@@ -42,7 +42,7 @@ const projects: Project[] = [
   { 
     id: 7, 
     title: "Second Portfolio", 
-    description: "Un portafolio inspirado en el trabajo de Yihui Hu, con un diseño tipo pegatina.",
+    description: "", // Will be populated from translations
     githubUrl: "https://github.com/txnioh/second-portfolio",
     demoUrl: "https://second-portfolio-txnio.vercel.app/",
     imagePath: "/projects-img/project-second-portfolio.png"
@@ -50,7 +50,7 @@ const projects: Project[] = [
   { 
     id: 1, 
     title: "3D Crystal Effect", 
-    description: "Un efecto visual de cristal 3D implementado con JavaScript.",
+    description: "", // Will be populated from translations
     githubUrl: "https://github.com/txnioh/3d-cristal-effect",
     demoUrl: "https://3d-cristal-effect.vercel.app/",
     imagePath: "/projects-img/project-crystal-effect.png"
@@ -58,7 +58,7 @@ const projects: Project[] = [
   { 
     id: 2, 
     title: "Infinite Particles", 
-    description: "Una animación de partículas infinitas creada con JavaScript.",
+    description: "", // Will be populated from translations
     githubUrl: "https://github.com/txnioh/infinite-particles",
     demoUrl: "https://infinite-particles-txnio.vercel.app/",
     imagePath: "/projects-img/project-infinite-particles.png"
@@ -66,7 +66,7 @@ const projects: Project[] = [
   { 
     id: 3, 
     title: "Floating Images", 
-    description: "Una galería mínima con interacción del mouse para imágenes flotantes.",
+    description: "", // Will be populated from translations
     githubUrl: "https://github.com/txnioh/floating-images",
     demoUrl: "https://floating-images.vercel.app/",
     imagePath: "/projects-img/project-floating-images.png"
@@ -74,7 +74,7 @@ const projects: Project[] = [
   { 
     id: 4, 
     title: "Pixel Transition", 
-    description: "Una transición de píxeles simple para la barra de menú.",
+    description: "", // Will be populated from translations
     githubUrl: "https://github.com/txnioh/pixel-transition",
     demoUrl: "https://pixel-transition-eight.vercel.app/",
     imagePath: "/projects-img/project-pixel-transition.png"
@@ -82,7 +82,7 @@ const projects: Project[] = [
   { 
     id: 5, 
     title: "Gradient Generator", 
-    description: "Un generador de gradientes implementado en JavaScript.",
+    description: "", // Will be populated from translations
     githubUrl: "https://github.com/txnioh/gradient-generator",
     demoUrl: "https://gradient-generator-txnio.vercel.app/",
     imagePath: "/projects-img/project-gradient-generator.png"
@@ -100,18 +100,80 @@ const getRandomFont = () => {
   return availableFonts[Math.floor(Math.random() * availableFonts.length)];
 };
 
+// Matrix characters for animation
+const matrixChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&*()_+-=[]{}|;:,.<>?';
+
+// Function to generate random matrix characters
+const generateRandomChars = (length: number) => {
+  let result = '';
+  for (let i = 0; i < length; i++) {
+    result += matrixChars.charAt(Math.floor(Math.random() * matrixChars.length));
+  }
+  return result;
+};
+
 const ProjectsPage = () => {
   const { t, i18n } = useTranslation();
   const [randomFont, setRandomFont] = useState('font-pixel');
   const currentLanguage = (i18n.language || 'en').split('-')[0] as 'en' | 'es';
+  
+  // Animation states for navigation
+  const [isAnimatingNav, setIsAnimatingNav] = useState(false);
+  const [navTexts, setNavTexts] = useState({
+    home: '',
+    macFolio: '',
+    linkedin: '',
+    github: ''
+  });
 
   const setLanguage = (languageCode: 'en' | 'es') => {
-    i18n.changeLanguage(languageCode);
-    if (typeof window !== 'undefined') {
-      try {
-        window.localStorage.setItem('lng', languageCode);
-      } catch {}
-    }
+    // Start matrix animation for navigation
+    setIsAnimatingNav(true);
+    
+    // Get current texts to animate
+    const currentTexts = {
+      home: t('common.home') || 'Home',
+      macFolio: t('common.macFolio') || 'Mac-Folio',
+      linkedin: t('common.linkedin') || 'LinkedIn',
+      github: t('common.github') || 'GitHub'
+    };
+    
+    // Generate initial matrix text
+    setNavTexts({
+      home: generateRandomChars(currentTexts.home.length),
+      macFolio: generateRandomChars(currentTexts.macFolio.length),
+      linkedin: generateRandomChars(currentTexts.linkedin.length),
+      github: generateRandomChars(currentTexts.github.length)
+    });
+
+    // Matrix animation loop
+    let animationCount = 0;
+    const maxAnimations = 2;
+    const animationInterval = setInterval(() => {
+      animationCount++;
+      
+      // Update matrix text with new random characters
+      setNavTexts({
+        home: generateRandomChars(currentTexts.home.length),
+        macFolio: generateRandomChars(currentTexts.macFolio.length),
+        linkedin: generateRandomChars(currentTexts.linkedin.length),
+        github: generateRandomChars(currentTexts.github.length)
+      });
+
+      // Stop animation and change language
+      if (animationCount >= maxAnimations) {
+        clearInterval(animationInterval);
+        setIsAnimatingNav(false);
+        
+        // Change language after animation
+        i18n.changeLanguage(languageCode);
+        if (typeof window !== 'undefined') {
+          try {
+            window.localStorage.setItem('lng', languageCode);
+          } catch {}
+        }
+      }
+    }, 50);
   };
 
   useEffect(() => {
@@ -159,14 +221,14 @@ const ProjectsPage = () => {
             className="hover:opacity-80 transition-opacity"
             style={{ color: '#edeced' }}
           >
-            {t('common.home') || 'Home'}
+            {isAnimatingNav ? navTexts.home : (t('common.home') || 'Home')}
           </a>
           <a
             href="/mac-folio"
             className="hover:opacity-80 transition-opacity"
             style={{ color: '#edeced' }}
           >
-            {t('common.macFolio') || 'Mac-Folio'}
+            {isAnimatingNav ? navTexts.macFolio : (t('common.macFolio') || 'Mac-Folio')}
           </a>
           <a
             href="https://www.linkedin.com/in/txnio/"
@@ -175,7 +237,7 @@ const ProjectsPage = () => {
             className="hover:opacity-80 transition-opacity"
             style={{ color: '#edeced' }}
           >
-            {t('common.linkedin') || 'LinkedIn'}
+            {isAnimatingNav ? navTexts.linkedin : (t('common.linkedin') || 'LinkedIn')}
           </a>
           <a
             href="https://github.com/txnioh"
@@ -184,7 +246,7 @@ const ProjectsPage = () => {
             className="hover:opacity-80 transition-opacity"
             style={{ color: '#edeced' }}
           >
-            {t('common.github') || 'GitHub'}
+            {isAnimatingNav ? navTexts.github : (t('common.github') || 'GitHub')}
           </a>
         </div>
       </div>
@@ -196,10 +258,10 @@ const ProjectsPage = () => {
           style={{ color: '#edeced' }}
           onClick={handleTitleClick}
         >
-          PROJECTS
+          {t('projects.title')}
         </h1>
         <p className="text-lg md:text-xl font-pixel mt-2" style={{ color: '#edeced', opacity: 0.8 }}>
-          by TXNIO
+          {t('projects.subtitle')}
         </p>
       </div>
 
@@ -229,7 +291,7 @@ const ProjectsPage = () => {
                   {project.title}
                 </h3>
                 <p className="text-sm font-pixel" style={{ color: '#e0e0e0', opacity: 0.9, lineHeight: 1.4 }}>
-                  {project.description}
+                  {t(`projectDescriptions.${project.title}`)}
                 </p>
                 
                 {/* Links */}
@@ -241,7 +303,7 @@ const ProjectsPage = () => {
                     className="text-sm font-pixel hover:opacity-80 transition-opacity underline"
                     style={{ color: '#90EE90' }}
                   >
-                    Live Demo ↗
+                    {t('projects.liveDemo')} ↗
                   </a>
                   <a
                     href={project.githubUrl}
@@ -250,7 +312,7 @@ const ProjectsPage = () => {
                     className="text-sm font-pixel hover:opacity-80 transition-opacity underline"
                     style={{ color: '#87CEEB' }}
                   >
-                    GitHub ↗
+                    {t('projects.github')} ↗
                   </a>
                 </div>
               </div>

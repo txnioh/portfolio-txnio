@@ -70,7 +70,11 @@ const resources = {
       // Projects Content
       projects: {
         backToProjects: 'Back to projects',
-        loadingProject: 'Loading'
+        loadingProject: 'Loading',
+        title: 'PROJECTS',
+        subtitle: 'by TXNIO',
+        liveDemo: 'Live Demo',
+        github: 'GitHub'
       },
 
       // Contact Content
@@ -219,7 +223,11 @@ I like cinema, photography and hypnagogic music.`,
       // Projects Content
       projects: {
         backToProjects: 'Volver a proyectos',
-        loadingProject: 'Cargando'
+        loadingProject: 'Cargando',
+        title: 'PROYECTOS',
+        subtitle: 'por TXNIO',
+        liveDemo: 'Demo en Vivo',
+        github: 'GitHub'
       },
 
       // Contact Content

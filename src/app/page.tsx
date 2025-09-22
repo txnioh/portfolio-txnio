@@ -84,13 +84,100 @@ const generateRandomChars = (length: number) => {
 export default function Home() {
   const { t, i18n } = useTranslation();
 
+  // Animation states for footer navigation
+  const [isAnimatingFooter, setIsAnimatingFooter] = useState(false);
+  const [footerTexts, setFooterTexts] = useState({
+    blog: '',
+    projects: '',
+    macFolio: '',
+    linkedin: '',
+    github: ''
+  });
+
+  // Animation states for center text and button
+  const [isAnimatingCenter, setIsAnimatingCenter] = useState(false);
+  const [isAnimatingButton, setIsAnimatingButton] = useState(false);
+  const [centerTexts, setCenterTexts] = useState({
+    title: '',
+    subtitle: ''
+  });
+  const [buttonText, setButtonText] = useState('');
+
   const setLanguage = (languageCode: 'en' | 'es') => {
-    i18n.changeLanguage(languageCode);
-    if (typeof window !== 'undefined') {
-      try {
-        window.localStorage.setItem('lng', languageCode);
-      } catch {}
-    }
+    // Start matrix animations for all elements
+    setIsAnimatingFooter(true);
+    setIsAnimatingCenter(true);
+    setIsAnimatingButton(true);
+    
+    // Get current texts to animate
+    const currentTexts = {
+      // Footer
+      blog: t('common.blog') || 'Blog',
+      projects: t('common.projects') || 'Projects',
+      macFolio: t('common.macFolio') || 'Mac-Folio',
+      linkedin: t('common.linkedin') || 'LinkedIn',
+      github: t('common.github') || 'GitHub',
+      // Center
+      title: t('landing.title') || 'a FRONTEND DEVELOPER',
+      subtitle: t('landing.subtitle') || 'CURRENTLY DESIGNING IN',
+      // Button
+      button: t('common.newOSExperience') || 'New OS experience'
+    };
+    
+    // Generate initial matrix text for all elements
+    setFooterTexts({
+      blog: generateRandomChars(currentTexts.blog.length),
+      projects: generateRandomChars(currentTexts.projects.length),
+      macFolio: generateRandomChars(currentTexts.macFolio.length),
+      linkedin: generateRandomChars(currentTexts.linkedin.length),
+      github: generateRandomChars(currentTexts.github.length)
+    });
+
+    setCenterTexts({
+      title: generateRandomChars(currentTexts.title.length),
+      subtitle: generateRandomChars(currentTexts.subtitle.length)
+    });
+
+    setButtonText(generateRandomChars(currentTexts.button.length));
+
+    // Matrix animation loop
+    let animationCount = 0;
+    const maxAnimations = 2;
+    const animationInterval = setInterval(() => {
+      animationCount++;
+      
+      // Update matrix text with new random characters for all elements
+      setFooterTexts({
+        blog: generateRandomChars(currentTexts.blog.length),
+        projects: generateRandomChars(currentTexts.projects.length),
+        macFolio: generateRandomChars(currentTexts.macFolio.length),
+        linkedin: generateRandomChars(currentTexts.linkedin.length),
+        github: generateRandomChars(currentTexts.github.length)
+      });
+
+      setCenterTexts({
+        title: generateRandomChars(currentTexts.title.length),
+        subtitle: generateRandomChars(currentTexts.subtitle.length)
+      });
+
+      setButtonText(generateRandomChars(currentTexts.button.length));
+
+      // Stop animation and change language
+      if (animationCount >= maxAnimations) {
+        clearInterval(animationInterval);
+        setIsAnimatingFooter(false);
+        setIsAnimatingCenter(false);
+        setIsAnimatingButton(false);
+        
+        // Change language after animation
+        i18n.changeLanguage(languageCode);
+        if (typeof window !== 'undefined') {
+          try {
+            window.localStorage.setItem('lng', languageCode);
+          } catch {}
+        }
+      }
+    }, 50);
   };
 
   useEffect(() => {
@@ -567,7 +654,7 @@ export default function Home() {
                   minWidth: '200px'
                 }}
               >
-                ↗ {t('common.newOSExperience')}
+                ↗ {isAnimatingButton ? buttonText : t('common.newOSExperience')}
               </button>
             </div>
 
@@ -585,11 +672,11 @@ export default function Home() {
                   </h2>
                   <h3 className={`text-xl md:text-4xl ${randomFonts.title} hover:opacity-80 transition-opacity`} style={{color: '#edeced', opacity: 0.9}}>
                     <EmojiRenderer emoji={randomEmojis.title} />
-                    {t('landing.title')}
+                    {isAnimatingCenter ? centerTexts.title : t('landing.title')}
                   </h3>
                   <h4 className={`text-lg md:text-xl ${randomFonts.subtitle} hover:opacity-80 transition-opacity`} style={{color: '#edeced', opacity: 0.8}}>
                     <EmojiRenderer emoji={randomEmojis.subtitle} />
-                    {t('landing.subtitle')}
+                    {isAnimatingCenter ? centerTexts.subtitle : t('landing.subtitle')}
                   </h4>
                   <h5 className={`text-2xl md:text-4xl ${randomFonts.company} font-bold hover:opacity-80 transition-opacity`} style={{color: '#edeced'}}>
                     <EmojiRenderer emoji={randomEmojis.company} />
@@ -611,21 +698,21 @@ export default function Home() {
                   className="hover:opacity-80 transition-opacity cursor-pointer"
                   style={{color: '#edeced', background: 'none', border: 'none', padding: 0, font: 'inherit'}}
                 >
-                  {t('common.blog')}
+                  {isAnimatingFooter ? footerTexts.blog : (t('common.blog') || 'Blog')}
                 </button>
                 <a
                   href="/projects"
                   className="hover:opacity-80 transition-opacity"
                   style={{color: '#edeced'}}
                 >
-                  {t('common.projects') || 'Projects'}
+                  {isAnimatingFooter ? footerTexts.projects : (t('common.projects') || 'Projects')}
                 </a>
                 <a
                   href="/mac-folio"
                   className="hover:opacity-80 transition-opacity"
                   style={{color: '#edeced'}}
                 >
-                  {t('common.macFolio')}
+                  {isAnimatingFooter ? footerTexts.macFolio : (t('common.macFolio') || 'Mac-Folio')}
                 </a>
                 <a
                   href="https://www.linkedin.com/in/txnio/"
@@ -634,7 +721,7 @@ export default function Home() {
                   className="hover:opacity-80 transition-opacity"
                   style={{color: '#edeced'}}
                 >
-                  {t('common.linkedin')}
+                  {isAnimatingFooter ? footerTexts.linkedin : (t('common.linkedin') || 'LinkedIn')}
                 </a>
                 <a
                   href="https://github.com/txnioh"
@@ -643,7 +730,7 @@ export default function Home() {
                   className="hover:opacity-80 transition-opacity"
                   style={{color: '#edeced'}}
                 >
-                  {t('common.github')}
+                  {isAnimatingFooter ? footerTexts.github : (t('common.github') || 'GitHub')}
                 </a>
               </div>
             </div>
@@ -661,7 +748,14 @@ export default function Home() {
       )}
 
       {/* Language Switcher */}
-      <div className="fixed top-4 right-4 z-50 flex gap-3 pointer-events-auto">
+      <div 
+        className="fixed top-4 right-4 z-50 flex gap-3 pointer-events-auto transition-all duration-300 ease-in-out"
+        style={{
+          opacity: isInteracting ? 0 : 1,
+          transform: isInteracting ? 'translateY(-20px)' : 'translateY(0)',
+          pointerEvents: isInteracting ? 'none' : 'auto'
+        }}
+      >
         <button
           onClick={() => setLanguage('en')}
           className={`px-4 py-2 text-sm font-pixel transition-opacity ${currentLanguage === 'en' ? 'text-white opacity-100' : 'text-white/60 hover:text-white/80'}`}
