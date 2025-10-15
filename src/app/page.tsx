@@ -114,16 +114,16 @@ export default function Home() {
     // Get current texts to animate
     const currentTexts = {
       // Footer
-      blog: t('common.blog') || 'Blog',
-      projects: t('common.projects') || 'Projects',
-      macFolio: t('common.macFolio') || 'Mac-Folio',
-      linkedin: t('common.linkedin') || 'LinkedIn',
-      github: t('common.github') || 'GitHub',
+      blog: t('common.blog'),
+      projects: t('common.projects'),
+      macFolio: t('common.macFolio'),
+      linkedin: t('common.linkedin'),
+      github: t('common.github'),
       // Center
-      title: t('landing.title') || 'a FRONTEND DEVELOPER',
-      subtitle: t('landing.subtitle') || 'CURRENTLY DESIGNING IN',
+      title: t('landing.title'),
+      subtitle: t('landing.subtitle'),
       // Button
-      button: t('common.newOSExperience') || 'New OS experience'
+      button: t('common.newOSExperience')
     };
     
     // Generate initial matrix text for all elements
@@ -223,8 +223,8 @@ export default function Home() {
   const [originalText] = useState({
     name: 'ANTONIO GONZALEZ',
     nickname: '(TXNIO)',
-    title: 'a FRONTEND DEVELOPER',
-    subtitle: 'CURRENTLY DESIGNING IN',
+    title: 'a FULL STACK DEVELOPER',
+    subtitle: 'CURRENTLY IN',
     company: 'CEMOSA'
   });
 

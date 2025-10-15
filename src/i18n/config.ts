@@ -102,8 +102,8 @@ I like cinema, photography and hypnagogic music.`,
 
       // Landing hero (main page)
       landing: {
-        title: 'a FRONTEND DEVELOPER',
-        subtitle: 'CURRENTLY DESIGNING IN'
+        title: 'a FULL STACK DEVELOPER',
+        subtitle: 'CURRENTLY IN'
       },
 
       // Settings
@@ -255,8 +255,8 @@ me gusta el cine, fotografía y la música hipnagógica.`,
 
       // Landing hero (main page)
       landing: {
-        title: 'un DESARROLLADOR FRONTEND',
-        subtitle: 'ACTUALMENTE DISEÑANDO EN'
+        title: 'DESARROLLADOR FULL STACK',
+        subtitle: 'ACTUALMENTE EN'
       },
 
       // Settings
