@@ -8,6 +8,7 @@ import Image from 'next/image';
 import { Github, Linkedin } from 'lucide-react';
 import Glitter from './components/Glitter';
 import LanguageSelector from './components/LanguageSelector';
+import FollowingFace from './components/FollowingFace';
 
 // Available fonts for random selection
 const availableFonts = [
@@ -210,6 +211,7 @@ export default function Home() {
   const [isClicking, setIsClicking] = useState(false);
   const [showComingSoon, setShowComingSoon] = useState(false);
   const [isMobileDevice, setIsMobileDevice] = useState(false);
+  const [showFollowingFace, setShowFollowingFace] = useState(false);
 
   // Matrix animation states
   const [isAnimatingText, setIsAnimatingText] = useState(false);
@@ -407,6 +409,16 @@ export default function Home() {
     }, 50); // 50ms interval for smooth animation
   };
 
+  const handleFaceToggle = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent triggering handleTextClick
+    setShowFollowingFace(prev => !prev);
+  };
+
+  const handleTextBlockClick = (e: React.MouseEvent) => {
+    handleTextClick();
+    handleFaceToggle(e);
+  };
+
   useEffect(() => {
     const pixelSize = 70;
     const holeDuration = 300; // 1 second in ms
@@ -585,7 +597,7 @@ export default function Home() {
   // i18n now provides translations
 
   return (
-    <div className="min-h-screen relative" onMouseMove={() => !hasInteracted && setHasInteracted(true)}>
+    <div className="h-screen w-screen relative overflow-hidden" onMouseMove={() => !hasInteracted && setHasInteracted(true)}>
       <Glitter buttonPosition={buttonPosition} isInteracting={isHoveringLink} isRevealing={isRevealing} />
       {/* Background iframe */}
       <iframe
@@ -671,7 +683,7 @@ export default function Home() {
             {/* Main Content - Centered */}
             <div className="flex-1 flex items-center justify-center px-4">
               <div className="text-center max-w-lg mx-auto">
-                <div className="space-y-1 cursor-pointer" onClick={handleTextClick}>
+                <div className="space-y-1 cursor-pointer" onClick={handleTextBlockClick}>
                   <h1 className={`text-2xl md:text-4xl font-bold ${randomFonts.name} hover:opacity-80 transition-opacity`} style={{color: '#edeced'}}>
                     <EmojiRenderer emoji={randomEmojis.name} />
                     {isAnimatingText ? matrixText.name : originalText.name}
@@ -680,6 +692,7 @@ export default function Home() {
                     <EmojiRenderer emoji={randomEmojis.nickname} />
                     {isAnimatingText ? matrixText.nickname : originalText.nickname}
                   </h2>
+                  <FollowingFace isVisible={showFollowingFace} className="py-2" />
                   <h3 className={`text-lg md:text-xl ${randomFonts.title} hover:opacity-80 transition-opacity`} style={{color: '#edeced', opacity: 0.9}}>
                     <EmojiRenderer emoji={randomEmojis.title} />
                     {isAnimatingCenter ? centerTexts.title : t('landing.title')}
@@ -784,6 +797,9 @@ export default function Home() {
       >
         X
       </button>
+
+      {/* Following Face Component */}
+      <FollowingFace isVisible={showFollowingFace} />
     </div>
   );
 }

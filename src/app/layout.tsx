@@ -44,16 +44,20 @@ export default function RootLayout({
             padding: 0;
             height: 100%;
             width: 100%;
-            overflow: visible;
+            overflow: hidden;
             background-color: black;
           }
           #__next {
             height: 100%;
             width: 100%;
+            overflow: hidden;
           }
           #content-wrapper {
             opacity: 1;
             transition: opacity 0.3s ease-in;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
           }
         `}</style>
         <script dangerouslySetInnerHTML={{
