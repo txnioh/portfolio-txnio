@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 
 // Valores posibles para pupil_x y pupil_y: -15 a 15 en pasos de 3
@@ -66,70 +66,57 @@ interface FollowingFaceProps {
 }
 
 const FollowingFace: React.FC<FollowingFaceProps> = ({ isVisible, className }) => {
-  const [currentPupilX, setCurrentPupilX] = useState(0);
-  const [currentPupilY, setCurrentPupilY] = useState(0);
-  const rafIdRef = useRef<number | null>(null);
-  const lastMouseXRef = useRef<number>(0);
-  const lastMouseYRef = useRef<number>(0);
-  const currentPupilXRef = useRef(0);
-  const currentPupilYRef = useRef(0);
-
-  /**
-   * Actualiza la imagen según la posición del cursor
-   */
-  const updateFaceImage = useCallback((mouseX: number, mouseY: number) => {
-    // Usar el centro de la ventana como referencia
-    const centerX = window.innerWidth / 2;
-    const centerY = window.innerHeight / 2;
-    
-    // Calcular nuevos valores de pupil
-    const { pupilX, pupilY } = mapCursorToPupilValues(mouseX, mouseY, centerX, centerY);
-    
-    // Solo actualizar si cambió
-    if (pupilX !== currentPupilXRef.current || pupilY !== currentPupilYRef.current) {
-      currentPupilXRef.current = pupilX;
-      currentPupilYRef.current = pupilY;
-      setCurrentPupilX(pupilX);
-      setCurrentPupilY(pupilY);
-    }
-  }, []);
-
-  // Throttle usando requestAnimationFrame para suavizar las actualizaciones
-  const handleMouseMove = useCallback((event: MouseEvent) => {
-    if (!isVisible) return;
-    
-    lastMouseXRef.current = event.clientX;
-    lastMouseYRef.current = event.clientY;
-    
-    if (!rafIdRef.current) {
-      rafIdRef.current = requestAnimationFrame(() => {
-        updateFaceImage(lastMouseXRef.current, lastMouseYRef.current);
-        rafIdRef.current = null;
-      });
-    }
-  }, [isVisible, updateFaceImage]);
+  const imgRef = useRef<HTMLImageElement>(null);
+  const currentPupilRef = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
     if (!isVisible) return;
 
-    // Agregar event listener para mousemove
-    document.addEventListener('mousemove', handleMouseMove);
+    // Handler RAW sin throttling, debouncing ni limitaciones
+    const handleMouseMove = (event: MouseEvent) => {
+      const centerX = window.innerWidth / 2;
+      const centerY = window.innerHeight / 2;
+      
+      // Calcular nuevos valores de pupil directamente
+      const { pupilX, pupilY } = mapCursorToPupilValues(
+        event.clientX,
+        event.clientY,
+        centerX,
+        centerY
+      );
+      
+      // Solo actualizar si cambió (evitar recargas innecesarias de imagen)
+      if (pupilX !== currentPupilRef.current.x || pupilY !== currentPupilRef.current.y) {
+        currentPupilRef.current.x = pupilX;
+        currentPupilRef.current.y = pupilY;
+        
+        // Actualizar src directamente en el DOM - RAW sin React state
+        if (imgRef.current) {
+          const filename = buildImageFilename(pupilX, pupilY);
+          imgRef.current.src = `/face/${filename}`;
+        }
+      }
+    };
 
-    // Inicializar con posición central cuando se hace visible
+    // Event listener RAW con passive para máximo rendimiento
+    document.addEventListener('mousemove', handleMouseMove, { passive: true });
+
+    // Inicializar con posición central
     const centerX = window.innerWidth / 2;
     const centerY = window.innerHeight / 2;
-    updateFaceImage(centerX, centerY);
+    const { pupilX, pupilY } = mapCursorToPupilValues(centerX, centerY, centerX, centerY);
+    currentPupilRef.current = { x: pupilX, y: pupilY };
+    if (imgRef.current) {
+      const filename = buildImageFilename(pupilX, pupilY);
+      imgRef.current.src = `/face/${filename}`;
+    }
 
     return () => {
       document.removeEventListener('mousemove', handleMouseMove);
-      if (rafIdRef.current) {
-        cancelAnimationFrame(rafIdRef.current);
-        rafIdRef.current = null;
-      }
     };
-  }, [isVisible, handleMouseMove]);
+  }, [isVisible]);
 
-  const filename = buildImageFilename(currentPupilX, currentPupilY);
+  const filename = buildImageFilename(currentPupilRef.current.x, currentPupilRef.current.y);
 
   return (
     <AnimatePresence>
@@ -141,7 +128,8 @@ const FollowingFace: React.FC<FollowingFaceProps> = ({ isVisible, className }) =
           exit={{ opacity: 0, scale: 0.9, y: 10 }}
           transition={{ duration: 0.2, ease: 'easeOut' }}
         >
-          <motion.img
+          <img
+            ref={imgRef}
             id="face-image"
             src={`/face/${filename}`}
             alt="Face following cursor"
@@ -152,10 +140,6 @@ const FollowingFace: React.FC<FollowingFaceProps> = ({ isVisible, className }) =
               userSelect: 'none',
               pointerEvents: 'none',
             }}
-            initial={{ opacity: 0.6 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15, ease: 'easeOut' }}
           />
         </motion.div>
       )}
