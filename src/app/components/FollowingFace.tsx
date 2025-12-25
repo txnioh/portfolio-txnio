@@ -72,6 +72,21 @@ const FollowingFace: React.FC<FollowingFaceProps> = ({ isVisible, className }) =
   useEffect(() => {
     if (!isVisible) return;
 
+    // Inicializar con posición central primero
+    const initImage = () => {
+      const centerX = window.innerWidth / 2;
+      const centerY = window.innerHeight / 2;
+      const { pupilX, pupilY } = mapCursorToPupilValues(centerX, centerY, centerX, centerY);
+      currentPupilRef.current = { x: pupilX, y: pupilY };
+      if (imgRef.current) {
+        const filename = buildImageFilename(pupilX, pupilY);
+        imgRef.current.src = `/face/${filename}`;
+      }
+    };
+
+    // Inicializar después de un pequeño delay para asegurar que el DOM está listo
+    const initTimeout = setTimeout(initImage, 10);
+
     // Handler RAW sin throttling, debouncing ni limitaciones
     const handleMouseMove = (event: MouseEvent) => {
       const centerX = window.innerWidth / 2;
@@ -101,17 +116,8 @@ const FollowingFace: React.FC<FollowingFaceProps> = ({ isVisible, className }) =
     // Event listener RAW con passive para máximo rendimiento
     document.addEventListener('mousemove', handleMouseMove, { passive: true });
 
-    // Inicializar con posición central
-    const centerX = window.innerWidth / 2;
-    const centerY = window.innerHeight / 2;
-    const { pupilX, pupilY } = mapCursorToPupilValues(centerX, centerY, centerX, centerY);
-    currentPupilRef.current = { x: pupilX, y: pupilY };
-    if (imgRef.current) {
-      const filename = buildImageFilename(pupilX, pupilY);
-      imgRef.current.src = `/face/${filename}`;
-    }
-
     return () => {
+      clearTimeout(initTimeout);
       document.removeEventListener('mousemove', handleMouseMove);
     };
   }, [isVisible]);
@@ -122,10 +128,23 @@ const FollowingFace: React.FC<FollowingFaceProps> = ({ isVisible, className }) =
     <AnimatePresence>
       {isVisible && (
         <motion.div
-          className={`w-full flex items-center justify-center pointer-events-none ${className ?? ''}`}
-          initial={{ opacity: 0, scale: 0.9, y: 10 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.9, y: 10 }}
+          className="pointer-events-none"
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 5,
+          }}
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.9 }}
           transition={{ duration: 0.2, ease: 'easeOut' }}
         >
           <img
@@ -133,12 +152,19 @@ const FollowingFace: React.FC<FollowingFaceProps> = ({ isVisible, className }) =
             id="face-image"
             src={`/face/${filename}`}
             alt="Face following cursor"
+            onError={(e) => {
+              console.error('Error loading image:', `/face/${filename}`);
+            }}
+            onLoad={() => {
+              console.log('Image loaded:', `/face/${filename}`);
+            }}
             style={{
               width: '220px',
               height: '220px',
               imageRendering: 'crisp-edges',
               userSelect: 'none',
               pointerEvents: 'none',
+              display: 'block',
             }}
           />
         </motion.div>

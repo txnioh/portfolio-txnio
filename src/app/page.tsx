@@ -597,7 +597,7 @@ export default function Home() {
   // i18n now provides translations
 
   return (
-    <div className="h-screen w-screen relative overflow-hidden" onMouseMove={() => !hasInteracted && setHasInteracted(true)}>
+    <div className="min-h-screen relative" onMouseMove={() => !hasInteracted && setHasInteracted(true)}>
       <Glitter buttonPosition={buttonPosition} isInteracting={isHoveringLink} isRevealing={isRevealing} />
       {/* Background iframe */}
       <iframe
@@ -683,28 +683,30 @@ export default function Home() {
             {/* Main Content - Centered */}
             <div className="flex-1 flex items-center justify-center px-4">
               <div className="text-center max-w-lg mx-auto">
-                <div className="space-y-1 cursor-pointer" onClick={handleTextBlockClick}>
-                  <h1 className={`text-2xl md:text-4xl font-bold ${randomFonts.name} hover:opacity-80 transition-opacity`} style={{color: '#edeced'}}>
-                    <EmojiRenderer emoji={randomEmojis.name} />
-                    {isAnimatingText ? matrixText.name : originalText.name}
-                  </h1>
-                  <h2 className={`text-xl md:text-2xl ${randomFonts.nickname} hover:opacity-80 transition-opacity`} style={{color: '#edeced'}}>
-                    <EmojiRenderer emoji={randomEmojis.nickname} />
-                    {isAnimatingText ? matrixText.nickname : originalText.nickname}
-                  </h2>
-                  <FollowingFace isVisible={showFollowingFace} className="py-2" />
-                  <h3 className={`text-lg md:text-xl ${randomFonts.title} hover:opacity-80 transition-opacity`} style={{color: '#edeced', opacity: 0.9}}>
-                    <EmojiRenderer emoji={randomEmojis.title} />
-                    {isAnimatingCenter ? centerTexts.title : t('landing.title')}
-                  </h3>
-                  <h4 className={`text-base md:text-lg ${randomFonts.subtitle} hover:opacity-80 transition-opacity`} style={{color: '#edeced', opacity: 0.8}}>
-                    <EmojiRenderer emoji={randomEmojis.subtitle} />
-                    {isAnimatingCenter ? centerTexts.subtitle : t('landing.subtitle')}
-                  </h4>
-                  <h5 className={`text-xl md:text-2xl ${randomFonts.company} font-bold hover:opacity-80 transition-opacity`} style={{color: '#edeced'}}>
-                    <EmojiRenderer emoji={randomEmojis.company} />
-                    {isAnimatingText ? matrixText.company : originalText.company}
-                  </h5>
+                <div className="relative" style={{ minHeight: 'fit-content' }}>
+                  <div className="space-y-1 cursor-pointer" onClick={handleTextBlockClick}>
+                    <h1 className={`text-2xl md:text-4xl font-bold ${randomFonts.name} hover:opacity-80 transition-opacity relative z-10`} style={{color: '#edeced'}}>
+                      <EmojiRenderer emoji={randomEmojis.name} />
+                      {isAnimatingText ? matrixText.name : originalText.name}
+                    </h1>
+                    <h2 className={`text-xl md:text-2xl ${randomFonts.nickname} hover:opacity-80 transition-opacity relative z-0`} style={{color: '#edeced'}}>
+                      <EmojiRenderer emoji={randomEmojis.nickname} />
+                      {isAnimatingText ? matrixText.nickname : originalText.nickname}
+                    </h2>
+                    <h3 className={`text-lg md:text-xl ${randomFonts.title} hover:opacity-80 transition-opacity relative z-10`} style={{color: '#edeced', opacity: 0.9}}>
+                      <EmojiRenderer emoji={randomEmojis.title} />
+                      {isAnimatingCenter ? centerTexts.title : t('landing.title')}
+                    </h3>
+                    <h4 className={`text-base md:text-lg ${randomFonts.subtitle} hover:opacity-80 transition-opacity relative z-0`} style={{color: '#edeced', opacity: 0.8}}>
+                      <EmojiRenderer emoji={randomEmojis.subtitle} />
+                      {isAnimatingCenter ? centerTexts.subtitle : t('landing.subtitle')}
+                    </h4>
+                    <h5 className={`text-xl md:text-2xl ${randomFonts.company} font-bold hover:opacity-80 transition-opacity relative z-0`} style={{color: '#edeced'}}>
+                      <EmojiRenderer emoji={randomEmojis.company} />
+                      {isAnimatingText ? matrixText.company : originalText.company}
+                    </h5>
+                  </div>
+                  <FollowingFace isVisible={showFollowingFace} />
                 </div>
 
               </div>
@@ -797,9 +799,6 @@ export default function Home() {
       >
         X
       </button>
-
-      {/* Following Face Component */}
-      <FollowingFace isVisible={showFollowingFace} />
     </div>
   );
 }
