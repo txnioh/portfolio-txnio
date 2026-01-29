@@ -89,7 +89,7 @@ interface FollowingFaceProps {
   className?: string;
 }
 
-const FollowingFace: React.FC<FollowingFaceProps> = ({ isVisible, className }) => {
+const FollowingFace: React.FC<FollowingFaceProps> = ({ isVisible }) => {
   const imgRef = useRef<HTMLImageElement>(null);
   const currentPupilRef = useRef({ x: 0, y: 0 });
 
@@ -179,7 +179,7 @@ const FollowingFace: React.FC<FollowingFaceProps> = ({ isVisible, className }) =
             id="face-image"
             src={`/face/${filename}`}
             alt="Face following cursor"
-            onError={(e) => {
+            onError={() => {
               console.error('Error loading image:', `/face/${filename}`);
             }}
             onLoad={() => {
