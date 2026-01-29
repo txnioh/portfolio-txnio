@@ -9,13 +9,19 @@ interface LanguageSelectorProps {
   className?: string;
 }
 
-const LanguageSelector: React.FC<LanguageSelectorProps> = ({ 
-  onLanguageChange, 
-  currentLanguage, 
-  className = '' 
+const LanguageSelector: React.FC<LanguageSelectorProps> = ({
+  onLanguageChange,
+  currentLanguage,
+  className = ''
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Set mounted to true after client hydration
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -50,7 +56,7 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
         aria-label="Select language"
       >
         <Globe size={16} />
-        <span className="uppercase">{currentLanguage}</span>
+        <span className="uppercase">{mounted ? currentLanguage : 'en'}</span>
       </button>
 
       {/* Dropdown Menu */}
@@ -60,11 +66,10 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
             <button
               key={language.code}
               onClick={() => handleLanguageSelect(language.code)}
-              className={`w-full px-3 py-2 text-left text-sm font-pixel transition-colors hover:bg-white/10 flex items-center gap-2 ${
-                currentLanguage === language.code 
-                  ? 'text-white bg-white/5' 
-                  : 'text-white/70 hover:text-white'
-              }`}
+              className={`w-full px-3 py-2 text-left text-sm font-pixel transition-colors hover:bg-white/10 flex items-center gap-2 ${currentLanguage === language.code
+                ? 'text-white bg-white/5'
+                : 'text-white/70 hover:text-white'
+                }`}
             >
               <span className="text-base">{language.flag}</span>
               <span>{language.label}</span>

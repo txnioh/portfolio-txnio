@@ -13,14 +13,14 @@ import FollowingFace from './components/FollowingFace';
 // Available fonts for random selection
 const availableFonts = [
   'font-chicago',
-  'font-renogare', 
+  'font-renogare',
   'font-geneva',
   'font-pixel',
 ];
 
 // Available emojis for random selection
 const availableEmojis = [
-  '🚀', '💻', '⚡', '🔥', '✨', '🌟', '🌌', '🌊', '🐍', '👨‍💻', '😎', '😇', '🫧', '🪐', '🥶','👀', '👍', '🤓', '👌', '☀️', '🌙', '🌍'
+  '🚀', '💻', '⚡', '🔥', '✨', '🌟', '🌌', '🌊', '🐍', '👨‍💻', '😎', '😇', '🫧', '🪐', '🥶', '👀', '👍', '🤓', '👌', '☀️', '🌙', '🌍'
 ];
 
 // Emoji to image file mapping for mobile
@@ -111,7 +111,7 @@ export default function Home() {
     setIsAnimatingFooter(true);
     setIsAnimatingCenter(true);
     setIsAnimatingButton(true);
-    
+
     // Get current texts to animate
     const currentTexts = {
       // Footer
@@ -126,7 +126,7 @@ export default function Home() {
       // Button
       button: t('common.newOSExperience')
     };
-    
+
     // Generate initial matrix text for all elements
     setFooterTexts({
       blog: generateRandomChars(currentTexts.blog.length),
@@ -148,7 +148,7 @@ export default function Home() {
     const maxAnimations = 2;
     const animationInterval = setInterval(() => {
       animationCount++;
-      
+
       // Update matrix text with new random characters for all elements
       setFooterTexts({
         blog: generateRandomChars(currentTexts.blog.length),
@@ -171,30 +171,54 @@ export default function Home() {
         setIsAnimatingFooter(false);
         setIsAnimatingCenter(false);
         setIsAnimatingButton(false);
-        
+
         // Change language after animation
         i18n.changeLanguage(languageCode);
         if (typeof window !== 'undefined') {
           try {
             window.localStorage.setItem('lng', languageCode);
-          } catch {}
+          } catch { }
         }
       }
     }, 50);
   };
 
+  // Track if component is mounted to prevent hydration mismatch
+  const [mounted, setMounted] = useState(false);
+
   useEffect(() => {
+    setMounted(true);
     if (typeof window !== 'undefined') {
       try {
         const savedLanguage = window.localStorage.getItem('lng');
         if (savedLanguage && savedLanguage !== i18n.language) {
           i18n.changeLanguage(savedLanguage);
         }
-      } catch {}
+      } catch { }
     }
   }, [i18n]);
 
   const currentLanguage = (i18n.language || 'en').split('-')[0] as 'en' | 'es';
+
+  // Helper function to safely get translations (returns English fallback during SSR)
+  const safeT = (key: string): string => {
+    if (!mounted) {
+      // Return English fallback during SSR to match server render
+      const fallbacks: Record<string, string> = {
+        'common.newOSExperience': 'New OS experience',
+        'common.blog': 'Blog',
+        'common.projects': 'Projects',
+        'common.macFolio': 'Mac-Folio',
+        'common.linkedin': 'LinkedIn',
+        'common.github': 'GitHub',
+        'common.comingSoon': 'Coming Soon!',
+        'landing.title': 'a FULL STACK DEVELOPER',
+        'landing.subtitle': 'CURRENTLY IN'
+      };
+      return fallbacks[key] || key;
+    }
+    return t(key);
+  };
   // Language is handled by i18n configuration
   const [isInteracting, setIsInteracting] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -203,7 +227,7 @@ export default function Home() {
   const linkRef = useRef<HTMLButtonElement>(null);
   const radiusRef = useRef(0);
   const maxRadiusRef = useRef(0);
-  
+
   const [hasInteracted, setHasInteracted] = useState(false);
   const [isHoveringLink, setIsHoveringLink] = useState(false);
   const [revealOrigin, setRevealOrigin] = useState<{ x: number, y: number } | null>(null);
@@ -235,7 +259,7 @@ export default function Home() {
     const fonts = getRandomFonts(5); // Get 5 random fonts for different elements (link is always pixel)
     return {
       name: fonts[0],
-      nickname: fonts[1], 
+      nickname: fonts[1],
       title: fonts[2],
       subtitle: fonts[3],
       company: fonts[4]
@@ -276,7 +300,7 @@ export default function Home() {
       const emojis = getRandomEmojis(emojiCount);
       const positions = ['name', 'nickname', 'title', 'subtitle', 'company'];
       const shuffledPositions = positions.sort(() => 0.5 - Math.random()).slice(0, emojiCount);
-      
+
       setRandomEmojis({
         name: shuffledPositions.includes('name') ? emojis[shuffledPositions.indexOf('name')] : '',
         nickname: shuffledPositions.includes('nickname') ? emojis[shuffledPositions.indexOf('nickname')] : '',
@@ -292,22 +316,22 @@ export default function Home() {
   // Detect mobile device on mount and handle resize
   useEffect(() => {
     const checkMobile = () => setIsMobileDevice(isMobile());
-    
+
     checkMobile();
     window.addEventListener('resize', checkMobile);
-    
+
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
   // Component to render emoji (text or image based on device)
   const EmojiRenderer = ({ emoji }: { emoji: string }) => {
     const [imageError, setImageError] = useState(false);
-    
+
     if (!emoji) return null;
-    
+
     if (isMobileDevice && emojiToImageMap[emoji] && !imageError) {
       return (
-        <Image 
+        <Image
           src={`/emojis/${emojiToImageMap[emoji]}`}
           alt={emoji}
           width={24}
@@ -318,7 +342,7 @@ export default function Home() {
         />
       );
     }
-    
+
     return <span className="font-emoji mr-2">{emoji}</span>;
   };
 
@@ -331,7 +355,7 @@ export default function Home() {
     // Exclude top and bottom areas where buttons and links are
     const topExclusionZone = 100; // Top area height
     const bottomExclusionZone = 100; // Bottom area height
-    
+
     if (clientY < topExclusionZone || clientY > window.innerHeight - bottomExclusionZone) {
       return;
     }
@@ -348,7 +372,7 @@ export default function Home() {
   const handleTextClick = () => {
     // Start Matrix animation
     setIsAnimatingText(true);
-    
+
     // Generate initial matrix text
     setMatrixText({
       name: generateRandomChars(originalText.name.length),
@@ -363,7 +387,7 @@ export default function Home() {
     const maxAnimations = 2; // 6 frames over 300ms (50ms each)
     const animationInterval = setInterval(() => {
       animationCount++;
-      
+
       // Update matrix text with new random characters
       setMatrixText({
         name: generateRandomChars(originalText.name.length),
@@ -377,23 +401,23 @@ export default function Home() {
       if (animationCount >= maxAnimations) {
         clearInterval(animationInterval);
         setIsAnimatingText(false);
-        
+
         // Generate new random fonts
         const newFonts = getRandomFonts(5);
         const newRandomFonts = {
           name: newFonts[0],
-          nickname: newFonts[1], 
+          nickname: newFonts[1],
           title: newFonts[2],
           subtitle: newFonts[3],
           company: newFonts[4]
         };
-        
+
         // Generate new random emojis (1-2 emojis in random positions)
         const emojiCount = Math.random() < 0.5 ? 1 : 2; // 50% chance for 1 or 2 emojis
         const newEmojis = getRandomEmojis(emojiCount);
         const positions = ['name', 'nickname', 'title', 'subtitle', 'company'];
         const shuffledPositions = positions.sort(() => 0.5 - Math.random()).slice(0, emojiCount);
-        
+
         const newRandomEmojis = {
           name: shuffledPositions.includes('name') ? newEmojis[shuffledPositions.indexOf('name')] : '',
           nickname: shuffledPositions.includes('nickname') ? newEmojis[shuffledPositions.indexOf('nickname')] : '',
@@ -401,7 +425,7 @@ export default function Home() {
           subtitle: shuffledPositions.includes('subtitle') ? newEmojis[shuffledPositions.indexOf('subtitle')] : '',
           company: shuffledPositions.includes('company') ? newEmojis[shuffledPositions.indexOf('company')] : ''
         };
-        
+
         // Force re-render with new fonts and emojis by updating state
         setRandomFonts(newRandomFonts);
         setRandomEmojis(newRandomEmojis);
@@ -431,15 +455,15 @@ export default function Home() {
       // Check if touching an interactive element
       const target = e.target as HTMLElement;
       const isInteractive = target.closest('a, button, [role="button"]');
-      
+
       if (isInteractive) {
         // Don't prevent default for interactive elements
         return;
       }
-      
+
       e.preventDefault();
       setHasInteracted(true);
-      
+
       if (e.touches.length > 0) {
         const touch = e.touches[0];
         addHole(touch.clientX, touch.clientY);
@@ -450,14 +474,14 @@ export default function Home() {
       // Check if touching an interactive element
       const target = e.target as HTMLElement;
       const isInteractive = target.closest('a, button, [role="button"]');
-      
+
       if (isInteractive) {
         // Don't prevent default for interactive elements
         return;
       }
-      
+
       e.preventDefault();
-      
+
       if (e.touches.length > 0) {
         const touch = e.touches[0];
         addHole(touch.clientX, touch.clientY);
@@ -468,12 +492,12 @@ export default function Home() {
       // Check if touching an interactive element
       const target = e.target as HTMLElement;
       const isInteractive = target.closest('a, button, [role="button"]');
-      
+
       if (isInteractive) {
         // Don't prevent default for interactive elements
         return;
       }
-      
+
       e.preventDefault();
     };
 
@@ -499,13 +523,13 @@ export default function Home() {
         animationFrameId.current = requestAnimationFrame(animate);
         return;
       }
-      
+
       ctx.imageSmoothingEnabled = false;
       const isAnimatingReveal = isRevealing || radiusRef.current > 0;
 
       if (isAnimatingReveal && revealOrigin) {
         const revealSpeed = 25;
-        
+
         if (isRevealing) {
           radiusRef.current = Math.min(radiusRef.current + revealSpeed, maxRadiusRef.current);
         } else {
@@ -528,7 +552,7 @@ export default function Home() {
             }
           }
         }
-        
+
         if (radiusRef.current >= maxRadiusRef.current && isRevealing) {
           ctx.clearRect(0, 0, canvas.width, canvas.height);
           setIsInteracting(true);
@@ -554,7 +578,7 @@ export default function Home() {
           });
         }
       }
-      
+
       animationFrameId.current = requestAnimationFrame(animate);
     };
 
@@ -563,7 +587,7 @@ export default function Home() {
       if (canvas) {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
-        
+
         if (revealOrigin) {
           const w = canvas.width;
           const h = canvas.height;
@@ -577,7 +601,7 @@ export default function Home() {
         }
       }
     };
-    
+
     window.addEventListener('resize', handleResize);
     handleResize();
     animate();
@@ -606,18 +630,18 @@ export default function Home() {
         style={{ zIndex: isInteracting ? 25 : 1 }}
         title="txniOS Background"
       />
-      
+
       {!isInteracting && (
         <>
           <div className="fixed inset-0 pointer-events-auto" style={{ backgroundColor: 'transparent', zIndex: 5 }} />
-          
+
           <canvas
             ref={canvasRef}
             className="fixed inset-0 z-10 pointer-events-none"
           />
 
           {/* Content Layer */}
-          <div 
+          <div
             className="relative z-20 min-h-screen flex flex-col pointer-events-auto transition-opacity duration-300"
             style={{ opacity: isRevealing ? 0 : 1 }}
           >
@@ -627,12 +651,12 @@ export default function Home() {
             <div className="relative text-center py-4 md:py-6 px-4">
               {/* Language Switcher */}
               <div className="absolute top-1/2 right-2 md:right-4 transform -translate-y-1/2 z-10">
-                <LanguageSelector 
-                  currentLanguage={currentLanguage}
+                <LanguageSelector
+                  currentLanguage={mounted ? currentLanguage : 'en'}
                   onLanguageChange={setLanguage}
                 />
               </div>
-              
+
               <button
                 ref={linkRef}
                 onMouseEnter={() => setIsHoveringLink(true)}
@@ -640,13 +664,13 @@ export default function Home() {
                 onClick={(e) => {
                   if (!isRevealing && !isClicking && !isInteracting) {
                     setIsClicking(true);
-                    
+
                     // Set reveal origin to mouse click position
                     const clickX = e.clientX;
                     const clickY = e.clientY;
-                    
+
                     setRevealOrigin({ x: clickX, y: clickY });
-                    
+
                     // Calculate max radius from click position
                     const w = window.innerWidth;
                     const h = window.innerHeight;
@@ -655,7 +679,7 @@ export default function Home() {
                     const d3 = Math.sqrt(clickX * clickX + Math.pow(h - clickY, 2));
                     const d4 = Math.sqrt(Math.pow(w - clickX, 2) + Math.pow(h - clickY, 2));
                     maxRadiusRef.current = Math.max(d1, d2, d3, d4);
-                    
+
                     setIsRevealing(true);
                     // Prevent multiple rapid clicks
                     setTimeout(() => setIsClicking(false), 1000);
@@ -676,7 +700,7 @@ export default function Home() {
                   minWidth: '180px'
                 }}
               >
-                ↗ {isAnimatingButton ? buttonText : t('common.newOSExperience')}
+                ↗ {isAnimatingButton ? buttonText : safeT('common.newOSExperience')}
               </button>
             </div>
 
@@ -685,23 +709,23 @@ export default function Home() {
               <div className="text-center max-w-lg mx-auto">
                 <div className="relative" style={{ minHeight: 'fit-content' }}>
                   <div className="space-y-1 cursor-pointer" onClick={handleTextBlockClick}>
-                    <h1 className={`text-2xl md:text-4xl font-bold ${randomFonts.name} hover:opacity-80 transition-opacity relative z-10`} style={{color: '#edeced'}}>
+                    <h1 className={`text-2xl md:text-4xl font-bold ${randomFonts.name} hover:opacity-80 transition-opacity relative z-10`} style={{ color: '#edeced' }}>
                       <EmojiRenderer emoji={randomEmojis.name} />
                       {isAnimatingText ? matrixText.name : originalText.name}
                     </h1>
-                    <h2 className={`text-xl md:text-2xl ${randomFonts.nickname} hover:opacity-80 transition-opacity relative z-0`} style={{color: '#edeced'}}>
+                    <h2 className={`text-xl md:text-2xl ${randomFonts.nickname} hover:opacity-80 transition-opacity relative z-0`} style={{ color: '#edeced' }}>
                       <EmojiRenderer emoji={randomEmojis.nickname} />
                       {isAnimatingText ? matrixText.nickname : originalText.nickname}
                     </h2>
-                    <h3 className={`text-lg md:text-xl ${randomFonts.title} hover:opacity-80 transition-opacity relative z-10`} style={{color: '#edeced', opacity: 0.9}}>
+                    <h3 className={`text-lg md:text-xl ${randomFonts.title} hover:opacity-80 transition-opacity relative z-10`} style={{ color: '#edeced', opacity: 0.9 }}>
                       <EmojiRenderer emoji={randomEmojis.title} />
-                      {isAnimatingCenter ? centerTexts.title : t('landing.title')}
+                      {isAnimatingCenter ? centerTexts.title : safeT('landing.title')}
                     </h3>
-                    <h4 className={`text-base md:text-lg ${randomFonts.subtitle} hover:opacity-80 transition-opacity relative z-0`} style={{color: '#edeced', opacity: 0.8}}>
+                    <h4 className={`text-base md:text-lg ${randomFonts.subtitle} hover:opacity-80 transition-opacity relative z-0`} style={{ color: '#edeced', opacity: 0.8 }}>
                       <EmojiRenderer emoji={randomEmojis.subtitle} />
-                      {isAnimatingCenter ? centerTexts.subtitle : t('landing.subtitle')}
+                      {isAnimatingCenter ? centerTexts.subtitle : safeT('landing.subtitle')}
                     </h4>
-                    <h5 className={`text-xl md:text-2xl ${randomFonts.company} font-bold hover:opacity-80 transition-opacity relative z-0`} style={{color: '#edeced'}}>
+                    <h5 className={`text-xl md:text-2xl ${randomFonts.company} font-bold hover:opacity-80 transition-opacity relative z-0`} style={{ color: '#edeced' }}>
                       <EmojiRenderer emoji={randomEmojis.company} />
                       {isAnimatingText ? matrixText.company : originalText.company}
                     </h5>
@@ -721,35 +745,35 @@ export default function Home() {
                     setTimeout(() => setShowComingSoon(false), 2000);
                   }}
                   className="hover:opacity-80 transition-opacity cursor-pointer min-h-[44px] flex items-center justify-center"
-                  style={{color: '#edeced', background: 'none', border: 'none', padding: 0, font: 'inherit'}}
+                  style={{ color: '#edeced', background: 'none', border: 'none', padding: 0, font: 'inherit' }}
                 >
-                  {isAnimatingFooter ? footerTexts.blog : (t('common.blog') || 'Blog')}
+                  {isAnimatingFooter ? footerTexts.blog : safeT('common.blog')}
                 </button>
                 <a
                   href="/projects"
                   className="hover:opacity-80 transition-opacity min-h-[44px] flex items-center justify-center"
-                  style={{color: '#edeced'}}
+                  style={{ color: '#edeced' }}
                 >
-                  {isAnimatingFooter ? footerTexts.projects : (t('common.projects') || 'Projects')}
+                  {isAnimatingFooter ? footerTexts.projects : safeT('common.projects')}
                 </a>
                 <a
                   href="/mac-folio"
                   className="hover:opacity-80 transition-opacity min-h-[44px] flex items-center justify-center"
-                  style={{color: '#edeced'}}
+                  style={{ color: '#edeced' }}
                 >
-                  {isAnimatingFooter ? footerTexts.macFolio : (t('common.macFolio') || 'Mac-Folio')}
+                  {isAnimatingFooter ? footerTexts.macFolio : safeT('common.macFolio')}
                 </a>
                 <a
                   href="https://www.linkedin.com/in/txnio/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="hover:opacity-80 transition-opacity min-h-[44px] flex items-center justify-center"
-                  style={{color: '#edeced'}}
+                  style={{ color: '#edeced' }}
                   title="LinkedIn"
                 >
                   <Linkedin size={16} className="md:hidden" />
                   <span className="hidden md:inline">
-                    {isAnimatingFooter ? footerTexts.linkedin : (t('common.linkedin') || 'LinkedIn')}
+                    {isAnimatingFooter ? footerTexts.linkedin : safeT('common.linkedin')}
                   </span>
                 </a>
                 <a
@@ -757,12 +781,12 @@ export default function Home() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="hover:opacity-80 transition-opacity min-h-[44px] flex items-center justify-center"
-                  style={{color: '#edeced'}}
+                  style={{ color: '#edeced' }}
                   title="GitHub"
                 >
                   <Github size={16} className="md:hidden" />
                   <span className="hidden md:inline">
-                    {isAnimatingFooter ? footerTexts.github : (t('common.github') || 'GitHub')}
+                    {isAnimatingFooter ? footerTexts.github : safeT('common.github')}
                   </span>
                 </a>
               </div>
@@ -775,7 +799,7 @@ export default function Home() {
       {showComingSoon && (
         <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
           <div className="bg-black text-white px-6 py-3 rounded-lg font-pixel text-lg">
-            {t('common.comingSoon')}
+            {safeT('common.comingSoon')}
           </div>
         </div>
       )}

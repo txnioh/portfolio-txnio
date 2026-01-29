@@ -1,0 +1,163 @@
+{
+    "common": {
+        "madeWithLove": "hecho con amor por txnio.",
+        "loading": "Cargando",
+        "back": "Volver",
+        "unavailableContent": "Contenido no disponible",
+        "blog": "Blog",
+        "projects": "Proyectos",
+        "home": "Inicio",
+        "social": "Social",
+        "linkedin": "LinkedIn",
+        "github": "GitHub",
+        "macFolio": "Mac-Folio",
+        "comingSoon": "¡Próximamente!",
+        "newOSExperience": "Nueva experiencia de OS"
+    },
+    "windows": {
+        "aboutMe": "Sobre Mí",
+        "projects": "Proyectos",
+        "contact": "Contacto",
+        "settings": "Settings",
+        "snakeGame": "Snake Game",
+        "home": "Home",
+        "oldTxniOS": "txniOS Old"
+    },
+    "aboutMe": {
+        "fileName": "sobreTxnio.ts",
+        "name": "Antonio J. González",
+        "alias": "Txnio",
+        "role": "Desarrollador para uso humano",
+        "experience": {
+            "company": "1.5+ años",
+            "personal": "2+ años"
+        },
+        "skills": [
+            "JavaScript",
+            "TypeScript",
+            ".NET",
+            "NextJS",
+            "Node.js",
+            "Python",
+            "HTML5",
+            "CSS3",
+            "Power Platform",
+            "Integración de IA"
+        ],
+        "currentStack": {
+            "frontend": [
+                "React",
+                "NextJS",
+                "TypeScript"
+            ],
+            "styling": [
+                "Framer-Motion",
+                "TailwindCSS"
+            ],
+            "stateManagement": [
+                "Redux",
+                "Context API"
+            ],
+            "backend": [
+                "Node.js",
+                "Express",
+                "Firebase"
+            ],
+            "database": [
+                "MongoDB",
+                "GraphQL"
+            ],
+            "deployment": [
+                "Vercel",
+                "Netlify",
+                "Docker"
+            ]
+        },
+        "interests": [
+            "Desarrollo Frontend",
+            "Diseño minimalista",
+            "Integración de Machine Learning"
+        ],
+        "currentlyLearning": [
+            "Swift",
+            "NextJS Avanzado",
+            "GraphQL"
+        ],
+        "aiTools": [
+            "ChatGPT, Claude para optimización de código",
+            "Midjourney para inspiración en UI/UX"
+        ]
+    },
+    "projects": {
+        "backToProjects": "Volver a proyectos",
+        "loadingProject": "Cargando",
+        "title": "PROYECTOS",
+        "subtitle": "por TXNIO",
+        "liveDemo": "Demo en Vivo",
+        "github": "GitHub"
+    },
+    "contact": {
+        "title": "¡Hablemos!",
+        "description": "Si tienes alguna pregunta, propuesta de colaboración o simplemente quieres charlar, no dudes en contactarme a través de cualquiera de estos medios.",
+        "email": "Email",
+        "linkedin": "LinkedIn",
+        "github": "GitHub"
+    },
+    "home": {
+        "introduction": "hola! soy Tony, aunque mi pseudónimo es -- txnio --, ahora mismo estoy construyendo cosas para web,\n\npor ahora estudiando diferentes tecnologías para poder expresar arte en ventanas de navegadores.\n\nme gusta el cine, fotografía y la música hipnagógica.",
+        "lastEdited": "Ultima edición: 16:04, Vier Sep 27 2024",
+        "toggleLights": {
+            "turnOn": "enciende las luces",
+            "turnOff": "apaga las luces"
+        }
+    },
+    "landing": {
+        "title": "DESARROLLADOR FULL STACK",
+        "subtitle": "ACTUALMENTE EN"
+    },
+    "settings": {
+        "title": "Ajustes del Sistema",
+        "search": "Buscar ajustes...",
+        "wallpaper": {
+            "title": "Fondo de Pantalla",
+            "label": "Fondo de pantalla",
+            "description": "Cambia el fondo de escritorio"
+        },
+        "user": {
+            "title": "Usuario y Cuentas",
+            "label": "Usuario y Cuentas",
+            "description": "Gestiona tus cuentas de usuario y ajustes de inicio de sesión"
+        },
+        "network": {
+            "title": "Red e Internet",
+            "label": "Red e Internet",
+            "description": "Configura tus conexiones Wi-Fi y ajustes de red"
+        },
+        "bluetooth": {
+            "title": "Bluetooth",
+            "label": "Bluetooth",
+            "description": "Administra tus dispositivos Bluetooth y conexiones"
+        },
+        "security": {
+            "title": "Seguridad y Privacidad",
+            "label": "Seguridad y Privacidad",
+            "description": "Ajusta la configuración de seguridad y privacidad de tu sistema"
+        },
+        "keyboard": {
+            "title": "Teclado",
+            "label": "Teclado",
+            "description": "Personaliza la configuración de tu teclado y atajos"
+        }
+    },
+    "projectDescriptions": {
+        "txniOS Old": "Simulación interactiva de Mac OS 7 con ventanas funcionales y la estética clásica del sistema.",
+        "Cubes": "Una experiencia visual interactiva con cubos 3D utilizando Three.js y React Three Fiber.",
+        "Minder": "Una aplicación para subir imágenes, comentarios y proyectos utilizando Firebase, React, TypeScript, Next.js y autenticación de Google.",
+        "Second Portfolio": "Un portafolio inspirado en el trabajo de Yihui Hu, con un diseño tipo pegatina.",
+        "3D Crystal Effect": "Un efecto visual de cristal 3D implementado con JavaScript.",
+        "Infinite Particles": "Una animación de partículas infinitas creada con JavaScript.",
+        "Floating Images": "Una galería mínima con interacción del mouse para imágenes flotantes.",
+        "Pixel Transition": "Una transición de píxeles simple para la barra de menú.",
+        "Gradient Generator": "Un generador de gradientes implementado en JavaScript."
+    }
+}
