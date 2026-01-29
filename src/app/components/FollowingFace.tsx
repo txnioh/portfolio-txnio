@@ -6,6 +6,30 @@ import { AnimatePresence, motion } from 'framer-motion';
 // Valores posibles para pupil_x y pupil_y: -15 a 15 en pasos de 3
 const PUPIL_VALUES = [-15, -12, -9, -6, -3, 0, 3, 6, 9, 12, 15];
 
+// Array para almacenar las imágenes precargadas (evita garbage collection)
+const preloadedImages: HTMLImageElement[] = [];
+let imagesPreloaded = false;
+
+/**
+ * Precarga todas las imágenes de la cara para evitar carga lenta en despliegue.
+ * Las imágenes se almacenan en memoria para estar disponibles instantáneamente.
+ */
+function preloadAllFaceImages(): void {
+  if (imagesPreloaded) return;
+
+  PUPIL_VALUES.forEach((px) => {
+    PUPIL_VALUES.forEach((py) => {
+      const filename = buildImageFilename(px, py);
+      const img = new Image();
+      img.src = `/face/${filename}`;
+      preloadedImages.push(img);
+    });
+  });
+
+  imagesPreloaded = true;
+  console.log(`Preloaded ${preloadedImages.length} face images`);
+}
+
 /**
  * Redondea un valor al valor más cercano en PUPIL_VALUES
  */
@@ -27,7 +51,7 @@ function buildImageFilename(pupilX: number, pupilY: number): string {
     }
     return `${value}p0`;
   };
-  
+
   return `gaze_px${formatValue(pupilX)}_py${formatValue(pupilY)}_256.webp`;
 }
 
@@ -44,19 +68,19 @@ function mapCursorToPupilValues(
   // Queremos que el cursor en los bordes de la pantalla mapee aproximadamente a -15 o 15
   const maxDistance = Math.min(centerX, centerY);
   const sensitivity = 15 / maxDistance;
-  
+
   // Calcular posición relativa al centro
   const relativeX = (mouseX - centerX) * sensitivity;
   const relativeY = (centerY - mouseY) * sensitivity; // Invertir Y porque en pantalla Y aumenta hacia abajo
-  
+
   // Limitar al rango de -15 a 15
   const clampedX = Math.max(-15, Math.min(15, relativeX));
   const clampedY = Math.max(-15, Math.min(15, relativeY));
-  
+
   // Redondear a los valores disponibles
   const pupilX = roundToNearestPupilValue(clampedX);
   const pupilY = roundToNearestPupilValue(clampedY);
-  
+
   return { pupilX, pupilY };
 }
 
@@ -71,6 +95,9 @@ const FollowingFace: React.FC<FollowingFaceProps> = ({ isVisible, className }) =
 
   useEffect(() => {
     if (!isVisible) return;
+
+    // Precargar todas las imágenes al montar el componente
+    preloadAllFaceImages();
 
     // Inicializar con posición central primero
     const initImage = () => {
@@ -91,7 +118,7 @@ const FollowingFace: React.FC<FollowingFaceProps> = ({ isVisible, className }) =
     const handleMouseMove = (event: MouseEvent) => {
       const centerX = window.innerWidth / 2;
       const centerY = window.innerHeight / 2;
-      
+
       // Calcular nuevos valores de pupil directamente
       const { pupilX, pupilY } = mapCursorToPupilValues(
         event.clientX,
@@ -99,12 +126,12 @@ const FollowingFace: React.FC<FollowingFaceProps> = ({ isVisible, className }) =
         centerX,
         centerY
       );
-      
+
       // Solo actualizar si cambió (evitar recargas innecesarias de imagen)
       if (pupilX !== currentPupilRef.current.x || pupilY !== currentPupilRef.current.y) {
         currentPupilRef.current.x = pupilX;
         currentPupilRef.current.y = pupilY;
-        
+
         // Actualizar src directamente en el DOM - RAW sin React state
         if (imgRef.current) {
           const filename = buildImageFilename(pupilX, pupilY);
