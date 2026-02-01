@@ -104,7 +104,7 @@ const getRandomFont = () => {
 
 // Fixed widths for accordion: only expanded + collapsed columns animate; total stays constant
 const PROJECT_COUNT = projects.length;
-const COLLAPSED_WIDTH_PCT = 5.5;
+const COLLAPSED_WIDTH_PCT = 8;
 const EXPANDED_WIDTH_PCT = 100 - (PROJECT_COUNT - 1) * COLLAPSED_WIDTH_PCT;
 const DEFAULT_WIDTH_PCT = 100 / PROJECT_COUNT;
 
