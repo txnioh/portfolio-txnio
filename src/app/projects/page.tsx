@@ -4,8 +4,8 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
+import { Github, Linkedin } from 'lucide-react';
 import '../../i18n/config';
-import ProjectsNavbar from '../components/ProjectsNavbar';
 
 interface Project {
   id: number;
@@ -119,7 +119,6 @@ const ProjectsPage = () => {
   const [randomFont, setRandomFont] = useState('font-pixel');
   const [hoveredId, setHoveredId] = useState<number | null>(null);
   const [isMobile, setIsMobile] = useState(false);
-
   useEffect(() => {
     setRandomFont(getRandomFont());
 
@@ -148,15 +147,9 @@ const ProjectsPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white" style={{ backgroundColor: '#121212' }}>
-      {/* Navbar */}
-      <ProjectsNavbar
-        isAnimatingNav={false}
-        navTexts={{ home: '', macFolio: '', linkedin: '', github: '' }}
-      />
-
-      {/* Header */}
-      <div className="text-center py-8 px-4 mt-4">
+    <div className="min-h-screen bg-black text-white flex flex-col" style={{ backgroundColor: '#121212' }}>
+      {/* Header - no encoger */}
+      <div className="shrink-0 text-center py-8 px-4 pt-4">
         <h1
           className={`text-3xl md:text-4xl lg:text-5xl font-bold ${randomFont} cursor-pointer hover:opacity-80 transition-opacity`}
           style={{ color: '#edeced' }}
@@ -169,14 +162,15 @@ const ProjectsPage = () => {
         </p>
       </div>
 
-      {/* Accordion Pillars */}
+      {/* Accordion Pillars - altura fija, no encoger */}
       <div
-        className={`mx-auto px-4 md:px-8 pb-8 ${isMobile ? 'max-w-md' : 'max-w-7xl'}`}
+        className={`shrink-0 mx-auto w-full px-4 md:px-8 pb-8 ${isMobile ? 'max-w-md' : 'max-w-7xl'}`}
         style={{
           display: 'flex',
           flexDirection: isMobile ? 'column' : 'row',
           flexWrap: isMobile ? undefined : 'nowrap',
           alignItems: 'stretch',
+          minHeight: isMobile ? 'auto' : '65vh',
           height: isMobile ? 'auto' : '65vh',
           gap: isMobile ? '16px' : '8px',
         }}
@@ -262,6 +256,62 @@ const ProjectsPage = () => {
           </motion.div>
           );
         })}
+      </div>
+
+      {/* Footer Links - mismo estilo que la página principal */}
+      <div className="shrink-0 mt-auto py-4 text-center px-4">
+        <div className={`flex items-center justify-between md:justify-center md:space-x-8 text-xs md:text-sm font-pixel`} style={{ color: '#edeced' }}>
+          <a
+            href="/blog"
+            className="hover:opacity-80 transition-opacity min-h-[44px] flex items-center justify-center"
+            style={{ color: '#edeced' }}
+          >
+            {t('common.blog')}
+          </a>
+          <a
+            href="/"
+            className="hover:opacity-80 transition-opacity min-h-[44px] flex items-center justify-center"
+            style={{ color: '#edeced' }}
+          >
+            {t('common.home')}
+          </a>
+          <a
+            href="/projects"
+            className="hover:opacity-80 transition-opacity min-h-[44px] flex items-center justify-center"
+            style={{ color: '#edeced' }}
+          >
+            {t('common.projects')}
+          </a>
+          <a
+            href="/mac-folio"
+            className="hover:opacity-80 transition-opacity min-h-[44px] flex items-center justify-center"
+            style={{ color: '#edeced' }}
+          >
+            {t('common.macFolio')}
+          </a>
+          <a
+            href="https://www.linkedin.com/in/txnio/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:opacity-80 transition-opacity min-h-[44px] flex items-center justify-center"
+            style={{ color: '#edeced' }}
+            title="LinkedIn"
+          >
+            <Linkedin size={16} className="md:hidden" />
+            <span className="hidden md:inline">{t('common.linkedin')}</span>
+          </a>
+          <a
+            href="https://github.com/txnioh"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:opacity-80 transition-opacity min-h-[44px] flex items-center justify-center"
+            style={{ color: '#edeced' }}
+            title="GitHub"
+          >
+            <Github size={16} className="md:hidden" />
+            <span className="hidden md:inline">{t('common.github')}</span>
+          </a>
+        </div>
       </div>
 
     </div>

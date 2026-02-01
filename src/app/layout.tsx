@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { Inter } from 'next/font/google';
+import PageTransition from "./components/PageTransition";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -68,7 +69,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased ${inter.className}`}
       >
         <div id="content-wrapper">
-          {children}
+          <PageTransition>{children}</PageTransition>
         </div>
       </body>
     </html>

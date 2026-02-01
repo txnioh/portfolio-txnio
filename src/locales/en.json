@@ -88,6 +88,11 @@
             "Midjourney for UI/UX inspiration"
         ]
     },
+    "blog": {
+        "title": "BLOG",
+        "subtitle": "by TXNIO",
+        "welcomeEntry": "Welcome entry"
+    },
     "projects": {
         "backToProjects": "Back to projects",
         "loadingProject": "Loading",

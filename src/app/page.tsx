@@ -140,7 +140,6 @@ export default function Home() {
   const [revealOrigin, setRevealOrigin] = useState<{ x: number, y: number } | null>(null);
   const [isRevealing, setIsRevealing] = useState(false);
   const [isClicking, setIsClicking] = useState(false);
-  const [showComingSoon, setShowComingSoon] = useState(false);
   const [isMobileDevice, setIsMobileDevice] = useState(false);
   const [showFollowingFace, setShowFollowingFace] = useState(false);
 
@@ -638,16 +637,13 @@ export default function Home() {
             {/* Footer Links */}
             <div className="py-4 text-center px-4">
               <div className={`flex items-center justify-between md:justify-center md:space-x-8 text-xs md:text-sm ${randomFonts.subtitle}`}>
-                <button
-                  onClick={() => {
-                    setShowComingSoon(true);
-                    setTimeout(() => setShowComingSoon(false), 2000);
-                  }}
-                  className="hover:opacity-80 transition-opacity cursor-pointer min-h-[44px] flex items-center justify-center"
-                  style={{ color: '#edeced', background: 'none', border: 'none', padding: 0, font: 'inherit' }}
+                <a
+                  href="/blog"
+                  className="hover:opacity-80 transition-opacity min-h-[44px] flex items-center justify-center"
+                  style={{ color: '#edeced' }}
                 >
                   {safeT('common.blog')}
-                </button>
+                </a>
                 <a
                   href="/projects"
                   className="hover:opacity-80 transition-opacity min-h-[44px] flex items-center justify-center"
@@ -692,15 +688,6 @@ export default function Home() {
             </div>
           </div>
         </>
-      )}
-
-      {/* Coming Soon Message */}
-      {showComingSoon && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
-          <div className="bg-black text-white px-6 py-3 rounded-lg font-pixel text-lg">
-            {safeT('common.comingSoon')}
-          </div>
-        </div>
       )}
 
       {/* Close Button - Always present but with visibility control */}
