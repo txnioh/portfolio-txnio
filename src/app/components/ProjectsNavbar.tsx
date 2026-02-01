@@ -2,20 +2,20 @@
 
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Github, Linkedin } from 'lucide-react';
+import { Github, Linkedin, ArrowUpRight } from 'lucide-react';
 
 interface ProjectsNavbarProps {
 
   isAnimatingNav: boolean;
   navTexts: {
     home: string;
-    macFolio: string;
+    txniOS: string;
     linkedin: string;
     github: string;
   };
 }
 
-const FALLBACK = { home: 'Home', macFolio: 'Mac-Folio', linkedin: 'LinkedIn', github: 'GitHub' };
+const FALLBACK = { home: 'Home', txniOS: 'txniOS', linkedin: 'LinkedIn', github: 'GitHub' };
 
 const ProjectsNavbar: React.FC<ProjectsNavbarProps> = ({
 
@@ -46,10 +46,14 @@ const ProjectsNavbar: React.FC<ProjectsNavbarProps> = ({
               {label('home')}
             </a>
             <a
-              href="/mac-folio"
-              className="text-white/70 hover:text-white transition-colors duration-200 text-xs md:text-sm font-pixel"
+              href="https://os.txnio.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-white/70 hover:text-white transition-colors duration-200 text-xs md:text-sm font-pixel flex items-center gap-1"
+              title="txniOS"
             >
-              {label('macFolio')}
+              {label('txniOS')}
+              <ArrowUpRight size={14} className="inline shrink-0" />
             </a>
             <a
               href="https://www.linkedin.com/in/txnio/"

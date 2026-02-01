@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Github, Linkedin } from 'lucide-react';
+import { Github, Linkedin, ArrowUpRight } from 'lucide-react';
 import '../../i18n/config';
 
 interface BlogPost {
@@ -57,8 +57,8 @@ const BlogPage = () => {
 
   return (
     <div className="min-h-screen bg-black text-white flex flex-col" style={{ backgroundColor: '#121212' }}>
-      {/* Header */}
-      <div className="shrink-0 text-center py-8 px-4 pt-4">
+      {/* Header - alineado con proyectos (más espacio y centrado) */}
+      <div className="shrink-0 text-center py-10 md:py-14 px-6 max-w-2xl mx-auto">
         <h1
           className={`text-3xl md:text-4xl lg:text-5xl font-bold ${randomFont} cursor-pointer hover:opacity-80 transition-opacity`}
           style={{ color: '#edeced' }}
@@ -66,7 +66,7 @@ const BlogPage = () => {
         >
           {t('blog.title')}
         </h1>
-        <p className="text-base md:text-lg lg:text-xl font-pixel mt-2" style={{ color: '#edeced', opacity: 0.8 }}>
+        <p className="text-base md:text-lg lg:text-xl font-pixel mt-3 md:mt-4" style={{ color: '#edeced', opacity: 0.8 }}>
           {t('blog.subtitle')}
         </p>
       </div>
@@ -90,22 +90,22 @@ const BlogPage = () => {
         ))}
       </div>
 
-      {/* Footer Links - mismo estilo que la página principal */}
+      {/* Footer Links - mismo orden y estilo que proyectos */}
       <div className="shrink-0 mt-auto py-4 text-center px-4">
         <div className={`flex items-center justify-between md:justify-center md:space-x-8 text-xs md:text-sm font-pixel`} style={{ color: '#edeced' }}>
-          <a
-            href="/"
-            className="hover:opacity-80 transition-opacity min-h-[44px] flex items-center justify-center"
-            style={{ color: '#edeced' }}
-          >
-            {t('common.home')}
-          </a>
           <a
             href="/blog"
             className="hover:opacity-80 transition-opacity min-h-[44px] flex items-center justify-center"
             style={{ color: '#edeced' }}
           >
             {t('common.blog')}
+          </a>
+          <a
+            href="/"
+            className="hover:opacity-80 transition-opacity min-h-[44px] flex items-center justify-center"
+            style={{ color: '#edeced' }}
+          >
+            {t('common.home')}
           </a>
           <a
             href="/projects"
@@ -115,11 +115,15 @@ const BlogPage = () => {
             {t('common.projects')}
           </a>
           <a
-            href="/mac-folio"
-            className="hover:opacity-80 transition-opacity min-h-[44px] flex items-center justify-center"
+            href="https://os.txnio.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:opacity-80 transition-opacity min-h-[44px] flex items-center justify-center gap-1"
             style={{ color: '#edeced' }}
+            title="txniOS"
           >
-            {t('common.macFolio')}
+            {t('common.txniOS')}
+            <ArrowUpRight size={14} className="inline shrink-0" />
           </a>
           <a
             href="https://www.linkedin.com/in/txnio/"

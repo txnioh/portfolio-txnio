@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Image from 'next/image';
-import { Github, Linkedin } from 'lucide-react';
+import { Github, Linkedin, ArrowUpRight } from 'lucide-react';
 import Glitter from './components/Glitter';
 import FollowingFace from './components/FollowingFace';
 
@@ -115,7 +115,7 @@ export default function Home() {
         'common.newOSExperience': 'New OS experience',
         'common.blog': 'Blog',
         'common.projects': 'Projects',
-        'common.macFolio': 'Mac-Folio',
+        'common.txniOS': 'txniOS',
         'common.linkedin': 'LinkedIn',
         'common.github': 'GitHub',
         'common.comingSoon': 'Coming Soon!',
@@ -652,11 +652,15 @@ export default function Home() {
                   {safeT('common.projects')}
                 </a>
                 <a
-                  href="/mac-folio"
-                  className="hover:opacity-80 transition-opacity min-h-[44px] flex items-center justify-center"
+                  href="https://os.txnio.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:opacity-80 transition-opacity min-h-[44px] flex items-center justify-center gap-1"
                   style={{ color: '#edeced' }}
+                  title="txniOS"
                 >
-                  {safeT('common.macFolio')}
+                  {safeT('common.txniOS')}
+                  <ArrowUpRight size={14} className="inline shrink-0" />
                 </a>
                 <a
                   href="https://www.linkedin.com/in/txnio/"

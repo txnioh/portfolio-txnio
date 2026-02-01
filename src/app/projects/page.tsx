@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { Github, Linkedin } from 'lucide-react';
+import { Github, Linkedin, ArrowUpRight } from 'lucide-react';
 import '../../i18n/config';
 
 interface Project {
@@ -148,8 +148,8 @@ const ProjectsPage = () => {
 
   return (
     <div className="min-h-screen bg-black text-white flex flex-col" style={{ backgroundColor: '#121212' }}>
-      {/* Header - no encoger */}
-      <div className="shrink-0 text-center py-8 px-4 pt-4">
+      {/* Header - no encoger, más espacio y centrado */}
+      <div className="shrink-0 text-center py-10 md:py-14 px-6 max-w-2xl mx-auto">
         <h1
           className={`text-3xl md:text-4xl lg:text-5xl font-bold ${randomFont} cursor-pointer hover:opacity-80 transition-opacity`}
           style={{ color: '#edeced' }}
@@ -157,7 +157,7 @@ const ProjectsPage = () => {
         >
           {t('projects.title')}
         </h1>
-        <p className="text-base md:text-lg lg:text-xl font-pixel mt-2" style={{ color: '#edeced', opacity: 0.8 }}>
+        <p className="text-base md:text-lg lg:text-xl font-pixel mt-3 md:mt-4" style={{ color: '#edeced', opacity: 0.8 }}>
           {t('projects.subtitle')}
         </p>
       </div>
@@ -283,11 +283,15 @@ const ProjectsPage = () => {
             {t('common.projects')}
           </a>
           <a
-            href="/mac-folio"
-            className="hover:opacity-80 transition-opacity min-h-[44px] flex items-center justify-center"
+            href="https://os.txnio.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:opacity-80 transition-opacity min-h-[44px] flex items-center justify-center gap-1"
             style={{ color: '#edeced' }}
+            title="txniOS"
           >
-            {t('common.macFolio')}
+            {t('common.txniOS')}
+            <ArrowUpRight size={14} className="inline shrink-0" />
           </a>
           <a
             href="https://www.linkedin.com/in/txnio/"
