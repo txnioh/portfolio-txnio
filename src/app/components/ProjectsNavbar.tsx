@@ -1,13 +1,11 @@
 'use client'
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Github, Linkedin } from 'lucide-react';
-import LanguageSelector from './LanguageSelector';
 
 interface ProjectsNavbarProps {
-  currentLanguage: 'en' | 'es';
-  onLanguageChange: (languageCode: 'en' | 'es') => void;
+
   isAnimatingNav: boolean;
   navTexts: {
     home: string;
@@ -17,32 +15,41 @@ interface ProjectsNavbarProps {
   };
 }
 
+const FALLBACK = { home: 'Home', macFolio: 'Mac-Folio', linkedin: 'LinkedIn', github: 'GitHub' };
+
 const ProjectsNavbar: React.FC<ProjectsNavbarProps> = ({
-  currentLanguage,
-  onLanguageChange,
+
   isAnimatingNav,
   navTexts
 }) => {
   const { t } = useTranslation();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const label = (key: keyof typeof FALLBACK) =>
+    isAnimatingNav ? navTexts[key] : (mounted ? (t(`common.${key}`) || FALLBACK[key]) : FALLBACK[key]);
 
   return (
     <nav className="sticky top-0 z-40 bg-black/80 backdrop-blur-md border-b border-white/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          
+
           {/* Navigation Links */}
           <div className="flex items-center justify-between md:justify-start md:space-x-6 flex-1 pr-4">
             <a
               href="/"
               className="text-white/70 hover:text-white transition-colors duration-200 text-xs md:text-sm font-pixel"
             >
-              {isAnimatingNav ? navTexts.home : (t('common.home') || 'Home')}
+              {label('home')}
             </a>
             <a
               href="/mac-folio"
               className="text-white/70 hover:text-white transition-colors duration-200 text-xs md:text-sm font-pixel"
             >
-              {isAnimatingNav ? navTexts.macFolio : (t('common.macFolio') || 'Mac-Folio')}
+              {label('macFolio')}
             </a>
             <a
               href="https://www.linkedin.com/in/txnio/"
@@ -53,7 +60,7 @@ const ProjectsNavbar: React.FC<ProjectsNavbarProps> = ({
             >
               <Linkedin size={16} className="md:hidden" />
               <span className="hidden md:inline text-xs md:text-sm font-pixel">
-                {isAnimatingNav ? navTexts.linkedin : (t('common.linkedin') || 'LinkedIn')}
+                {label('linkedin')}
               </span>
             </a>
             <a
@@ -65,18 +72,12 @@ const ProjectsNavbar: React.FC<ProjectsNavbarProps> = ({
             >
               <Github size={16} className="md:hidden" />
               <span className="hidden md:inline text-xs md:text-sm font-pixel">
-                {isAnimatingNav ? navTexts.github : (t('common.github') || 'GitHub')}
+                {label('github')}
               </span>
             </a>
           </div>
 
-          {/* Language Selector */}
-          <div className="flex items-center">
-            <LanguageSelector 
-              currentLanguage={currentLanguage}
-              onLanguageChange={onLanguageChange}
-            />
-          </div>
+
         </div>
       </div>
     </nav>

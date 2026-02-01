@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import '../../i18n/config';
 import ProjectsNavbar from '../components/ProjectsNavbar';
@@ -16,73 +17,73 @@ interface Project {
 }
 
 const projects: Project[] = [
-  { 
-    id: 9, 
-    title: "txniOS Old", 
+  {
+    id: 9,
+    title: "txniOS Old",
     description: "", // Will be populated from translations
     githubUrl: "https://github.com/txnioh/portfolio-txnio",
     demoUrl: "https://os.txnio.com",
     imagePath: "/projects-img/project-macold.png"
   },
-  { 
-    id: 8, 
-    title: "Cubes", 
+  {
+    id: 8,
+    title: "Cubes",
     description: "", // Will be populated from translations
     githubUrl: "https://github.com/txnioh/cubes",
     demoUrl: "https://cubes-umber.vercel.app",
     imagePath: "/projects-img/project-cubes.png"
   },
-  { 
-    id: 6, 
-    title: "Minder", 
+  {
+    id: 6,
+    title: "Minder",
     description: "", // Will be populated from translations
     githubUrl: "https://github.com/txnioh/minder",
     demoUrl: "https://minder-txnio.vercel.app/",
     imagePath: "/projects-img/project-minder.png"
   },
-  { 
-    id: 7, 
-    title: "Second Portfolio", 
+  {
+    id: 7,
+    title: "Second Portfolio",
     description: "", // Will be populated from translations
     githubUrl: "https://github.com/txnioh/second-portfolio",
     demoUrl: "https://second-portfolio-txnio.vercel.app/",
     imagePath: "/projects-img/project-second-portfolio.png"
   },
-  { 
-    id: 1, 
-    title: "3D Crystal Effect", 
+  {
+    id: 1,
+    title: "3D Crystal Effect",
     description: "", // Will be populated from translations
     githubUrl: "https://github.com/txnioh/3d-cristal-effect",
     demoUrl: "https://3d-cristal-effect.vercel.app/",
     imagePath: "/projects-img/project-crystal-effect.png"
   },
-  { 
-    id: 2, 
-    title: "Infinite Particles", 
+  {
+    id: 2,
+    title: "Infinite Particles",
     description: "", // Will be populated from translations
     githubUrl: "https://github.com/txnioh/infinite-particles",
     demoUrl: "https://infinite-particles-txnio.vercel.app/",
     imagePath: "/projects-img/project-infinite-particles.png"
   },
-  { 
-    id: 3, 
-    title: "Floating Images", 
+  {
+    id: 3,
+    title: "Floating Images",
     description: "", // Will be populated from translations
     githubUrl: "https://github.com/txnioh/floating-images",
     demoUrl: "https://floating-images.vercel.app/",
     imagePath: "/projects-img/project-floating-images.png"
   },
-  { 
-    id: 4, 
-    title: "Pixel Transition", 
+  {
+    id: 4,
+    title: "Pixel Transition",
     description: "", // Will be populated from translations
     githubUrl: "https://github.com/txnioh/pixel-transition",
     demoUrl: "https://pixel-transition-eight.vercel.app/",
     imagePath: "/projects-img/project-pixel-transition.png"
   },
-  { 
-    id: 5, 
-    title: "Gradient Generator", 
+  {
+    id: 5,
+    title: "Gradient Generator",
     description: "", // Will be populated from translations
     githubUrl: "https://github.com/txnioh/gradient-generator",
     demoUrl: "https://gradient-generator-txnio.vercel.app/",
@@ -92,7 +93,7 @@ const projects: Project[] = [
 
 const availableFonts = [
   'font-chicago',
-  'font-renogare', 
+  'font-renogare',
   'font-geneva',
   'font-pixel',
 ];
@@ -101,84 +102,22 @@ const getRandomFont = () => {
   return availableFonts[Math.floor(Math.random() * availableFonts.length)];
 };
 
-// Matrix characters for animation
-const matrixChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&*()_+-=[]{}|;:,.<>?';
-
-// Function to generate random matrix characters
-const generateRandomChars = (length: number) => {
-  let result = '';
-  for (let i = 0; i < length; i++) {
-    result += matrixChars.charAt(Math.floor(Math.random() * matrixChars.length));
-  }
-  return result;
-};
-
 const ProjectsPage = () => {
   const { t, i18n } = useTranslation();
   const [randomFont, setRandomFont] = useState('font-pixel');
-  const currentLanguage = (i18n.language || 'en').split('-')[0] as 'en' | 'es';
-  
-  // Animation states for navigation
-  const [isAnimatingNav, setIsAnimatingNav] = useState(false);
-  const [navTexts, setNavTexts] = useState({
-    home: '',
-    macFolio: '',
-    linkedin: '',
-    github: ''
-  });
-
-  const setLanguage = (languageCode: 'en' | 'es') => {
-    // Start matrix animation for navigation
-    setIsAnimatingNav(true);
-    
-    // Get current texts to animate
-    const currentTexts = {
-      home: t('common.home') || 'Home',
-      macFolio: t('common.macFolio') || 'Mac-Folio',
-      linkedin: t('common.linkedin') || 'LinkedIn',
-      github: t('common.github') || 'GitHub'
-    };
-    
-    // Generate initial matrix text
-    setNavTexts({
-      home: generateRandomChars(currentTexts.home.length),
-      macFolio: generateRandomChars(currentTexts.macFolio.length),
-      linkedin: generateRandomChars(currentTexts.linkedin.length),
-      github: generateRandomChars(currentTexts.github.length)
-    });
-
-    // Matrix animation loop
-    let animationCount = 0;
-    const maxAnimations = 2;
-    const animationInterval = setInterval(() => {
-      animationCount++;
-      
-      // Update matrix text with new random characters
-      setNavTexts({
-        home: generateRandomChars(currentTexts.home.length),
-        macFolio: generateRandomChars(currentTexts.macFolio.length),
-        linkedin: generateRandomChars(currentTexts.linkedin.length),
-        github: generateRandomChars(currentTexts.github.length)
-      });
-
-      // Stop animation and change language
-      if (animationCount >= maxAnimations) {
-        clearInterval(animationInterval);
-        setIsAnimatingNav(false);
-        
-        // Change language after animation
-        i18n.changeLanguage(languageCode);
-        if (typeof window !== 'undefined') {
-          try {
-            window.localStorage.setItem('lng', languageCode);
-          } catch {}
-        }
-      }
-    }, 50);
-  };
+  const [hoveredId, setHoveredId] = useState<number | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     setRandomFont(getRandomFont());
+
+    // Detectar móvil
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
   useEffect(() => {
@@ -188,7 +127,7 @@ const ProjectsPage = () => {
         if (savedLanguage && savedLanguage !== i18n.language) {
           i18n.changeLanguage(savedLanguage);
         }
-      } catch {}
+      } catch { }
     }
   }, [i18n]);
 
@@ -199,16 +138,14 @@ const ProjectsPage = () => {
   return (
     <div className="min-h-screen bg-black text-white" style={{ backgroundColor: '#121212' }}>
       {/* Navbar */}
-      <ProjectsNavbar 
-        currentLanguage={currentLanguage}
-        onLanguageChange={setLanguage}
-        isAnimatingNav={isAnimatingNav}
-        navTexts={navTexts}
+      <ProjectsNavbar
+        isAnimatingNav={false}
+        navTexts={{ home: '', macFolio: '', linkedin: '', github: '' }}
       />
 
       {/* Header */}
       <div className="text-center py-8 px-4 mt-4">
-        <h1 
+        <h1
           className={`text-3xl md:text-4xl lg:text-5xl font-bold ${randomFont} cursor-pointer hover:opacity-80 transition-opacity`}
           style={{ color: '#edeced' }}
           onClick={handleTitleClick}
@@ -220,60 +157,99 @@ const ProjectsPage = () => {
         </p>
       </div>
 
-      {/* Projects Grid */}
-      <div className="max-w-7xl mx-auto px-4 md:px-6 pb-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
-          {projects.map((project) => (
-            <div
-              key={project.id}
-              className="group cursor-pointer transition-all duration-300 hover:-translate-y-2"
-            >
-              {/* Project Image */}
-              <div className="relative mb-4 rounded-lg overflow-hidden">
-                <Image
-                  src={project.imagePath}
-                  alt={project.title}
-                  width={400}
-                  height={250}
-                  className="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300" />
-              </div>
+      {/* Accordion Pillars */}
+      <div
+        className={`mx-auto px-4 md:px-8 pb-8 ${isMobile ? 'max-w-md' : 'max-w-7xl'}`}
+        style={{
+          display: 'flex',
+          flexDirection: isMobile ? 'column' : 'row',
+          alignItems: 'stretch',
+          height: isMobile ? 'auto' : '65vh',
+          gap: isMobile ? '16px' : '8px',
+        }}
+      >
+        {projects.map((project) => (
+          <motion.div
+            key={project.id}
+            className="relative overflow-hidden cursor-pointer"
+            style={{
+              height: isMobile ? '200px' : '100%',
+              borderRadius: '32px',
+              minWidth: isMobile ? '100%' : '0',
+            }}
+            animate={{
+              flex: isMobile
+                ? 'none'
+                : hoveredId === null
+                  ? 1
+                  : hoveredId === project.id
+                    ? 3
+                    : 0.6,
+            }}
+            transition={{
+              type: "tween",
+              duration: 0.28,
+              ease: hoveredId === project.id
+                ? [0.7, 0, 1, 1]     // ease-in más pronunciado al entrar
+                : [0, 0, 0.35, 1],  // ease-out más pronunciado al salir
+            }}
+            onMouseEnter={() => !isMobile && setHoveredId(project.id)}
+            onClick={() => window.open(project.demoUrl, '_blank')}
+          >
+            {/* Background Image */}
+            <Image
+              src={project.imagePath}
+              alt={project.title}
+              fill
+              className="object-cover"
+              sizes={isMobile ? "100vw" : "(max-width: 768px) 100vw, 20vw"}
+            />
 
-              {/* Project Info */}
-              <div className="space-y-2">
-                <h3 className="text-xl font-bold font-pixel group-hover:text-orange-400 transition-colors" style={{ color: '#FFA500' }}>
-                  {project.title}
-                </h3>
-                <p className="text-sm font-pixel" style={{ color: '#e0e0e0', opacity: 0.9, lineHeight: 1.4 }}>
-                  {t(`projectDescriptions.${project.title}`)}
-                </p>
-                
-                {/* Links */}
-                <div className="flex gap-4 pt-2">
-                  <a
-                    href={project.demoUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm font-pixel hover:opacity-80 transition-opacity underline"
-                    style={{ color: '#90EE90' }}
+            {/* Dark overlay for text readability */}
+            <motion.div
+              className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"
+              animate={{
+                opacity: hoveredId === project.id || isMobile ? 1 : 0.4,
+              }}
+              transition={{
+                duration: 0.28,
+                ease: hoveredId === project.id ? [0.7, 0, 1, 1] : [0, 0, 0.35, 1],
+              }}
+            />
+
+            {/* Content - Title and description */}
+            <AnimatePresence>
+              {(hoveredId === project.id || isMobile) && (
+                <motion.div
+                  className="absolute inset-0 flex flex-col justify-end p-4 pointer-events-none"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -5 }}
+                  transition={{
+                    duration: 0.22,
+                    ease: [0.65, 0, 0.35, 1],
+                  }}
+                >
+                  <h3
+                    className="text-lg md:text-xl lg:text-2xl font-bold font-pixel mb-2"
+                    style={{ color: '#FFA500' }}
                   >
-                    {t('projects.liveDemo')} ↗
-                  </a>
-                  <a
-                    href={project.githubUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm font-pixel hover:opacity-80 transition-opacity underline"
-                    style={{ color: '#87CEEB' }}
-                  >
-                    {t('projects.github')} ↗
-                  </a>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+                    {project.title}
+                  </h3>
+
+                  {!isMobile && (
+                    <p
+                      className="text-xs md:text-sm font-pixel line-clamp-2"
+                      style={{ color: '#e0e0e0' }}
+                    >
+                      {t(`projectDescriptions.${project.title}`)}
+                    </p>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+        ))}
       </div>
 
     </div>

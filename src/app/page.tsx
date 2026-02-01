@@ -7,7 +7,6 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import { Github, Linkedin } from 'lucide-react';
 import Glitter from './components/Glitter';
-import LanguageSelector from './components/LanguageSelector';
 import FollowingFace from './components/FollowingFace';
 
 // Available fonts for random selection
@@ -87,101 +86,9 @@ const generateRandomChars = (length: number) => {
 export default function Home() {
   const { t, i18n } = useTranslation();
 
-  // Animation states for footer navigation
-  const [isAnimatingFooter, setIsAnimatingFooter] = useState(false);
-  const [footerTexts, setFooterTexts] = useState({
-    blog: '',
-    projects: '',
-    macFolio: '',
-    linkedin: '',
-    github: ''
-  });
 
-  // Animation states for center text and button
-  const [isAnimatingCenter, setIsAnimatingCenter] = useState(false);
-  const [isAnimatingButton, setIsAnimatingButton] = useState(false);
-  const [centerTexts, setCenterTexts] = useState({
-    title: '',
-    subtitle: ''
-  });
-  const [buttonText, setButtonText] = useState('');
 
-  const setLanguage = (languageCode: 'en' | 'es') => {
-    // Start matrix animations for all elements
-    setIsAnimatingFooter(true);
-    setIsAnimatingCenter(true);
-    setIsAnimatingButton(true);
 
-    // Get current texts to animate
-    const currentTexts = {
-      // Footer
-      blog: t('common.blog'),
-      projects: t('common.projects'),
-      macFolio: t('common.macFolio'),
-      linkedin: t('common.linkedin'),
-      github: t('common.github'),
-      // Center
-      title: t('landing.title'),
-      subtitle: t('landing.subtitle'),
-      // Button
-      button: t('common.newOSExperience')
-    };
-
-    // Generate initial matrix text for all elements
-    setFooterTexts({
-      blog: generateRandomChars(currentTexts.blog.length),
-      projects: generateRandomChars(currentTexts.projects.length),
-      macFolio: generateRandomChars(currentTexts.macFolio.length),
-      linkedin: generateRandomChars(currentTexts.linkedin.length),
-      github: generateRandomChars(currentTexts.github.length)
-    });
-
-    setCenterTexts({
-      title: generateRandomChars(currentTexts.title.length),
-      subtitle: generateRandomChars(currentTexts.subtitle.length)
-    });
-
-    setButtonText(generateRandomChars(currentTexts.button.length));
-
-    // Matrix animation loop
-    let animationCount = 0;
-    const maxAnimations = 2;
-    const animationInterval = setInterval(() => {
-      animationCount++;
-
-      // Update matrix text with new random characters for all elements
-      setFooterTexts({
-        blog: generateRandomChars(currentTexts.blog.length),
-        projects: generateRandomChars(currentTexts.projects.length),
-        macFolio: generateRandomChars(currentTexts.macFolio.length),
-        linkedin: generateRandomChars(currentTexts.linkedin.length),
-        github: generateRandomChars(currentTexts.github.length)
-      });
-
-      setCenterTexts({
-        title: generateRandomChars(currentTexts.title.length),
-        subtitle: generateRandomChars(currentTexts.subtitle.length)
-      });
-
-      setButtonText(generateRandomChars(currentTexts.button.length));
-
-      // Stop animation and change language
-      if (animationCount >= maxAnimations) {
-        clearInterval(animationInterval);
-        setIsAnimatingFooter(false);
-        setIsAnimatingCenter(false);
-        setIsAnimatingButton(false);
-
-        // Change language after animation
-        i18n.changeLanguage(languageCode);
-        if (typeof window !== 'undefined') {
-          try {
-            window.localStorage.setItem('lng', languageCode);
-          } catch { }
-        }
-      }
-    }, 50);
-  };
 
   // Track if component is mounted to prevent hydration mismatch
   const [mounted, setMounted] = useState(false);
@@ -198,7 +105,7 @@ export default function Home() {
     }
   }, [i18n]);
 
-  const currentLanguage = (i18n.language || 'en').split('-')[0] as 'en' | 'es';
+
 
   // Helper function to safely get translations (returns English fallback during SSR)
   const safeT = (key: string): string => {
@@ -649,14 +556,6 @@ export default function Home() {
 
             {/* Top Link */}
             <div className="relative text-center py-4 md:py-6 px-4">
-              {/* Language Switcher */}
-              <div className="absolute top-1/2 right-2 md:right-4 transform -translate-y-1/2 z-10">
-                <LanguageSelector
-                  currentLanguage={mounted ? currentLanguage : 'en'}
-                  onLanguageChange={setLanguage}
-                />
-              </div>
-
               <button
                 ref={linkRef}
                 onMouseEnter={() => setIsHoveringLink(true)}
@@ -700,7 +599,7 @@ export default function Home() {
                   minWidth: '180px'
                 }}
               >
-                ↗ {isAnimatingButton ? buttonText : safeT('common.newOSExperience')}
+                ↗ {safeT('common.newOSExperience')}
               </button>
             </div>
 
@@ -719,11 +618,11 @@ export default function Home() {
                     </h2>
                     <h3 className={`text-lg md:text-xl ${randomFonts.title} hover:opacity-80 transition-opacity relative z-10`} style={{ color: '#edeced', opacity: 0.9 }}>
                       <EmojiRenderer emoji={randomEmojis.title} />
-                      {isAnimatingCenter ? centerTexts.title : safeT('landing.title')}
+                      {safeT('landing.title')}
                     </h3>
                     <h4 className={`text-base md:text-lg ${randomFonts.subtitle} hover:opacity-80 transition-opacity relative z-0`} style={{ color: '#edeced', opacity: 0.8 }}>
                       <EmojiRenderer emoji={randomEmojis.subtitle} />
-                      {isAnimatingCenter ? centerTexts.subtitle : safeT('landing.subtitle')}
+                      {safeT('landing.subtitle')}
                     </h4>
                     <h5 className={`text-xl md:text-2xl ${randomFonts.company} font-bold hover:opacity-80 transition-opacity relative z-0`} style={{ color: '#edeced' }}>
                       <EmojiRenderer emoji={randomEmojis.company} />
@@ -747,21 +646,21 @@ export default function Home() {
                   className="hover:opacity-80 transition-opacity cursor-pointer min-h-[44px] flex items-center justify-center"
                   style={{ color: '#edeced', background: 'none', border: 'none', padding: 0, font: 'inherit' }}
                 >
-                  {isAnimatingFooter ? footerTexts.blog : safeT('common.blog')}
+                  {safeT('common.blog')}
                 </button>
                 <a
                   href="/projects"
                   className="hover:opacity-80 transition-opacity min-h-[44px] flex items-center justify-center"
                   style={{ color: '#edeced' }}
                 >
-                  {isAnimatingFooter ? footerTexts.projects : safeT('common.projects')}
+                  {safeT('common.projects')}
                 </a>
                 <a
                   href="/mac-folio"
                   className="hover:opacity-80 transition-opacity min-h-[44px] flex items-center justify-center"
                   style={{ color: '#edeced' }}
                 >
-                  {isAnimatingFooter ? footerTexts.macFolio : safeT('common.macFolio')}
+                  {safeT('common.macFolio')}
                 </a>
                 <a
                   href="https://www.linkedin.com/in/txnio/"
@@ -773,7 +672,7 @@ export default function Home() {
                 >
                   <Linkedin size={16} className="md:hidden" />
                   <span className="hidden md:inline">
-                    {isAnimatingFooter ? footerTexts.linkedin : safeT('common.linkedin')}
+                    {safeT('common.linkedin')}
                   </span>
                 </a>
                 <a
@@ -786,7 +685,7 @@ export default function Home() {
                 >
                   <Github size={16} className="md:hidden" />
                   <span className="hidden md:inline">
-                    {isAnimatingFooter ? footerTexts.github : safeT('common.github')}
+                    {safeT('common.github')}
                   </span>
                 </a>
               </div>
@@ -803,7 +702,6 @@ export default function Home() {
           </div>
         </div>
       )}
-
 
       {/* Close Button - Always present but with visibility control */}
       <button
