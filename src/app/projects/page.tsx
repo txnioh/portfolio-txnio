@@ -102,6 +102,18 @@ const getRandomFont = () => {
   return availableFonts[Math.floor(Math.random() * availableFonts.length)];
 };
 
+// Fixed widths for accordion: only expanded + collapsed columns animate; total stays constant
+const PROJECT_COUNT = projects.length;
+const COLLAPSED_WIDTH_PCT = 5.5;
+const EXPANDED_WIDTH_PCT = 100 - (PROJECT_COUNT - 1) * COLLAPSED_WIDTH_PCT;
+const DEFAULT_WIDTH_PCT = 100 / PROJECT_COUNT;
+
+const COLUMN_TRANSITION = {
+  type: 'tween' as const,
+  duration: 0.28,
+  ease: [0.25, 0.1, 0.25, 1] as const,
+};
+
 const ProjectsPage = () => {
   const { t, i18n } = useTranslation();
   const [randomFont, setRandomFont] = useState('font-pixel');
@@ -163,36 +175,38 @@ const ProjectsPage = () => {
         style={{
           display: 'flex',
           flexDirection: isMobile ? 'column' : 'row',
+          flexWrap: isMobile ? undefined : 'nowrap',
           alignItems: 'stretch',
           height: isMobile ? 'auto' : '65vh',
           gap: isMobile ? '16px' : '8px',
         }}
+        onMouseLeave={() => !isMobile && setHoveredId(null)}
       >
-        {projects.map((project) => (
+        {projects.map((project) => {
+          const widthPct =
+            isMobile
+              ? undefined
+              : hoveredId === null
+                ? DEFAULT_WIDTH_PCT
+                : hoveredId === project.id
+                  ? EXPANDED_WIDTH_PCT
+                  : COLLAPSED_WIDTH_PCT;
+          return (
           <motion.div
             key={project.id}
             className="relative overflow-hidden cursor-pointer"
             style={{
               height: isMobile ? '200px' : '100%',
               borderRadius: '32px',
-              minWidth: isMobile ? '100%' : '0',
+              minWidth: isMobile ? '100%' : undefined,
+              ...(isMobile ? {} : { flexGrow: 0, flexShrink: 0 }),
             }}
-            animate={{
-              flex: isMobile
-                ? 'none'
-                : hoveredId === null
-                  ? 1
-                  : hoveredId === project.id
-                    ? 3
-                    : 0.6,
-            }}
-            transition={{
-              type: "tween",
-              duration: 0.28,
-              ease: hoveredId === project.id
-                ? [0.7, 0, 1, 1]     // ease-in más pronunciado al entrar
-                : [0, 0, 0.35, 1],  // ease-out más pronunciado al salir
-            }}
+            animate={
+              isMobile
+                ? undefined
+                : { flexBasis: `${widthPct}%` }
+            }
+            transition={COLUMN_TRANSITION}
             onMouseEnter={() => !isMobile && setHoveredId(project.id)}
             onClick={() => window.open(project.demoUrl, '_blank')}
           >
@@ -211,10 +225,7 @@ const ProjectsPage = () => {
               animate={{
                 opacity: hoveredId === project.id || isMobile ? 1 : 0.4,
               }}
-              transition={{
-                duration: 0.28,
-                ease: hoveredId === project.id ? [0.7, 0, 1, 1] : [0, 0, 0.35, 1],
-              }}
+              transition={COLUMN_TRANSITION}
             />
 
             {/* Content - Title and description */}
@@ -249,7 +260,8 @@ const ProjectsPage = () => {
               )}
             </AnimatePresence>
           </motion.div>
-        ))}
+          );
+        })}
       </div>
 
     </div>
