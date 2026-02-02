@@ -131,7 +131,7 @@ interface Project {
 const projects: Project[] = [
   { 
     id: 9, 
-    title: "txniOS Old", 
+    title: "txniOS", 
     description: "", // Will be populated from translations
     githubUrl: "https://github.com/txnioh/portfolio-txnio",
     demoUrl: "https://os.txnio.com",

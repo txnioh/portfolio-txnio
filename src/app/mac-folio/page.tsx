@@ -35,7 +35,7 @@ const MacFolioPage = () => {
         'Settings': t('windows.settings'),
         'Snake Game': t('windows.snakeGame'),
         'Home': t('windows.home'),
-        'txniOS Old': t('windows.oldTxniOS'),
+        'txniOS': t('windows.oldTxniOS'),
         // English to Spanish mappings
         'About Me': t('windows.aboutMe'),
         'Projects': t('windows.projects'),
@@ -156,7 +156,15 @@ const MacFolioPage = () => {
   };
 
   const setWallpaper = (wallpaper: string) => {
-    setCurrentWallpaper(wallpaper);
+    // If wallpaper already includes path, use it directly, otherwise construct the path
+    if (wallpaper.startsWith('/')) {
+      setCurrentWallpaper(wallpaper);
+    } else {
+      const wallpaperPath = wallpaper === 'wallpaper-txnios-old' 
+        ? `/${wallpaper}.jpg` 
+        : `/${wallpaper}-day.jpg`;
+      setCurrentWallpaper(wallpaperPath);
+    }
   };
 
   if (loading) {

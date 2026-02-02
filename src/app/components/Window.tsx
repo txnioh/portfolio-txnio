@@ -263,7 +263,7 @@ const Window: React.FC<WindowProps> = ({
       return <SettingsContent currentWallpaper={currentWallpaper} setWallpaper={setWallpaper} />;
     } else if (id === snakeGameKey || id === 'Snake Game') {
       return isOpen ? <SnakeGame /> : null;
-    } else if (id === oldTxniOSKey || id === 'txniOS Old') {
+    } else if (id === oldTxniOSKey || id === 'txniOS') {
       return windowProp.url ? <IframeContent url={windowProp.url} /> : null;
     } else {
       return <div>{t('common.unavailableContent')}</div>;

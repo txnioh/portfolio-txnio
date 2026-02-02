@@ -115,7 +115,7 @@ const Dock: React.FC<DockProps> = ({ windows, toggleWindow, isMobile }) => {
       return t('windows.snakeGame');
     } else if (windowId === homeKey || windowId === 'Home') {
       return t('windows.home');
-    } else if (windowId === oldTxniOSKey || windowId === 'txniOS Old') {
+    } else if (windowId === oldTxniOSKey || windowId === 'txniOS') {
       return t('windows.oldTxniOS');
     }
     return windowId; // Fallback to original ID

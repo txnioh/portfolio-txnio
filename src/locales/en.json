@@ -21,7 +21,7 @@
         "settings": "Settings",
         "snakeGame": "Snake Game",
         "home": "Home",
-        "oldTxniOS": "txniOS Old"
+        "oldTxniOS": "txniOS"
     },
     "aboutMe": {
         "fileName": "aboutTxnio.ts",
@@ -155,7 +155,7 @@
         }
     },
     "projectDescriptions": {
-        "txniOS Old": "Interactive simulation of Mac OS 7 with functional windows and classic system aesthetics.",
+        "txniOS": "Interactive simulation of Mac OS 7 with functional windows and classic system aesthetics.",
         "Cubes": "An interactive visual experience with 3D cubes using Three.js and React Three Fiber.",
         "Minder": "An application to upload images, comments and projects using Firebase, React, TypeScript, Next.js and Google authentication.",
         "Second Portfolio": "A portfolio inspired by the work of Yihui Hu, with a sticker-type design.",

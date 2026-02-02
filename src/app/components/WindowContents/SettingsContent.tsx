@@ -208,7 +208,7 @@ const SettingsContent: React.FC<SettingsContentProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [loadedWallpapers, setLoadedWallpapers] = useState<{ [key: string]: boolean }>({});
 
-  const wallpapers = ['wallpaper1', 'wallpaper2', 'wallpaper3'];
+  const wallpapers = ['wallpaper1', 'wallpaper2', 'wallpaper3', 'wallpaper-txnios-old'];
 
   const handleImageLoad = (wallpaper: string) => {
     setLoadedWallpapers(prev => ({
@@ -230,12 +230,12 @@ const SettingsContent: React.FC<SettingsContentProps> = ({
                   onClick={() => setWallpaper(wallpaper)}
                 >
                   <WallpaperImage
-                    src={`/${wallpaper}-day.jpg`}
+                    src={wallpaper === 'wallpaper-txnios-old' ? `/${wallpaper}.jpg` : `/${wallpaper}-day.jpg`}
                     alt={`Wallpaper ${wallpaper}`}
                     isLoaded={!!loadedWallpapers[wallpaper]}
                     onLoad={() => handleImageLoad(wallpaper)}
                   />
-                  <WallpaperOverlay isSelected={currentWallpaper === wallpaper} />
+                  <WallpaperOverlay isSelected={currentWallpaper === `/${wallpaper === 'wallpaper-txnios-old' ? wallpaper + '.jpg' : wallpaper + '-day.jpg'}`} />
                 </WallpaperWrapper>
               ))}
             </WallpaperGrid>
