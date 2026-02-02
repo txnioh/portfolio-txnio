@@ -120,7 +120,7 @@ export default function Home() {
         'common.github': 'GitHub',
         'common.comingSoon': 'Coming Soon!',
         'landing.title': 'a FULL STACK DEVELOPER',
-        'landing.subtitle': 'CURRENTLY IN'
+        'landing.subtitle': 'IN'
       };
       return fallbacks[key] || key;
     }
@@ -151,13 +151,6 @@ export default function Home() {
     title: '',
     subtitle: '',
     company: ''
-  });
-  const [originalText] = useState({
-    name: 'ANTONIO GONZALEZ',
-    nickname: '(TXNIO)',
-    title: 'a FULL STACK DEVELOPER',
-    subtitle: 'CURRENTLY IN',
-    company: 'CEMOSA'
   });
 
   // Random font and emoji assignments for this session
@@ -281,11 +274,11 @@ export default function Home() {
 
     // Generate initial matrix text
     setMatrixText({
-      name: generateRandomChars(originalText.name.length),
-      nickname: generateRandomChars(originalText.nickname.length),
-      title: generateRandomChars(originalText.title.length),
-      subtitle: generateRandomChars(originalText.subtitle.length),
-      company: generateRandomChars(originalText.company.length)
+      name: generateRandomChars('ANTONIO GONZALEZ'.length),
+      nickname: generateRandomChars('(TXNIO)'.length),
+      title: generateRandomChars(safeT('landing.title').length),
+      subtitle: generateRandomChars(safeT('landing.subtitle').length),
+      company: generateRandomChars('CEMOSA'.length)
     });
 
     // Matrix animation loop
@@ -296,11 +289,11 @@ export default function Home() {
 
       // Update matrix text with new random characters
       setMatrixText({
-        name: generateRandomChars(originalText.name.length),
-        nickname: generateRandomChars(originalText.nickname.length),
-        title: generateRandomChars(originalText.title.length),
-        subtitle: generateRandomChars(originalText.subtitle.length),
-        company: generateRandomChars(originalText.company.length)
+        name: generateRandomChars('ANTONIO GONZALEZ'.length),
+        nickname: generateRandomChars('(TXNIO)'.length),
+        title: generateRandomChars(safeT('landing.title').length),
+        subtitle: generateRandomChars(safeT('landing.subtitle').length),
+        company: generateRandomChars('CEMOSA'.length)
       });
 
       // Stop animation after 300ms
@@ -609,11 +602,11 @@ export default function Home() {
                   <div className="space-y-1 cursor-pointer" onClick={handleTextBlockClick}>
                     <h1 className={`text-2xl md:text-4xl font-bold ${randomFonts.name} hover:opacity-80 transition-opacity relative z-10`} style={{ color: '#edeced' }}>
                       <EmojiRenderer emoji={randomEmojis.name} />
-                      {isAnimatingText ? matrixText.name : originalText.name}
+                      {isAnimatingText ? matrixText.name : 'ANTONIO GONZALEZ'}
                     </h1>
                     <h2 className={`text-xl md:text-2xl ${randomFonts.nickname} hover:opacity-80 transition-opacity relative z-0`} style={{ color: '#edeced' }}>
                       <EmojiRenderer emoji={randomEmojis.nickname} />
-                      {isAnimatingText ? matrixText.nickname : originalText.nickname}
+                      {isAnimatingText ? matrixText.nickname : '(TXNIO)'}
                     </h2>
                     <h3 className={`text-lg md:text-xl ${randomFonts.title} hover:opacity-80 transition-opacity relative z-10`} style={{ color: '#edeced', opacity: 0.9 }}>
                       <EmojiRenderer emoji={randomEmojis.title} />
@@ -625,7 +618,7 @@ export default function Home() {
                     </h4>
                     <h5 className={`text-xl md:text-2xl ${randomFonts.company} font-bold hover:opacity-80 transition-opacity relative z-0`} style={{ color: '#edeced' }}>
                       <EmojiRenderer emoji={randomEmojis.company} />
-                      {isAnimatingText ? matrixText.company : originalText.company}
+                      {isAnimatingText ? matrixText.company : 'CEMOSA'}
                     </h5>
                   </div>
                   <FollowingFace isVisible={showFollowingFace} />
