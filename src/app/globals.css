@@ -2,6 +2,36 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --portfolio-bg: #121212;
+  --portfolio-text: #edeced;
+  --portfolio-text-muted: rgba(237, 236, 237, 0.8);
+  --portfolio-overlay: #121212;
+  --portfolio-close-bg: #000000;
+  --portfolio-close-text: #ffffff;
+  --portfolio-link-grad-start: #edeced;
+  --portfolio-link-grad-mid-soft: #90ee90;
+  --portfolio-link-grad-mid-strong: #32cd32;
+  --portfolio-toggle-bg: rgba(237, 236, 237, 0.08);
+  --portfolio-toggle-bg-hover: rgba(237, 236, 237, 0.16);
+  --portfolio-toggle-border: rgba(237, 236, 237, 0.25);
+}
+
+html[data-theme='light'] {
+  --portfolio-bg: #f7f7f5;
+  --portfolio-text: #1d1d1f;
+  --portfolio-text-muted: rgba(29, 29, 31, 0.75);
+  --portfolio-overlay: #f7f7f5;
+  --portfolio-close-bg: #ffffff;
+  --portfolio-close-text: #1d1d1f;
+  --portfolio-link-grad-start: #1d1d1f;
+  --portfolio-link-grad-mid-soft: #6fb86b;
+  --portfolio-link-grad-mid-strong: #2f8f2f;
+  --portfolio-toggle-bg: rgba(29, 29, 31, 0.08);
+  --portfolio-toggle-bg-hover: rgba(29, 29, 31, 0.16);
+  --portfolio-toggle-border: rgba(29, 29, 31, 0.22);
+}
+
 @font-face {
   font-family: 'ChicagoKare';
   src: url('/fonts/ChicagoKare-Regular.woff') format('woff');
@@ -45,6 +75,34 @@
 html, body {
   height: 100%;
   overflow: visible;
+  background-color: var(--portfolio-bg);
+  color: var(--portfolio-text);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.portfolio-theme-surface {
+  background-color: var(--portfolio-bg);
+  color: var(--portfolio-text);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.portfolio-theme-text {
+  color: var(--portfolio-text);
+}
+
+.portfolio-theme-text-muted {
+  color: var(--portfolio-text-muted);
+}
+
+.theme-toggle-button {
+  border: 1px solid var(--portfolio-toggle-border);
+  background-color: var(--portfolio-toggle-bg);
+  color: var(--portfolio-text);
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.theme-toggle-button:hover {
+  background-color: var(--portfolio-toggle-bg-hover);
 }
 
 .font-chicago {

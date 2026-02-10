@@ -4,6 +4,10 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Github, Linkedin, ArrowUpRight } from 'lucide-react';
 import '../../i18n/config';
+import ThemeToggle from '../components/ThemeToggle';
+import ThemeMotionContainer from '../components/ThemeMotionContainer';
+import { usePortfolioTheme } from '../hooks/usePortfolioTheme';
+import { useThemePixelWave } from '../hooks/useThemePixelWave';
 
 interface BlogPost {
   slug: string;
@@ -34,6 +38,11 @@ const getRandomFont = () => {
 
 const BlogPage = () => {
   const { t, i18n } = useTranslation();
+  const { theme, setTheme } = usePortfolioTheme();
+  const { canvasRef: themeWaveCanvasRef, triggerWaveToggle } = useThemePixelWave({
+    theme,
+    setTheme,
+  });
   const [randomFont, setRandomFont] = useState('font-pixel');
 
   useEffect(() => {
@@ -56,17 +65,18 @@ const BlogPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col" style={{ backgroundColor: '#121212' }}>
+    <ThemeMotionContainer theme={theme} className="min-h-screen flex flex-col portfolio-theme-surface">
+      <canvas ref={themeWaveCanvasRef} className="fixed inset-0 z-[70] pointer-events-none" aria-hidden="true" />
       {/* Header - alineado con proyectos (más espacio y centrado) */}
       <div className="shrink-0 text-center py-10 md:py-14 px-6 max-w-2xl mx-auto">
         <h1
           className={`text-3xl md:text-4xl lg:text-5xl font-bold ${randomFont} cursor-pointer hover:opacity-80 transition-opacity`}
-          style={{ color: '#edeced' }}
+          style={{ color: 'var(--portfolio-text)' }}
           onClick={handleTitleClick}
         >
           {t('blog.title')}
         </h1>
-        <p className="text-base md:text-lg lg:text-xl font-pixel mt-3 md:mt-4" style={{ color: '#edeced', opacity: 0.8 }}>
+        <p className="text-base md:text-lg lg:text-xl font-pixel mt-3 md:mt-4" style={{ color: 'var(--portfolio-text-muted)' }}>
           {t('blog.subtitle')}
         </p>
       </div>
@@ -77,12 +87,12 @@ const BlogPage = () => {
           <article
             key={post.slug}
             className="font-pixel"
-            style={{ color: '#edeced' }}
+            style={{ color: 'var(--portfolio-text)' }}
           >
-            <h2 className="text-xl md:text-2xl font-bold mb-2" style={{ color: '#edeced' }}>
+            <h2 className="text-xl md:text-2xl font-bold mb-2" style={{ color: 'var(--portfolio-text)' }}>
               {t('blog.welcomeEntry')}
             </h2>
-            <p className="text-sm opacity-80 mb-4" style={{ color: '#edeced', opacity: 0.8 }}>
+            <p className="text-sm opacity-80 mb-4" style={{ color: 'var(--portfolio-text-muted)' }}>
               {post.date}
             </p>
             <p className="text-base md:text-lg">{post.content}</p>
@@ -92,25 +102,25 @@ const BlogPage = () => {
 
       {/* Footer Links - mismo orden y estilo que proyectos */}
       <div className="shrink-0 mt-auto py-4 text-center px-4">
-        <div className={`flex items-center justify-between md:justify-center md:space-x-8 text-xs md:text-sm font-pixel`} style={{ color: '#edeced' }}>
+        <div className={`flex items-center justify-between md:justify-center md:space-x-8 text-xs md:text-sm font-pixel`} style={{ color: 'var(--portfolio-text)' }}>
           <a
             href="/blog"
             className="hover:opacity-80 transition-opacity min-h-[44px] flex items-center justify-center"
-            style={{ color: '#edeced' }}
+            style={{ color: 'var(--portfolio-text)' }}
           >
             {t('common.blog')}
           </a>
           <a
             href="/"
             className="hover:opacity-80 transition-opacity min-h-[44px] flex items-center justify-center"
-            style={{ color: '#edeced' }}
+            style={{ color: 'var(--portfolio-text)' }}
           >
             {t('common.home')}
           </a>
           <a
             href="/projects"
             className="hover:opacity-80 transition-opacity min-h-[44px] flex items-center justify-center"
-            style={{ color: '#edeced' }}
+            style={{ color: 'var(--portfolio-text)' }}
           >
             {t('common.projects')}
           </a>
@@ -119,7 +129,7 @@ const BlogPage = () => {
             target="_blank"
             rel="noopener noreferrer"
             className="hover:opacity-80 transition-opacity min-h-[44px] flex items-center justify-center gap-1"
-            style={{ color: '#edeced' }}
+            style={{ color: 'var(--portfolio-text)' }}
             title="txniOS"
           >
             {t('common.txniOS')}
@@ -130,7 +140,7 @@ const BlogPage = () => {
             target="_blank"
             rel="noopener noreferrer"
             className="hover:opacity-80 transition-opacity min-h-[44px] flex items-center justify-center"
-            style={{ color: '#edeced' }}
+            style={{ color: 'var(--portfolio-text)' }}
             title="LinkedIn"
           >
             <Linkedin size={16} className="md:hidden" />
@@ -141,15 +151,23 @@ const BlogPage = () => {
             target="_blank"
             rel="noopener noreferrer"
             className="hover:opacity-80 transition-opacity min-h-[44px] flex items-center justify-center"
-            style={{ color: '#edeced' }}
+            style={{ color: 'var(--portfolio-text)' }}
             title="GitHub"
           >
             <Github size={16} className="md:hidden" />
             <span className="hidden md:inline">{t('common.github')}</span>
           </a>
+          <ThemeToggle
+            theme={theme}
+            onToggle={triggerWaveToggle}
+            labelForLightMode={t('common.lightMode')}
+            labelForDarkMode={t('common.darkMode')}
+            iconOnly
+            className="shrink-0"
+          />
         </div>
       </div>
-    </div>
+    </ThemeMotionContainer>
   );
 };
 

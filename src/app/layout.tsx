@@ -33,7 +33,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" data-theme="dark">
       <head>
         <link rel="preload" href="/fonts/ChicagoKare-Regular.woff" as="font" type="font/woff" crossOrigin="anonymous" />
         <link rel="preload" href="/fonts/Renogare-Regular.otf" as="font" type="font/otf" crossOrigin="anonymous" />
@@ -46,7 +46,9 @@ export default function RootLayout({
             height: 100%;
             width: 100%;
             overflow: visible;
-            background-color: black;
+            background-color: var(--portfolio-bg);
+            color: var(--portfolio-text);
+            transition: background-color 0.3s ease, color 0.3s ease;
           }
           #__next {
             height: 100%;
@@ -59,9 +61,21 @@ export default function RootLayout({
         `}</style>
         <script dangerouslySetInnerHTML={{
           __html: `
-            window.onload = function() {
-              document.getElementById('content-wrapper').style.opacity = '1';
-            }
+            (function() {
+              try {
+                var savedTheme = window.localStorage.getItem('portfolio-theme');
+                if (savedTheme === 'light' || savedTheme === 'dark') {
+                  document.documentElement.dataset.theme = savedTheme;
+                }
+              } catch (e) {}
+
+              window.addEventListener('load', function() {
+                var wrapper = document.getElementById('content-wrapper');
+                if (wrapper) {
+                  wrapper.style.opacity = '1';
+                }
+              });
+            })();
           `
         }} />
       </head>

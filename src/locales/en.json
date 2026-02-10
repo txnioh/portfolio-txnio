@@ -12,7 +12,9 @@
         "github": "GitHub",
         "txniOS": "txniOS",
         "comingSoon": "Coming Soon!",
-        "newOSExperience": "New OS experience"
+        "newOSExperience": "Flagship project: txniOS",
+        "lightMode": "Light mode",
+        "darkMode": "Dark mode"
     },
     "windows": {
         "aboutMe": "About Me",

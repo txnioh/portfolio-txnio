@@ -6,8 +6,11 @@ import { useTranslation } from 'react-i18next';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import { Github, Linkedin, ArrowUpRight } from 'lucide-react';
-import Glitter from './components/Glitter';
 import FollowingFace from './components/FollowingFace';
+import ThemeToggle from './components/ThemeToggle';
+import ThemeMotionContainer from './components/ThemeMotionContainer';
+import { usePortfolioTheme } from './hooks/usePortfolioTheme';
+import { useThemePixelWave } from './hooks/useThemePixelWave';
 
 // Available fonts for random selection
 const availableFonts = [
@@ -85,6 +88,11 @@ const generateRandomChars = (length: number) => {
 
 export default function Home() {
   const { t, i18n } = useTranslation();
+  const { theme, setTheme } = usePortfolioTheme();
+  const { canvasRef: themeWaveCanvasRef, triggerWaveToggle } = useThemePixelWave({
+    theme,
+    setTheme,
+  });
 
 
 
@@ -112,13 +120,15 @@ export default function Home() {
     if (!mounted) {
       // Return English fallback during SSR to match server render
       const fallbacks: Record<string, string> = {
-        'common.newOSExperience': 'New OS experience',
+        'common.newOSExperience': 'Flagship project: txniOS',
         'common.blog': 'Blog',
         'common.projects': 'Projects',
         'common.txniOS': 'txniOS',
         'common.linkedin': 'LinkedIn',
         'common.github': 'GitHub',
         'common.comingSoon': 'Coming Soon!',
+        'common.lightMode': 'Light mode',
+        'common.darkMode': 'Dark mode',
         'landing.title': 'a FULL STACK DEVELOPER',
         'landing.subtitle': 'IN'
       };
@@ -131,12 +141,11 @@ export default function Home() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const holesRef = useRef<{ x: number; y: number; timestamp: number }[]>([]);
   const animationFrameId = useRef<number>();
-  const linkRef = useRef<HTMLButtonElement>(null);
+  const overlayColorRef = useRef('#121212');
   const radiusRef = useRef(0);
   const maxRadiusRef = useRef(0);
 
   const [hasInteracted, setHasInteracted] = useState(false);
-  const [isHoveringLink, setIsHoveringLink] = useState(false);
   const [revealOrigin, setRevealOrigin] = useState<{ x: number, y: number } | null>(null);
   const [isRevealing, setIsRevealing] = useState(false);
   const [isClicking, setIsClicking] = useState(false);
@@ -164,25 +173,6 @@ export default function Home() {
       company: fonts[4]
     };
   });
-
-  const [buttonPosition, setButtonPosition] = useState<{ x: number, y: number, width: number, height: number } | null>(null);
-
-  useEffect(() => {
-    const updatePosition = () => {
-      if (linkRef.current) {
-        const rect = linkRef.current.getBoundingClientRect();
-        setButtonPosition({
-          x: rect.left,
-          y: rect.top,
-          width: rect.width,
-          height: rect.height
-        });
-      }
-    }
-    updatePosition();
-    window.addEventListener('resize', updatePosition);
-    return () => window.removeEventListener('resize', updatePosition);
-  }, []);
 
   const [randomEmojis, setRandomEmojis] = useState({
     name: '',
@@ -249,7 +239,7 @@ export default function Home() {
     // Only add holes after first interaction
     if (!hasInteracted) return;
     // Prevent single pixel effect during full reveal/hide animation
-    if (isHoveringLink || radiusRef.current > 0) return;
+    if (radiusRef.current > 0) return;
 
     // Exclude top and bottom areas where buttons and links are
     const topExclusionZone = 100; // Top area height
@@ -264,7 +254,7 @@ export default function Home() {
       y: clientY,
       timestamp: Date.now(),
     });
-  }, [hasInteracted, isHoveringLink]);
+  }, [hasInteracted]);
 
 
 
@@ -341,6 +331,16 @@ export default function Home() {
     handleTextClick();
     handleFaceToggle(e);
   };
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const computedStyles = window.getComputedStyle(document.documentElement);
+    const overlayColor = computedStyles.getPropertyValue('--portfolio-overlay').trim();
+    if (overlayColor) {
+      overlayColorRef.current = overlayColor;
+    }
+  }, [theme]);
 
   useEffect(() => {
     const pixelSize = 70;
@@ -435,7 +435,7 @@ export default function Home() {
           radiusRef.current = Math.max(radiusRef.current - revealSpeed, 0);
         }
 
-        ctx.fillStyle = '#121212';
+        ctx.fillStyle = overlayColorRef.current;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
         const gridCols = Math.ceil(canvas.width / pixelSize);
@@ -466,7 +466,7 @@ export default function Home() {
         );
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = '#121212';
+        ctx.fillStyle = overlayColorRef.current;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
         if (hasInteracted) {
@@ -518,10 +518,32 @@ export default function Home() {
   }, [isRevealing, revealOrigin, hasInteracted, isClicking, addHole]);
 
   // i18n now provides translations
+  const handleCloseExperience = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (!isInteracting) return;
+
+    // Prevent accidental immediate re-open from the same click event.
+    setIsClicking(true);
+    setIsInteracting(false);
+    setIsRevealing(false);
+
+    // Keep origin/radius so the reverse pixel animation can play naturally.
+    if (radiusRef.current <= 0 && maxRadiusRef.current > 0) {
+      radiusRef.current = maxRadiusRef.current;
+    }
+
+    window.setTimeout(() => setIsClicking(false), 260);
+  };
 
   return (
-    <div className="min-h-screen relative" onMouseMove={() => !hasInteracted && setHasInteracted(true)}>
-      <Glitter buttonPosition={buttonPosition} isInteracting={isHoveringLink} isRevealing={isRevealing} />
+    <ThemeMotionContainer
+      theme={theme}
+      className="min-h-screen relative portfolio-theme-surface"
+      onMouseMove={() => !hasInteracted && setHasInteracted(true)}
+    >
+      <canvas ref={themeWaveCanvasRef} className="fixed inset-0 z-[70] pointer-events-none" aria-hidden="true" />
       {/* Background iframe */}
       <iframe
         src="https://os.txnio.com"
@@ -549,9 +571,6 @@ export default function Home() {
             {/* Top Link */}
             <div className="relative text-center py-4 md:py-6 px-4">
               <button
-                ref={linkRef}
-                onMouseEnter={() => setIsHoveringLink(true)}
-                onMouseLeave={() => setIsHoveringLink(false)}
                 onClick={(e) => {
                   if (!isRevealing && !isClicking && !isInteracting) {
                     setIsClicking(true);
@@ -576,9 +595,9 @@ export default function Home() {
                     setTimeout(() => setIsClicking(false), 1000);
                   }
                 }}
-                className="hover:opacity-80 transition-all duration-300 ease-in-out cursor-pointer font-pixel text-sm md:text-lg shimmer-green px-4 py-2 rounded-lg"
+                className="transition-all duration-300 ease-in-out cursor-pointer font-pixel text-sm md:text-lg shimmer-green px-4 py-2 rounded-lg"
                 style={{
-                  background: 'linear-gradient(90deg, #edeced 0%, #90EE90 25%, #32CD32 50%, #90EE90 75%, #edeced 100%)',
+                  background: 'linear-gradient(90deg, var(--portfolio-link-grad-start) 0%, var(--portfolio-link-grad-mid-soft) 25%, var(--portfolio-link-grad-mid-strong) 50%, var(--portfolio-link-grad-mid-soft) 75%, var(--portfolio-link-grad-start) 100%)',
                   backgroundSize: '200% 100%',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
@@ -600,23 +619,23 @@ export default function Home() {
               <div className="text-center max-w-lg mx-auto">
                 <div className="relative" style={{ minHeight: 'fit-content' }}>
                   <div className="space-y-1 cursor-pointer" onClick={handleTextBlockClick}>
-                    <h1 className={`text-2xl md:text-4xl font-bold ${randomFonts.name} hover:opacity-80 transition-opacity relative z-10`} style={{ color: '#edeced' }}>
+                    <h1 className={`text-2xl md:text-4xl font-bold ${randomFonts.name} hover:opacity-80 transition-opacity relative z-10`} style={{ color: 'var(--portfolio-text)' }}>
                       <EmojiRenderer emoji={randomEmojis.name} />
                       {isAnimatingText ? matrixText.name : 'ANTONIO GONZALEZ'}
                     </h1>
-                    <h2 className={`text-xl md:text-2xl ${randomFonts.nickname} hover:opacity-80 transition-opacity relative z-0`} style={{ color: '#edeced' }}>
+                    <h2 className={`text-xl md:text-2xl ${randomFonts.nickname} hover:opacity-80 transition-opacity relative z-0`} style={{ color: 'var(--portfolio-text)' }}>
                       <EmojiRenderer emoji={randomEmojis.nickname} />
                       {isAnimatingText ? matrixText.nickname : '(TXNIO)'}
                     </h2>
-                    <h3 className={`text-lg md:text-xl ${randomFonts.title} hover:opacity-80 transition-opacity relative z-10`} style={{ color: '#edeced', opacity: 0.9 }}>
+                    <h3 className={`text-lg md:text-xl ${randomFonts.title} hover:opacity-80 transition-opacity relative z-10`} style={{ color: 'var(--portfolio-text)', opacity: 0.9 }}>
                       <EmojiRenderer emoji={randomEmojis.title} />
                       {safeT('landing.title')}
                     </h3>
-                    <h4 className={`text-base md:text-lg ${randomFonts.subtitle} hover:opacity-80 transition-opacity relative z-0`} style={{ color: '#edeced', opacity: 0.8 }}>
+                    <h4 className={`text-base md:text-lg ${randomFonts.subtitle} hover:opacity-80 transition-opacity relative z-0`} style={{ color: 'var(--portfolio-text)', opacity: 0.8 }}>
                       <EmojiRenderer emoji={randomEmojis.subtitle} />
                       {safeT('landing.subtitle')}
                     </h4>
-                    <h5 className={`text-xl md:text-2xl ${randomFonts.company} font-bold hover:opacity-80 transition-opacity relative z-0`} style={{ color: '#edeced' }}>
+                    <h5 className={`text-xl md:text-2xl ${randomFonts.company} font-bold hover:opacity-80 transition-opacity relative z-0`} style={{ color: 'var(--portfolio-text)' }}>
                       <EmojiRenderer emoji={randomEmojis.company} />
                       {isAnimatingText ? matrixText.company : 'CEMOSA'}
                     </h5>
@@ -633,14 +652,14 @@ export default function Home() {
                 <a
                   href="/blog"
                   className="hover:opacity-80 transition-opacity min-h-[44px] flex items-center justify-center"
-                  style={{ color: '#edeced' }}
+                  style={{ color: 'var(--portfolio-text)' }}
                 >
                   {safeT('common.blog')}
                 </a>
                 <a
                   href="/projects"
                   className="hover:opacity-80 transition-opacity min-h-[44px] flex items-center justify-center"
-                  style={{ color: '#edeced' }}
+                  style={{ color: 'var(--portfolio-text)' }}
                 >
                   {safeT('common.projects')}
                 </a>
@@ -649,7 +668,7 @@ export default function Home() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="hover:opacity-80 transition-opacity min-h-[44px] flex items-center justify-center gap-1"
-                  style={{ color: '#edeced' }}
+                  style={{ color: 'var(--portfolio-text)' }}
                   title="txniOS"
                 >
                   {safeT('common.txniOS')}
@@ -660,7 +679,7 @@ export default function Home() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="hover:opacity-80 transition-opacity min-h-[44px] flex items-center justify-center"
-                  style={{ color: '#edeced' }}
+                  style={{ color: 'var(--portfolio-text)' }}
                   title="LinkedIn"
                 >
                   <Linkedin size={16} className="md:hidden" />
@@ -673,7 +692,7 @@ export default function Home() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="hover:opacity-80 transition-opacity min-h-[44px] flex items-center justify-center"
-                  style={{ color: '#edeced' }}
+                  style={{ color: 'var(--portfolio-text)' }}
                   title="GitHub"
                 >
                   <Github size={16} className="md:hidden" />
@@ -681,6 +700,14 @@ export default function Home() {
                     {safeT('common.github')}
                   </span>
                 </a>
+                <ThemeToggle
+                  theme={theme}
+                  onToggle={triggerWaveToggle}
+                  labelForLightMode={safeT('common.lightMode')}
+                  labelForDarkMode={safeT('common.darkMode')}
+                  iconOnly
+                  className="shrink-0"
+                />
               </div>
             </div>
           </div>
@@ -689,15 +716,11 @@ export default function Home() {
 
       {/* Close Button - Always present but with visibility control */}
       <button
-        onClick={() => {
-          setIsInteracting(false);
-          setIsHoveringLink(false);
-          setIsRevealing(false);
-        }}
+        onClick={handleCloseExperience}
         className="fixed top-0 left-1/2 transform -translate-x-1/2 z-30 px-20 py-1 rounded-b-xl text-sm transition-all duration-300 ease-in-out font-pixel hover:opacity-90"
         style={{
-          backgroundColor: '#000000',
-          color: '#ffffff',
+          backgroundColor: 'var(--portfolio-close-bg)',
+          color: 'var(--portfolio-close-text)',
           opacity: isInteracting ? 1 : 0,
           transform: isInteracting ? 'translate(-50%, 0)' : 'translate(-50%, -20px)',
           pointerEvents: isInteracting ? 'auto' : 'none'
@@ -705,6 +728,6 @@ export default function Home() {
       >
         X
       </button>
-    </div>
+    </ThemeMotionContainer>
   );
 }
