@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { Inter } from 'next/font/google';
 import PageTransition from "./components/PageTransition";
+import { GlobalAudioPlayerProvider } from "./components/GlobalAudioPlayer";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -82,9 +83,11 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased ${inter.className}`}
       >
-        <div id="content-wrapper">
-          <PageTransition>{children}</PageTransition>
-        </div>
+        <GlobalAudioPlayerProvider>
+          <div id="content-wrapper">
+            <PageTransition>{children}</PageTransition>
+          </div>
+        </GlobalAudioPlayerProvider>
       </body>
     </html>
   );

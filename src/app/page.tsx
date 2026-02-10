@@ -5,8 +5,10 @@ import { useTranslation } from 'react-i18next';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { Github, Linkedin, ArrowUpRight } from 'lucide-react';
 import FollowingFace from './components/FollowingFace';
+import GlobalVinylControl from './components/GlobalVinylControl';
 import ThemeToggle from './components/ThemeToggle';
 import ThemeMotionContainer from './components/ThemeMotionContainer';
 import { usePortfolioTheme } from './hooks/usePortfolioTheme';
@@ -566,6 +568,7 @@ export default function Home() {
             className="relative z-20 min-h-screen flex flex-col pointer-events-auto transition-opacity duration-300"
             style={{ opacity: isRevealing ? 0 : 1 }}
           >
+            <GlobalVinylControl />
 
 
             {/* Top Link */}
@@ -649,20 +652,20 @@ export default function Home() {
             {/* Footer Links */}
             <div className="py-4 text-center px-4">
               <div className={`flex items-center justify-between md:justify-center md:space-x-8 text-xs md:text-sm ${randomFonts.subtitle}`}>
-                <a
+                <Link
                   href="/blog"
                   className="hover:opacity-80 transition-opacity min-h-[44px] flex items-center justify-center"
                   style={{ color: 'var(--portfolio-text)' }}
                 >
                   {safeT('common.blog')}
-                </a>
-                <a
+                </Link>
+                <Link
                   href="/projects"
                   className="hover:opacity-80 transition-opacity min-h-[44px] flex items-center justify-center"
                   style={{ color: 'var(--portfolio-text)' }}
                 >
                   {safeT('common.projects')}
-                </a>
+                </Link>
                 <a
                   href="https://os.txnio.com"
                   target="_blank"

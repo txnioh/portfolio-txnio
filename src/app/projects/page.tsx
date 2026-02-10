@@ -2,12 +2,14 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { Github, Linkedin, ArrowUpRight } from 'lucide-react';
 import '../../i18n/config';
 import ThemeToggle from '../components/ThemeToggle';
 import ThemeMotionContainer from '../components/ThemeMotionContainer';
+import GlobalVinylControl from '../components/GlobalVinylControl';
 import { usePortfolioTheme } from '../hooks/usePortfolioTheme';
 import { useThemePixelWave } from '../hooks/useThemePixelWave';
 
@@ -158,6 +160,7 @@ const ProjectsPage = () => {
   return (
     <ThemeMotionContainer theme={theme} className="min-h-screen flex flex-col portfolio-theme-surface">
       <canvas ref={themeWaveCanvasRef} className="fixed inset-0 z-[70] pointer-events-none" aria-hidden="true" />
+      <GlobalVinylControl />
       {/* Header - no encoger, más espacio y centrado */}
       <div className="shrink-0 text-center py-10 md:py-14 px-6 max-w-2xl mx-auto">
         <h1
@@ -271,27 +274,27 @@ const ProjectsPage = () => {
       {/* Footer Links - mismo estilo que la página principal */}
       <div className="shrink-0 mt-auto py-4 text-center px-4">
         <div className={`flex items-center justify-between md:justify-center md:space-x-8 text-xs md:text-sm font-pixel`} style={{ color: 'var(--portfolio-text)' }}>
-          <a
+          <Link
             href="/blog"
             className="hover:opacity-80 transition-opacity min-h-[44px] flex items-center justify-center"
             style={{ color: 'var(--portfolio-text)' }}
           >
             {t('common.blog')}
-          </a>
-          <a
+          </Link>
+          <Link
             href="/"
             className="hover:opacity-80 transition-opacity min-h-[44px] flex items-center justify-center"
             style={{ color: 'var(--portfolio-text)' }}
           >
             {t('common.home')}
-          </a>
-          <a
+          </Link>
+          <Link
             href="/projects"
             className="hover:opacity-80 transition-opacity min-h-[44px] flex items-center justify-center"
             style={{ color: 'var(--portfolio-text)' }}
           >
             {t('common.projects')}
-          </a>
+          </Link>
           <a
             href="https://os.txnio.com"
             target="_blank"
