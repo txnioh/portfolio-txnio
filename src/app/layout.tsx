@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import "./tailwind.css";
 import "./globals.css";
 import { Inter } from 'next/font/google';
 import PageTransition from "./components/PageTransition";

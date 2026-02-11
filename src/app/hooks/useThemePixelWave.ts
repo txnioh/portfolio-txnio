@@ -22,7 +22,7 @@ interface UseThemePixelWaveParams {
 }
 
 interface UseThemePixelWaveResult {
-  canvasRef: RefObject<HTMLCanvasElement>;
+  canvasRef: RefObject<HTMLCanvasElement | null>;
   isAnimating: boolean;
   triggerWaveToggle: (origin: ThemeWaveOrigin) => void;
 }
@@ -47,7 +47,7 @@ export const useThemePixelWave = ({
   setTheme,
 }: UseThemePixelWaveParams): UseThemePixelWaveResult => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const animationFrameRef = useRef<number>();
+  const animationFrameRef = useRef<number | null>(null);
   const waveStateRef = useRef<ThemeWaveState | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
 
@@ -140,7 +140,7 @@ export const useThemePixelWave = ({
     window.addEventListener('resize', resizeCanvas);
 
     return () => {
-      if (animationFrameRef.current) {
+      if (animationFrameRef.current !== null) {
         cancelAnimationFrame(animationFrameRef.current);
       }
       window.removeEventListener('resize', resizeCanvas);

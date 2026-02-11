@@ -142,7 +142,7 @@ export default function Home() {
   const [isInteracting, setIsInteracting] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const holesRef = useRef<{ x: number; y: number; timestamp: number }[]>([]);
-  const animationFrameId = useRef<number>();
+  const animationFrameId = useRef<number | null>(null);
   const overlayColorRef = useRef('#121212');
   const radiusRef = useRef(0);
   const maxRadiusRef = useRef(0);
