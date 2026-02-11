@@ -24,21 +24,17 @@ const availableFonts = [
 
 // Available emojis for random selection
 const availableEmojis = [
-  '🚀', '💻', '⚡', '🔥', '✨', '🌟', '🌌', '🌊', '🐍', '👨‍💻', '😎', '😇', '🫧', '🪐', '🥶', '👀', '👍', '🤓', '👌', '☀️', '🌙', '🌍'
+  '⚡', '✨', '🌟', '🌌', '🌊', '🐍', '😎', '😇', '🫧', '🪐', '🥶', '👀', '👍', '👌', '☀️', '🌙', '🌍'
 ];
 
 // Emoji to image file mapping for mobile
 const emojiToImageMap: { [key: string]: string } = {
-  '🚀': 'U+1F680.png',
-  '💻': 'U+1F4BB.png',
   '⚡': 'U+26A1.png',
-  '🔥': 'U+1F525.png',
   '✨': 'U+2728.png',
   '🌟': 'U+1F31F.png',
   '🌌': 'U+1F30C.png',
   '🌊': 'U+1F30A.png',
   '🐍': 'U+1F40D.png',
-  '👨‍💻': 'U+1F468_U+200D_U+1F4BB.png',
   '😎': 'U+1F60E.png',
   '😇': 'U+1F607.png',
   '🫧': 'U+1FAE7.png',
@@ -46,7 +42,6 @@ const emojiToImageMap: { [key: string]: string } = {
   '🥶': 'U+1F976.png',
   '👀': 'U+1F440.png',
   '👍': 'U+1F44D.png',
-  '🤓': 'U+1F913.png',
   '👌': 'U+1F44C.png',
   '☀️': 'U+2600_U+FE0F.png',
   '🌙': 'U+1F319.png',
@@ -131,7 +126,7 @@ export default function Home() {
         'common.comingSoon': 'Coming Soon!',
         'common.lightMode': 'Light mode',
         'common.darkMode': 'Dark mode',
-        'landing.title': 'a FULL STACK DEVELOPER',
+        'landing.title': 'a DEVELOPER',
         'landing.subtitle': 'IN'
       };
       return fallbacks[key] || key;
