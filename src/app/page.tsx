@@ -544,6 +544,7 @@ export default function Home() {
       {/* Background iframe */}
       <iframe
         src="https://os.txnio.com"
+        allow="autoplay; encrypted-media"
         className="fixed inset-0 w-full h-full border-0"
         style={{ zIndex: isInteracting ? 25 : 1 }}
         title="txniOS Background"
