@@ -4,5 +4,16 @@
       "source": "/proyecto/(.*)",
       "destination": "https://txnio.com/$1"
     }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Permissions-Policy",
+          "value": "autoplay=(self \"https://os.txnio.com\"), encrypted-media=(self \"https://os.txnio.com\")"
+        }
+      ]
+    }
   ]
-} 
+}
