@@ -716,12 +716,12 @@ export default function Home() {
       {/* Close Button - Always present but with visibility control */}
       <button
         onClick={handleCloseExperience}
-        className="fixed top-0 left-1/2 transform -translate-x-1/2 z-30 px-20 py-1 rounded-b-xl text-sm transition-all duration-300 ease-in-out font-pixel hover:opacity-90"
+        className="fixed top-3 left-1/2 z-30 px-8 py-2 rounded-full text-sm transition-all duration-300 ease-in-out font-pixel hover:opacity-90"
         style={{
           backgroundColor: 'var(--portfolio-close-bg)',
           color: 'var(--portfolio-close-text)',
           opacity: isInteracting ? 1 : 0,
-          transform: isInteracting ? 'translate(-50%, 0)' : 'translate(-50%, -20px)',
+          transform: isInteracting ? 'translate(-50%, 0)' : 'translate(-50%, -60px)',
           pointerEvents: isInteracting ? 'auto' : 'none'
         }}
       >
