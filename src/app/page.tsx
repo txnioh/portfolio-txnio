@@ -325,8 +325,12 @@ export default function Home() {
   };
 
   const handleTextBlockClick = (e: React.MouseEvent) => {
+    const shouldShowFollowingFaceOnTextClick = false;
+
     handleTextClick();
-    handleFaceToggle(e);
+    if (shouldShowFollowingFaceOnTextClick) {
+      handleFaceToggle(e);
+    }
   };
 
   useEffect(() => {
