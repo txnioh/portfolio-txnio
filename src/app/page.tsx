@@ -1,736 +1,123 @@
-'use client'
-
-import '../i18n/config';
-import { useTranslation } from 'react-i18next';
-
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import Image from 'next/image';
+import type { CSSProperties, ReactNode } from 'react';
 import Link from 'next/link';
-import { Github, Linkedin, ArrowUpRight } from 'lucide-react';
-import FollowingFace from './components/FollowingFace';
-import GlobalVinylControl from './components/GlobalVinylControl';
-import ThemeToggle from './components/ThemeToggle';
-import ThemeMotionContainer from './components/ThemeMotionContainer';
-import { usePortfolioTheme } from './hooks/usePortfolioTheme';
-import { useThemePixelWave } from './hooks/useThemePixelWave';
+import FooterRobotMark from './components/FooterRobotMark';
+import LocalTime from './components/LocalTime';
+import ProjectShowcase from './components/ProjectShowcase';
 
-// Available fonts for random selection
-const availableFonts = [
-  'font-chicago',
-  'font-renogare',
-  'font-geneva',
-  'font-pixel',
-];
+function ExternalLink({
+  href,
+  children,
+}: {
+  href: string;
+  children: ReactNode;
+}) {
+  return (
+    <a
+      className="minimal-basic-link"
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      {children}
+    </a>
+  );
+}
 
-// Available emojis for random selection
-const availableEmojis = [
-  '⚡', '✨', '🌟', '🌌', '🌊', '🐍', '😎', '😇', '🫧', '🪐', '🥶', '👀', '👍', '👌', '☀️', '🌙', '🌍'
-];
-
-// Emoji to image file mapping for mobile
-const emojiToImageMap: { [key: string]: string } = {
-  '⚡': 'U+26A1.png',
-  '✨': 'U+2728.png',
-  '🌟': 'U+1F31F.png',
-  '🌌': 'U+1F30C.png',
-  '🌊': 'U+1F30A.png',
-  '🐍': 'U+1F40D.png',
-  '😎': 'U+1F60E.png',
-  '😇': 'U+1F607.png',
-  '🫧': 'U+1FAE7.png',
-  '🪐': 'U+1FA90.png',
-  '🥶': 'U+1F976.png',
-  '👀': 'U+1F440.png',
-  '👍': 'U+1F44D.png',
-  '👌': 'U+1F44C.png',
-  '☀️': 'U+2600_U+FE0F.png',
-  '🌙': 'U+1F319.png',
-  '🌍': 'U+1F30D.png'
-};
-
-// Function to detect mobile devices
-const isMobile = () => {
-  if (typeof window === 'undefined') return false;
-  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
-};
-
-// Matrix characters for animation
-const matrixChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&*()_+-=[]{}|;:,.<>?';
-
-// Function to get multiple random fonts (ensuring variety)
-const getRandomFonts = (count: number) => {
-  const shuffled = [...availableFonts].sort(() => 0.5 - Math.random());
-  // If we need more fonts than available, cycle through them
-  const result = [];
-  for (let i = 0; i < count; i++) {
-    result.push(shuffled[i % shuffled.length]);
-  }
-  return result;
-};
-
-// Function to get multiple random emojis
-const getRandomEmojis = (count: number) => {
-  const shuffled = [...availableEmojis].sort(() => 0.5 - Math.random());
-  return shuffled.slice(0, count);
-};
-
-// Function to generate random matrix characters
-const generateRandomChars = (length: number) => {
-  let result = '';
-  for (let i = 0; i < length; i++) {
-    result += matrixChars.charAt(Math.floor(Math.random() * matrixChars.length));
-  }
-  return result;
-};
+function revealStyle(index: number) {
+  return {
+    '--reveal-index': index,
+  } as CSSProperties;
+}
 
 export default function Home() {
-  const { t, i18n } = useTranslation();
-  const { theme, setTheme } = usePortfolioTheme();
-  const { canvasRef: themeWaveCanvasRef, triggerWaveToggle } = useThemePixelWave({
-    theme,
-    setTheme,
-  });
-
-
-
-
-
-  // Track if component is mounted to prevent hydration mismatch
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-    if (typeof window !== 'undefined') {
-      try {
-        const savedLanguage = window.localStorage.getItem('lng');
-        if (savedLanguage && savedLanguage !== i18n.language) {
-          i18n.changeLanguage(savedLanguage);
-        }
-      } catch { }
-    }
-  }, [i18n]);
-
-
-
-  // Helper function to safely get translations (returns English fallback during SSR)
-  const safeT = (key: string): string => {
-    if (!mounted) {
-      // Return English fallback during SSR to match server render
-      const fallbacks: Record<string, string> = {
-        'common.newOSExperience': 'Flagship project: txniOS',
-        'common.blog': 'Blog',
-        'common.projects': 'Projects',
-        'common.txniOS': 'txniOS',
-        'common.linkedin': 'LinkedIn',
-        'common.github': 'GitHub',
-        'common.comingSoon': 'Coming Soon!',
-        'common.lightMode': 'Light mode',
-        'common.darkMode': 'Dark mode',
-        'landing.title': 'a DEVELOPER',
-        'landing.subtitle': 'IN'
-      };
-      return fallbacks[key] || key;
-    }
-    return t(key);
-  };
-  // Language is handled by i18n configuration
-  const [isInteracting, setIsInteracting] = useState(false);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const holesRef = useRef<{ x: number; y: number; timestamp: number }[]>([]);
-  const animationFrameId = useRef<number | null>(null);
-  const overlayColorRef = useRef('#121212');
-  const radiusRef = useRef(0);
-  const maxRadiusRef = useRef(0);
-
-  const [hasInteracted, setHasInteracted] = useState(false);
-  const [revealOrigin, setRevealOrigin] = useState<{ x: number, y: number } | null>(null);
-  const [isRevealing, setIsRevealing] = useState(false);
-  const [isClicking, setIsClicking] = useState(false);
-  const [isMobileDevice, setIsMobileDevice] = useState(false);
-  const [showFollowingFace, setShowFollowingFace] = useState(false);
-
-  // Matrix animation states
-  const [isAnimatingText, setIsAnimatingText] = useState(false);
-  const [matrixText, setMatrixText] = useState({
-    name: '',
-    nickname: '',
-    title: '',
-    subtitle: '',
-    company: ''
-  });
-
-  // Random font and emoji assignments for this session
-  const [randomFonts, setRandomFonts] = useState(() => {
-    const fonts = getRandomFonts(5); // Get 5 random fonts for different elements (link is always pixel)
-    return {
-      name: fonts[0],
-      nickname: fonts[1],
-      title: fonts[2],
-      subtitle: fonts[3],
-      company: fonts[4]
-    };
-  });
-
-  const [randomEmojis, setRandomEmojis] = useState({
-    name: '',
-    nickname: '',
-    title: '',
-    subtitle: '',
-    company: ''
-  });
-
-  // Generate emojis only on client side to avoid hydration mismatch
-  useEffect(() => {
-    const generateEmojis = () => {
-      const emojiCount = Math.random() < 0.5 ? 1 : 2; // 50% chance for 1 or 2 emojis
-      const emojis = getRandomEmojis(emojiCount);
-      const positions = ['name', 'nickname', 'title', 'subtitle', 'company'];
-      const shuffledPositions = positions.sort(() => 0.5 - Math.random()).slice(0, emojiCount);
-
-      setRandomEmojis({
-        name: shuffledPositions.includes('name') ? emojis[shuffledPositions.indexOf('name')] : '',
-        nickname: shuffledPositions.includes('nickname') ? emojis[shuffledPositions.indexOf('nickname')] : '',
-        title: shuffledPositions.includes('title') ? emojis[shuffledPositions.indexOf('title')] : '',
-        subtitle: shuffledPositions.includes('subtitle') ? emojis[shuffledPositions.indexOf('subtitle')] : '',
-        company: shuffledPositions.includes('company') ? emojis[shuffledPositions.indexOf('company')] : ''
-      });
-    };
-
-    generateEmojis();
-  }, []);
-
-  // Detect mobile device on mount and handle resize
-  useEffect(() => {
-    const checkMobile = () => setIsMobileDevice(isMobile());
-
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-
-  // Component to render emoji (text or image based on device)
-  const EmojiRenderer = ({ emoji }: { emoji: string }) => {
-    const [imageError, setImageError] = useState(false);
-
-    if (!emoji) return null;
-
-    if (isMobileDevice && emojiToImageMap[emoji] && !imageError) {
-      return (
-        <Image
-          src={`/emojis/${emojiToImageMap[emoji]}`}
-          alt={emoji}
-          width={24}
-          height={24}
-          className="inline-block mr-2 emoji-image"
-          style={{ verticalAlign: 'middle' }}
-          onError={() => setImageError(true)}
-        />
-      );
-    }
-
-    return <span className="font-emoji mr-2">{emoji}</span>;
-  };
-
-  const addHole = useCallback((clientX: number, clientY: number) => {
-    // Only add holes after first interaction
-    if (!hasInteracted) return;
-    // Prevent single pixel effect during full reveal/hide animation
-    if (radiusRef.current > 0) return;
-
-    // Exclude top and bottom areas where buttons and links are
-    const topExclusionZone = 100; // Top area height
-    const bottomExclusionZone = 100; // Bottom area height
-
-    if (clientY < topExclusionZone || clientY > window.innerHeight - bottomExclusionZone) {
-      return;
-    }
-
-    holesRef.current.push({
-      x: clientX,
-      y: clientY,
-      timestamp: Date.now(),
-    });
-  }, [hasInteracted]);
-
-
-
-  const handleTextClick = () => {
-    // Start Matrix animation
-    setIsAnimatingText(true);
-
-    // Generate initial matrix text
-    setMatrixText({
-      name: generateRandomChars('ANTONIO GONZALEZ'.length),
-      nickname: generateRandomChars('(TXNIO)'.length),
-      title: generateRandomChars(safeT('landing.title').length),
-      subtitle: generateRandomChars(safeT('landing.subtitle').length),
-      company: generateRandomChars('CEMOSA'.length)
-    });
-
-    // Matrix animation loop
-    let animationCount = 0;
-    const maxAnimations = 2; // 6 frames over 300ms (50ms each)
-    const animationInterval = setInterval(() => {
-      animationCount++;
-
-      // Update matrix text with new random characters
-      setMatrixText({
-        name: generateRandomChars('ANTONIO GONZALEZ'.length),
-        nickname: generateRandomChars('(TXNIO)'.length),
-        title: generateRandomChars(safeT('landing.title').length),
-        subtitle: generateRandomChars(safeT('landing.subtitle').length),
-        company: generateRandomChars('CEMOSA'.length)
-      });
-
-      // Stop animation after 300ms
-      if (animationCount >= maxAnimations) {
-        clearInterval(animationInterval);
-        setIsAnimatingText(false);
-
-        // Generate new random fonts
-        const newFonts = getRandomFonts(5);
-        const newRandomFonts = {
-          name: newFonts[0],
-          nickname: newFonts[1],
-          title: newFonts[2],
-          subtitle: newFonts[3],
-          company: newFonts[4]
-        };
-
-        // Generate new random emojis (1-2 emojis in random positions)
-        const emojiCount = Math.random() < 0.5 ? 1 : 2; // 50% chance for 1 or 2 emojis
-        const newEmojis = getRandomEmojis(emojiCount);
-        const positions = ['name', 'nickname', 'title', 'subtitle', 'company'];
-        const shuffledPositions = positions.sort(() => 0.5 - Math.random()).slice(0, emojiCount);
-
-        const newRandomEmojis = {
-          name: shuffledPositions.includes('name') ? newEmojis[shuffledPositions.indexOf('name')] : '',
-          nickname: shuffledPositions.includes('nickname') ? newEmojis[shuffledPositions.indexOf('nickname')] : '',
-          title: shuffledPositions.includes('title') ? newEmojis[shuffledPositions.indexOf('title')] : '',
-          subtitle: shuffledPositions.includes('subtitle') ? newEmojis[shuffledPositions.indexOf('subtitle')] : '',
-          company: shuffledPositions.includes('company') ? newEmojis[shuffledPositions.indexOf('company')] : ''
-        };
-
-        // Force re-render with new fonts and emojis by updating state
-        setRandomFonts(newRandomFonts);
-        setRandomEmojis(newRandomEmojis);
-      }
-    }, 50); // 50ms interval for smooth animation
-  };
-
-  const handleFaceToggle = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent triggering handleTextClick
-    setShowFollowingFace(prev => !prev);
-  };
-
-  const handleTextBlockClick = (e: React.MouseEvent) => {
-    const shouldShowFollowingFaceOnTextClick = false;
-
-    handleTextClick();
-    if (shouldShowFollowingFaceOnTextClick) {
-      handleFaceToggle(e);
-    }
-  };
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-
-    const computedStyles = window.getComputedStyle(document.documentElement);
-    const overlayColor = computedStyles.getPropertyValue('--portfolio-overlay').trim();
-    if (overlayColor) {
-      overlayColorRef.current = overlayColor;
-    }
-  }, [theme]);
-
-  useEffect(() => {
-    const pixelSize = 70;
-    const holeDuration = 300; // 1 second in ms
-
-    const handleMouseMove = (e: MouseEvent) => {
-      addHole(e.clientX, e.clientY);
-    };
-
-    const handleTouchStart = (e: TouchEvent) => {
-      // Check if touching an interactive element
-      const target = e.target as HTMLElement;
-      const isInteractive = target.closest('a, button, [role="button"]');
-
-      if (isInteractive) {
-        // Don't prevent default for interactive elements
-        return;
-      }
-
-      e.preventDefault();
-      setHasInteracted(true);
-
-      if (e.touches.length > 0) {
-        const touch = e.touches[0];
-        addHole(touch.clientX, touch.clientY);
-      }
-    };
-
-    const handleTouchMove = (e: TouchEvent) => {
-      // Check if touching an interactive element
-      const target = e.target as HTMLElement;
-      const isInteractive = target.closest('a, button, [role="button"]');
-
-      if (isInteractive) {
-        // Don't prevent default for interactive elements
-        return;
-      }
-
-      e.preventDefault();
-
-      if (e.touches.length > 0) {
-        const touch = e.touches[0];
-        addHole(touch.clientX, touch.clientY);
-      }
-    };
-
-    const handleTouchEnd = (e: TouchEvent) => {
-      // Check if touching an interactive element
-      const target = e.target as HTMLElement;
-      const isInteractive = target.closest('a, button, [role="button"]');
-
-      if (isInteractive) {
-        // Don't prevent default for interactive elements
-        return;
-      }
-
-      e.preventDefault();
-    };
-
-    let lastTime = 0;
-    const throttledMouseMove = (e: MouseEvent) => {
-      const now = Date.now();
-      if (now - lastTime >= 16) {
-        handleMouseMove(e);
-        lastTime = now;
-      }
-    };
-
-    document.addEventListener('mousemove', throttledMouseMove);
-    document.addEventListener('touchstart', handleTouchStart, { passive: false });
-    document.addEventListener('touchmove', handleTouchMove, { passive: false });
-    document.addEventListener('touchend', handleTouchEnd, { passive: false });
-
-    const animate = () => {
-      const canvas = canvasRef.current;
-      const ctx = canvas?.getContext('2d');
-
-      if (!canvas || !ctx) {
-        animationFrameId.current = requestAnimationFrame(animate);
-        return;
-      }
-
-      ctx.imageSmoothingEnabled = false;
-      const isAnimatingReveal = isRevealing || radiusRef.current > 0;
-
-      if (isAnimatingReveal && revealOrigin) {
-        const revealSpeed = 25;
-
-        if (isRevealing) {
-          radiusRef.current = Math.min(radiusRef.current + revealSpeed, maxRadiusRef.current);
-        } else {
-          radiusRef.current = Math.max(radiusRef.current - revealSpeed, 0);
-        }
-
-        ctx.fillStyle = overlayColorRef.current;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        const gridCols = Math.ceil(canvas.width / pixelSize);
-        const gridRows = Math.ceil(canvas.height / pixelSize);
-        const startCol = Math.floor(revealOrigin.x / pixelSize);
-        const startRow = Math.floor(revealOrigin.y / pixelSize);
-
-        for (let r = 0; r < gridRows; r++) {
-          for (let c = 0; c < gridCols; c++) {
-            const dist = Math.sqrt(Math.pow(c - startCol, 2) + Math.pow(r - startRow, 2));
-            if (dist * pixelSize < radiusRef.current) {
-              ctx.clearRect(c * pixelSize, r * pixelSize, pixelSize, pixelSize);
-            }
-          }
-        }
-
-        if (radiusRef.current >= maxRadiusRef.current && isRevealing) {
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-          setIsInteracting(true);
-          setIsRevealing(false);
-          setIsClicking(false);
-        }
-
-      } else {
-        const now = Date.now();
-        holesRef.current = holesRef.current.filter(
-          h => now - h.timestamp < holeDuration
-        );
-
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = overlayColorRef.current;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        if (hasInteracted) {
-          holesRef.current.forEach(hole => {
-            const px = Math.floor(hole.x / pixelSize) * pixelSize;
-            const py = Math.floor(hole.y / pixelSize) * pixelSize;
-            ctx.clearRect(px, py, pixelSize, pixelSize);
-          });
-        }
-      }
-
-      animationFrameId.current = requestAnimationFrame(animate);
-    };
-
-    const handleResize = () => {
-      const canvas = canvasRef.current;
-      if (canvas) {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-
-        if (revealOrigin) {
-          const w = canvas.width;
-          const h = canvas.height;
-          const x = revealOrigin.x;
-          const y = revealOrigin.y;
-          const d1 = Math.sqrt(x * x + y * y);
-          const d2 = Math.sqrt(Math.pow(w - x, 2) + y * y);
-          const d3 = Math.sqrt(x * x + Math.pow(h - y, 2));
-          const d4 = Math.sqrt(Math.pow(w - x, 2) + Math.pow(h - y, 2));
-          maxRadiusRef.current = Math.max(d1, d2, d3, d4);
-        }
-      }
-    };
-
-    window.addEventListener('resize', handleResize);
-    handleResize();
-    animate();
-
-    return () => {
-      document.removeEventListener('mousemove', throttledMouseMove);
-      document.removeEventListener('touchstart', handleTouchStart);
-      document.removeEventListener('touchmove', handleTouchMove);
-      document.removeEventListener('touchend', handleTouchEnd);
-      window.removeEventListener('resize', handleResize);
-      if (animationFrameId.current) {
-        cancelAnimationFrame(animationFrameId.current);
-      }
-    };
-  }, [isRevealing, revealOrigin, hasInteracted, isClicking, addHole]);
-
-  // i18n now provides translations
-  const handleCloseExperience = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault();
-    event.stopPropagation();
-
-    if (!isInteracting) return;
-
-    // Prevent accidental immediate re-open from the same click event.
-    setIsClicking(true);
-    setIsInteracting(false);
-    setIsRevealing(false);
-
-    // Keep origin/radius so the reverse pixel animation can play naturally.
-    if (radiusRef.current <= 0 && maxRadiusRef.current > 0) {
-      radiusRef.current = maxRadiusRef.current;
-    }
-
-    window.setTimeout(() => setIsClicking(false), 260);
-  };
-
   return (
-    <ThemeMotionContainer
-      theme={theme}
-      className="min-h-screen relative portfolio-theme-surface"
-      onMouseMove={() => !hasInteracted && setHasInteracted(true)}
-    >
-      <canvas ref={themeWaveCanvasRef} className="fixed inset-0 z-[70] pointer-events-none" aria-hidden="true" />
-      {/* Background iframe */}
-      <iframe
-        src="https://os.txnio.com"
-        allow="autoplay; encrypted-media"
-        className="fixed inset-0 w-full h-full border-0"
-        style={{ zIndex: isInteracting ? 25 : 1 }}
-        title="txniOS Background"
-      />
-
-      {!isInteracting && (
-        <>
-          <div className="fixed inset-0 pointer-events-auto" style={{ backgroundColor: 'transparent', zIndex: 5 }} />
-
-          <canvas
-            ref={canvasRef}
-            className="fixed inset-0 z-10 pointer-events-none"
-          />
-
-          {/* Content Layer */}
-          <div
-            className="relative z-20 min-h-screen flex flex-col pointer-events-auto transition-opacity duration-300"
-            style={{ opacity: isRevealing ? 0 : 1 }}
-          >
-            <GlobalVinylControl />
-
-
-            {/* Top Link */}
-            <div className="relative text-center py-4 md:py-6 px-4">
-              <button
-                onClick={(e) => {
-                  if (!isRevealing && !isClicking && !isInteracting) {
-                    setIsClicking(true);
-
-                    // Set reveal origin to mouse click position
-                    const clickX = e.clientX;
-                    const clickY = e.clientY;
-
-                    setRevealOrigin({ x: clickX, y: clickY });
-
-                    // Calculate max radius from click position
-                    const w = window.innerWidth;
-                    const h = window.innerHeight;
-                    const d1 = Math.sqrt(clickX * clickX + clickY * clickY);
-                    const d2 = Math.sqrt(Math.pow(w - clickX, 2) + clickY * clickY);
-                    const d3 = Math.sqrt(clickX * clickX + Math.pow(h - clickY, 2));
-                    const d4 = Math.sqrt(Math.pow(w - clickX, 2) + Math.pow(h - clickY, 2));
-                    maxRadiusRef.current = Math.max(d1, d2, d3, d4);
-
-                    setIsRevealing(true);
-                    // Prevent multiple rapid clicks
-                    setTimeout(() => setIsClicking(false), 1000);
-                  }
-                }}
-                className="transition-all duration-300 ease-in-out cursor-pointer font-pixel text-sm md:text-lg shimmer-green px-4 py-2 rounded-lg"
-                style={{
-                  background: 'linear-gradient(90deg, var(--portfolio-link-grad-start) 0%, var(--portfolio-link-grad-mid-soft) 25%, var(--portfolio-link-grad-mid-strong) 50%, var(--portfolio-link-grad-mid-soft) 75%, var(--portfolio-link-grad-start) 100%)',
-                  backgroundSize: '200% 100%',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                  animation: 'shimmer 10s ease-in-out infinite',
-                  opacity: isInteracting ? 0 : 1,
-                  transform: isInteracting ? 'translateY(-20px)' : 'translateY(0)',
-                  pointerEvents: isInteracting ? 'none' : 'auto',
-                  minHeight: '44px',
-                  minWidth: '180px'
-                }}
+    <main className="minimal-portfolio-page minimal-page-enter">
+      <div className="minimal-portfolio-shell">
+        <div className="minimal-homepage">
+          <article className="minimal-article">
+            <header>
+              <h1 className="minimal-reveal-line" style={revealStyle(0)}>
+                Antonio J. Gonzalez
+              </h1>
+              <time
+                className="minimal-reveal-line"
+                dateTime="2026-07-02"
+                style={revealStyle(1)}
               >
-                ↗ {safeT('common.newOSExperience')}
-              </button>
-            </div>
+                Updated Jul 2, 2026
+              </time>
+            </header>
 
-            {/* Main Content - Centered */}
-            <div className="flex-1 flex items-center justify-center px-4">
-              <div className="text-center max-w-lg mx-auto">
-                <div className="relative" style={{ minHeight: 'fit-content' }}>
-                  <div className="space-y-1 cursor-pointer" onClick={handleTextBlockClick}>
-                    <h1 className={`text-2xl md:text-4xl font-bold ${randomFonts.name} hover:opacity-80 transition-opacity relative z-10`} style={{ color: 'var(--portfolio-text)' }}>
-                      <EmojiRenderer emoji={randomEmojis.name} />
-                      {isAnimatingText ? matrixText.name : 'ANTONIO GONZALEZ'}
-                    </h1>
-                    <h2 className={`text-xl md:text-2xl ${randomFonts.nickname} hover:opacity-80 transition-opacity relative z-0`} style={{ color: 'var(--portfolio-text)' }}>
-                      <EmojiRenderer emoji={randomEmojis.nickname} />
-                      {isAnimatingText ? matrixText.nickname : '(TXNIO)'}
-                    </h2>
-                    <h3 className={`text-lg md:text-xl ${randomFonts.title} hover:opacity-80 transition-opacity relative z-10`} style={{ color: 'var(--portfolio-text)', opacity: 0.9 }}>
-                      <EmojiRenderer emoji={randomEmojis.title} />
-                      {safeT('landing.title')}
-                    </h3>
-                    <h4 className={`text-base md:text-lg ${randomFonts.subtitle} hover:opacity-80 transition-opacity relative z-0`} style={{ color: 'var(--portfolio-text)', opacity: 0.8 }}>
-                      <EmojiRenderer emoji={randomEmojis.subtitle} />
-                      {safeT('landing.subtitle')}
-                    </h4>
-                    <h5 className={`text-xl md:text-2xl ${randomFonts.company} font-bold hover:opacity-80 transition-opacity relative z-0`} style={{ color: 'var(--portfolio-text)' }}>
-                      <EmojiRenderer emoji={randomEmojis.company} />
-                      {isAnimatingText ? matrixText.company : 'CEMOSA'}
-                    </h5>
-                  </div>
-                  <FollowingFace isVisible={showFollowingFace} />
-                </div>
+            <p className="minimal-reveal-line" style={revealStyle(2)}>
+              I&apos;m Antonio, also known as txnio. I build things for the web
+              and use browser windows as a place for interface experiments.
+            </p>
 
+            <p className="minimal-reveal-line" style={revealStyle(3)}>
+              I currently work at CEMOSA, where I focus on practical software,
+              automation, and tools that make technical work easier to use.
+            </p>
+
+            <p className="minimal-reveal-line" style={revealStyle(4)}>
+              My stack is mostly TypeScript, React, Next.js, Node.js, Python,
+              .NET, Power Platform, and AI integration when it has a real job to
+              do.
+            </p>
+
+            <p className="minimal-reveal-line" style={revealStyle(5)}>
+              I care about minimal design, motion, cinema, photography, and
+              hypnagogic music.
+            </p>
+
+            <p className="minimal-reveal-line" style={revealStyle(6)}>
+              Recently, I have been exploring interface systems, small OS-like
+              environments, and visual experiments that sit between tool and
+              artwork.
+            </p>
+
+            <p className="minimal-reveal-line" style={revealStyle(7)}>
+              You can find me on{' '}
+              <ExternalLink href="https://www.linkedin.com/in/txnio/">
+                LinkedIn
+              </ExternalLink>
+              ,{' '}
+              <ExternalLink href="https://github.com/txnioh">
+                GitHub
+              </ExternalLink>
+              , try{' '}
+              <ExternalLink href="https://os.txnio.com">txniOS</ExternalLink>,
+              or reach me via{' '}
+              <a className="minimal-basic-link" href="mailto:txniodev@gmail.com">
+                email
+              </a>
+              .
+            </p>
+          </article>
+
+          <section className="minimal-section" aria-labelledby="projects-title">
+            <ProjectShowcase startRevealIndex={8} />
+          </section>
+
+          <footer className="minimal-footer">
+            <div className="minimal-footer-container">
+              <div className="minimal-footer-row minimal-reveal-line" style={revealStyle(20)}>
+                <p>
+                  <span>
+                    <LocalTime /> in Madrid, Spain
+                  </span>
+                </p>
+                <FooterRobotMark />
               </div>
             </div>
+          </footer>
 
-            {/* Footer Links */}
-            <div className="py-4 text-center px-4">
-              <div className={`flex items-center justify-between md:justify-center md:space-x-8 text-xs md:text-sm ${randomFonts.subtitle}`}>
-                <Link
-                  href="/blog"
-                  className="hover:opacity-80 transition-opacity min-h-[44px] flex items-center justify-center"
-                  style={{ color: 'var(--portfolio-text)' }}
-                >
-                  {safeT('common.blog')}
-                </Link>
-                <Link
-                  href="/projects"
-                  className="hover:opacity-80 transition-opacity min-h-[44px] flex items-center justify-center"
-                  style={{ color: 'var(--portfolio-text)' }}
-                >
-                  {safeT('common.projects')}
-                </Link>
-                <a
-                  href="https://os.txnio.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:opacity-80 transition-opacity min-h-[44px] flex items-center justify-center gap-1"
-                  style={{ color: 'var(--portfolio-text)' }}
-                  title="txniOS"
-                >
-                  {safeT('common.txniOS')}
-                  <ArrowUpRight size={14} className="inline shrink-0" />
-                </a>
-                <a
-                  href="https://www.linkedin.com/in/txnio/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:opacity-80 transition-opacity min-h-[44px] flex items-center justify-center"
-                  style={{ color: 'var(--portfolio-text)' }}
-                  title="LinkedIn"
-                >
-                  <Linkedin size={16} className="md:hidden" />
-                  <span className="hidden md:inline">
-                    {safeT('common.linkedin')}
-                  </span>
-                </a>
-                <a
-                  href="https://github.com/txnioh"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:opacity-80 transition-opacity min-h-[44px] flex items-center justify-center"
-                  style={{ color: 'var(--portfolio-text)' }}
-                  title="GitHub"
-                >
-                  <Github size={16} className="md:hidden" />
-                  <span className="hidden md:inline">
-                    {safeT('common.github')}
-                  </span>
-                </a>
-                <ThemeToggle
-                  theme={theme}
-                  onToggle={triggerWaveToggle}
-                  labelForLightMode={safeT('common.lightMode')}
-                  labelForDarkMode={safeT('common.darkMode')}
-                  iconOnly
-                  className="shrink-0"
-                />
-              </div>
-            </div>
-          </div>
-        </>
-      )}
-
-      {/* Close Button - Always present but with visibility control */}
-      <button
-        onClick={handleCloseExperience}
-        className="fixed top-3 left-1/2 z-30 px-8 py-2 rounded-full text-sm transition-all duration-300 ease-in-out font-pixel hover:opacity-90"
-        style={{
-          backgroundColor: 'var(--portfolio-close-bg)',
-          color: 'var(--portfolio-close-text)',
-          opacity: isInteracting ? 1 : 0,
-          transform: isInteracting ? 'translate(-50%, 0)' : 'translate(-50%, -60px)',
-          pointerEvents: isInteracting ? 'auto' : 'none'
-        }}
-      >
-        X
-      </button>
-    </ThemeMotionContainer>
+          <nav className="minimal-hidden-nav" aria-label="Other pages">
+            <Link href="/projects">All projects</Link>
+            <Link href="/blog">Blog</Link>
+            <Link href="/mac-folio">Classic portfolio</Link>
+          </nav>
+        </div>
+      </div>
+    </main>
   );
 }
