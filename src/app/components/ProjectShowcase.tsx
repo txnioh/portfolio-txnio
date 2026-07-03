@@ -1,50 +1,23 @@
-import type { CSSProperties } from 'react';
 import Link from 'next/link';
 import { projectGroups, projects } from '../projects/projectData';
 
-type ProjectShowcaseProps = {
-  startRevealIndex?: number;
-};
-
-function revealStyle(index: number) {
-  return {
-    '--reveal-index': index,
-  } as CSSProperties;
-}
-
-export default function ProjectShowcase({
-  startRevealIndex = 0,
-}: ProjectShowcaseProps) {
-  let revealIndex = startRevealIndex + 1;
-  const groupedProjects = projectGroups.map((group) => ({
-    group,
-    projects: projects
-      .filter((project) => project.group === group)
-      .map((project) => ({
-        project,
-        revealIndex: revealIndex++,
-      })),
-  }));
-
+export default function ProjectShowcase() {
   return (
     <section className="minimal-project-list" data-variant="primary">
-      <h3
-        id="projects-title"
-        className="minimal-reveal-line"
-        style={revealStyle(startRevealIndex)}
-      >
+      <h3 id="projects-title" className="minimal-reveal-line">
         Projects
       </h3>
       <ul>
-        {groupedProjects.map(({ group, projects: groupedProjectItems }) => (
+        {projectGroups.map((group) => (
           <li key={group}>
             <ul>
-              {groupedProjectItems.map(({ project, revealIndex }) => (
+              {projects
+                .filter((project) => project.group === group)
+                .map((project) => (
                 <li key={project.slug}>
                   <Link
                     className="minimal-row-link minimal-reveal-line"
                     href={`/projects/${project.slug}`}
-                    style={revealStyle(revealIndex)}
                   >
                     <h2>{project.title}</h2>
                     <span

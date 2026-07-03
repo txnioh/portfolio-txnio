@@ -48,8 +48,8 @@ export default function RootLayout({
             height: 100%;
             width: 100%;
             overflow: visible;
-            background-color: var(--portfolio-bg);
-            color: var(--portfolio-text);
+            background-color: var(--portfolio-bg, #fdfdfc);
+            color: var(--portfolio-text, #111111);
             transition: background-color 0.3s ease, color 0.3s ease;
           }
           #__next {
