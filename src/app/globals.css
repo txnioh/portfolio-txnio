@@ -400,13 +400,13 @@ html, body {
 }
 
 .minimal-footer-row {
-  display: flex;
-  align-items: flex-start;
-  gap: 22px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .minimal-footer p {
-  width: 250px;
+  width: auto;
   margin: 0;
   color: rgba(0, 0, 0, 0.4);
   font-size: 13px;
@@ -417,13 +417,13 @@ html, body {
 
 .minimal-footer-robot-gallery {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   color: rgba(0, 0, 0, 0.4);
 }
 
 .minimal-robot-option {
   display: inline-flex;
-  width: 40px;
+  width: 28px;
   align-items: center;
   color: rgba(0, 0, 0, 0.42);
   cursor: default;
@@ -432,8 +432,8 @@ html, body {
 
 .minimal-robot-option svg {
   display: block;
-  width: 40px;
-  height: 30px;
+  width: 28px;
+  height: 21px;
   fill: none;
   overflow: visible;
   stroke: currentColor;
@@ -450,6 +450,7 @@ html, body {
 
 .minimal-robot-shell {
   fill: rgba(0, 0, 0, 0.026);
+  stroke: none;
 }
 
 .minimal-robot-screen {

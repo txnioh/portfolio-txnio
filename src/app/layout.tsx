@@ -3,7 +3,6 @@ import localFont from "next/font/local";
 import "./tailwind.css";
 import "./globals.css";
 import { Inter } from 'next/font/google';
-import PageTransition from "./components/PageTransition";
 import { GlobalAudioPlayerProvider } from "./components/GlobalAudioPlayer";
 
 const geistSans = localFont({
@@ -58,7 +57,6 @@ export default function RootLayout({
           }
           #content-wrapper {
             opacity: 1;
-            transition: opacity 0.3s ease-in;
           }
         `}</style>
         <script dangerouslySetInnerHTML={{
@@ -71,12 +69,6 @@ export default function RootLayout({
                 }
               } catch (e) {}
 
-              window.addEventListener('load', function() {
-                var wrapper = document.getElementById('content-wrapper');
-                if (wrapper) {
-                  wrapper.style.opacity = '1';
-                }
-              });
             })();
           `
         }} />
@@ -86,7 +78,7 @@ export default function RootLayout({
       >
         <GlobalAudioPlayerProvider>
           <div id="content-wrapper">
-            <PageTransition>{children}</PageTransition>
+            {children}
           </div>
         </GlobalAudioPlayerProvider>
       </body>
