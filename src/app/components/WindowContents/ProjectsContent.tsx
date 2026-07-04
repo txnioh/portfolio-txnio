@@ -135,7 +135,7 @@ const projects: Project[] = [
     description: "", // Will be populated from translations
     githubUrl: "https://github.com/txnioh/portfolio-txnio",
     demoUrl: "https://os.txnio.com",
-    imagePath: "/projects-img/project-macold.png"
+    imagePath: "/projects-img/project-txnios-main.webp"
   },
   { 
     id: 8, 
@@ -267,6 +267,7 @@ const ProjectsContent: React.FC = () => {
         alt={project.title}
         width={350}
         height={230}
+        draggable={false}
       />
       <ProjectDescription>{t(`projectDescriptions.${project.title}`)}</ProjectDescription>
     </ProjectCard>

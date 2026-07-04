@@ -65,7 +65,14 @@ export default function FooterRobotMark() {
 
   return (
     <span ref={rootRef} className="minimal-footer-robot-gallery" aria-hidden="true">
-      <motion.span className="minimal-robot-option" style={{ opacity }}>
+      <motion.span
+        className="minimal-robot-option"
+        drag
+        dragElastic={0}
+        dragMomentum={false}
+        style={{ opacity }}
+        whileDrag={{ scale: 1.08 }}
+      >
         <svg viewBox="0 0 48 36" focusable="false">
           <motion.g
             className="minimal-robot-head-follow"

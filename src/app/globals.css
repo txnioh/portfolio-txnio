@@ -328,20 +328,11 @@ html, body {
   font: inherit;
   text-align: left;
   text-decoration: none;
-  transition: opacity 160ms ease;
 }
 
 .minimal-row-link:focus-visible {
   outline: 1px solid rgba(0, 0, 0, 0.28);
   outline-offset: -1px;
-}
-
-.minimal-project-list:has(.minimal-row-link:is(:hover, :focus-visible)) > ul .minimal-row-link {
-  opacity: 0.38;
-}
-
-.minimal-project-list:has(.minimal-row-link:is(:hover, :focus-visible)) > ul .minimal-row-link:is(:hover, :focus-visible) {
-  opacity: 1;
 }
 
 .minimal-project-list h2 {
@@ -356,6 +347,7 @@ html, body {
   font-weight: 460;
   line-height: normal;
   text-overflow: ellipsis;
+  transition: color 140ms ease;
   white-space: nowrap;
 }
 
@@ -370,6 +362,23 @@ html, body {
   font-weight: 460;
   line-height: normal;
   text-align: right;
+  transition: color 140ms ease;
+}
+
+.minimal-project-list:has(.minimal-row-link:is(:hover, :focus-visible)) > ul .minimal-row-link h2 {
+  color: rgba(0, 0, 0, 0.32);
+}
+
+.minimal-project-list:has(.minimal-row-link:is(:hover, :focus-visible)) > ul .minimal-row-link .minimal-row-meta {
+  color: rgba(0, 0, 0, 0.22);
+}
+
+.minimal-project-list:has(.minimal-row-link:is(:hover, :focus-visible)) > ul .minimal-row-link:is(:hover, :focus-visible) h2 {
+  color: #111111;
+}
+
+.minimal-project-list:has(.minimal-row-link:is(:hover, :focus-visible)) > ul .minimal-row-link:is(:hover, :focus-visible) .minimal-row-meta {
+  color: rgba(0, 0, 0, 0.4);
 }
 
 .minimal-row-meta span {
@@ -422,12 +431,18 @@ html, body {
 }
 
 .minimal-robot-option {
+  position: relative;
+  z-index: 2;
   display: inline-flex;
   width: 28px;
   align-items: center;
   color: rgba(0, 0, 0, 0.42);
-  cursor: default;
+  cursor: grab;
   touch-action: none;
+}
+
+.minimal-robot-option:active {
+  cursor: grabbing;
 }
 
 .minimal-robot-option svg {
@@ -578,6 +593,7 @@ html, body {
 }
 
 .minimal-project-preview {
+  position: relative;
   display: flex;
   aspect-ratio: 16 / 9;
   align-items: flex-end;
@@ -586,6 +602,14 @@ html, body {
   background:
     linear-gradient(135deg, rgba(0, 0, 0, 0.04), rgba(0, 0, 0, 0) 45%),
     #fbfbfa;
+  overflow: hidden;
+}
+
+.minimal-project-preview-media,
+.minimal-article-shot-image {
+  object-fit: cover;
+  user-select: none;
+  -webkit-user-drag: none;
 }
 
 .minimal-project-preview span {
@@ -632,6 +656,7 @@ html, body {
 }
 
 .minimal-article-shot-grid figure > div {
+  position: relative;
   display: flex;
   aspect-ratio: 4 / 3;
   align-items: flex-end;
@@ -639,6 +664,7 @@ html, body {
   background:
     linear-gradient(135deg, rgba(0, 0, 0, 0.035), rgba(0, 0, 0, 0) 42%),
     #fbfbfa;
+  overflow: hidden;
 }
 
 .minimal-article-shot-grid figure > div span {

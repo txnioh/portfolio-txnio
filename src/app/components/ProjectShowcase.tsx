@@ -1,6 +1,12 @@
 import Link from 'next/link';
 import { projectGroups, projects } from '../projects/projectData';
 
+const projectsByGroup = projects.reduce<Record<string, typeof projects>>((groups, project) => {
+  groups[project.group] = groups[project.group] ?? [];
+  groups[project.group].push(project);
+  return groups;
+}, {});
+
 export default function ProjectShowcase() {
   return (
     <section className="minimal-project-list" data-variant="primary">
@@ -11,12 +17,10 @@ export default function ProjectShowcase() {
         {projectGroups.map((group) => (
           <li key={group}>
             <ul>
-              {projects
-                .filter((project) => project.group === group)
-                .map((project) => (
+              {(projectsByGroup[group] ?? []).map((project) => (
                 <li key={project.slug}>
                   <Link
-                    className="minimal-row-link minimal-reveal-line"
+                    className="minimal-row-link"
                     href={`/projects/${project.slug}`}
                   >
                     <h2>{project.title}</h2>

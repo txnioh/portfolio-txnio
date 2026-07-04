@@ -2,6 +2,7 @@
 
 import type { MouseEvent } from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import PageEnter from './PageEnter';
 import type { PortfolioProject } from '../projects/projectData';
@@ -119,9 +120,21 @@ export default function ProjectArticle({ project }: ProjectArticleProps) {
 
           <div
             className="minimal-project-preview minimal-reveal-line"
-            aria-label={`${project.title} preview placeholder`}
+            aria-label={`${project.title} preview`}
           >
-            <span>Screenshot pending</span>
+            {project.previewImage ? (
+              <Image
+                className="minimal-project-preview-media"
+                src={project.previewImage.src}
+                alt={project.previewImage.alt}
+                fill
+                priority
+                draggable={false}
+                sizes="(max-width: 960px) 100vw, 720px"
+              />
+            ) : (
+              <span>Screenshot pending</span>
+            )}
           </div>
 
           <p className="minimal-reveal-line">{project.intro}</p>
@@ -145,8 +158,20 @@ export default function ProjectArticle({ project }: ProjectArticleProps) {
                   key={shot.label}
                   className="minimal-reveal-line"
                 >
-                  <div>
-                    <span>{String(index + 1).padStart(2, '0')}</span>
+                  <div className={shot.media ? 'has-media' : undefined}>
+                    {shot.media ? (
+                      <Image
+                        className="minimal-article-shot-image"
+                        src={shot.media.src}
+                        alt={shot.media.alt}
+                        fill
+                        draggable={false}
+                        sizes="(max-width: 760px) 100vw, 240px"
+                        unoptimized={shot.media.format === 'gif'}
+                      />
+                    ) : (
+                      <span>{String(index + 1).padStart(2, '0')}</span>
+                    )}
                   </div>
                   <figcaption>
                     <strong>{shot.label}</strong>

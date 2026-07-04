@@ -30,7 +30,7 @@ const projects: Project[] = [
     description: "", // Will be populated from translations
     githubUrl: "https://github.com/txnioh/portfolio-txnio",
     demoUrl: "https://os.txnio.com",
-    imagePath: "/projects-img/project-macold.png"
+    imagePath: "/projects-img/project-txnios-main.webp"
   },
   {
     id: 8,
@@ -338,6 +338,7 @@ const ProjectsPage = () => {
               src={project.imagePath}
               alt={project.title}
               fill
+              draggable={false}
               className="object-cover"
               sizes={isMobile ? "(max-width: 768px) 100vw" : "(max-width: 768px) 100vw, 20vw"}
             />

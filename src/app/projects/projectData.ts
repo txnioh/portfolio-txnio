@@ -7,6 +7,13 @@ export type ProjectSection = {
 export type ProjectShot = {
   label: string;
   description: string;
+  media?: ProjectMedia;
+};
+
+export type ProjectMedia = {
+  src: string;
+  alt: string;
+  format?: 'image' | 'gif';
 };
 
 export type PortfolioProject = {
@@ -17,6 +24,7 @@ export type PortfolioProject = {
   href: string;
   summary: string;
   intro: string;
+  previewImage?: ProjectMedia;
   sections: ProjectSection[];
   shots: ProjectShot[];
 };
@@ -34,6 +42,10 @@ export const projects: PortfolioProject[] = [
       'A browser-based desktop inspired by classic Mac OS, built as a place to open windows, explore projects, and play with interface nostalgia.',
     intro:
       'txniOS is the project that turns the portfolio into an operating-system-like space instead of a normal page. It keeps projects, contact, settings, music, and small experiments inside a desktop metaphor.',
+    previewImage: {
+      src: '/projects-img/project-txnios-main.webp',
+      alt: 'txniOS desktop with Finder and iPod windows open.',
+    },
     sections: [
       {
         id: 'overview',
@@ -61,8 +73,23 @@ export const projects: PortfolioProject[] = [
       },
     ],
     shots: [
-      { label: 'Desktop overview', description: 'Main desktop state with open project entry points.' },
-      { label: 'Window interaction', description: 'A project or app window in active use.' },
+      {
+        label: 'Desktop overview',
+        description: 'Main desktop state with open project entry points.',
+        media: {
+          src: '/projects-img/project-txnios-main.webp',
+          alt: 'txniOS desktop overview with application windows and dock.',
+        },
+      },
+      {
+        label: 'Window movement',
+        description: 'Animated capture of a window being moved across the desktop.',
+        media: {
+          src: '/projects-img/project-txnios-window-movement.gif',
+          alt: 'Animated txniOS window movement capture.',
+          format: 'gif',
+        },
+      },
       { label: 'Settings state', description: 'Wallpaper, controls, or system-style preferences.' },
     ],
   },
