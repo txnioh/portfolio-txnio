@@ -94,6 +94,75 @@ export const projects: PortfolioProject[] = [
     ],
   },
   {
+    slug: 'spacio',
+    group: 'main',
+    title: 'Spacio',
+    date: '2026',
+    href: 'https://spacio.txnio.com/',
+    summary:
+      'A browser-based BIM and digital-twin viewer for exploring models, sensor data, and environmental layers in one spatial interface.',
+    intro:
+      'Spacio turns a building model into an explorable workspace: choose a project, inspect the 3D scene, and move between geometry, sensors, and live-style environmental views.',
+    previewImage: {
+      src: '/projects-img/project-spacio-bim.gif',
+      alt: 'Animated Spacio BIM viewer showing a loaded building model and sensor panel.',
+      format: 'gif',
+    },
+    sections: [
+      {
+        id: 'overview',
+        title: 'Overview',
+        body: [
+          'The entry screen keeps the project selection simple, while the viewer opens a more detailed spatial workspace for each building.',
+          'The portfolio version presents Spacio as a focused example of how complex building information can become an approachable browser interaction.',
+        ],
+      },
+      {
+        id: 'interaction',
+        title: 'Interaction',
+        body: [
+          'Inside a project, the viewer combines a 3D BIM model with sensor navigation, floor grouping, search, and environmental heatmap controls.',
+          'Temperature, humidity, and CO₂ layers can be switched alongside measurements, clips, and a spatial tree for different inspection modes.',
+        ],
+      },
+      {
+        id: 'implementation',
+        title: 'Implementation',
+        body: [
+          'The experience is built around a browser-rendered BIM viewer with IFC model loading and a React interface for the surrounding workspace.',
+          'The important constraint is keeping the controls legible while the 3D scene remains the primary surface for understanding the building.',
+        ],
+      },
+    ],
+    shots: [
+      {
+        label: 'BIM viewer',
+        description: 'Animated model view with sensors, floor navigation, and analysis controls.',
+        media: {
+          src: '/projects-img/project-spacio-bim.gif',
+          alt: 'Animated Spacio BIM viewer showing a loaded building model and sensor panel.',
+          format: 'gif',
+        },
+      },
+      {
+        label: 'Project chooser',
+        description: 'The starting point for selecting a building model.',
+        media: {
+          src: '/projects-img/project-spacio-main.png',
+          alt: 'Spacio project chooser showing four BIM projects.',
+        },
+      },
+      {
+        label: 'CO₂ heatmap and charts',
+        description: 'A CO₂ heatmap with temperature and humidity charts for sensor analysis.',
+        media: {
+          src: '/projects-img/project-spacio-charts.png',
+          alt: 'Spacio project view with environmental chart data.',
+        },
+      },
+    ],
+  },
+  {
     slug: 'minder',
     group: 'apps',
     title: 'Minder',
