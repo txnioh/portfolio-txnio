@@ -172,6 +172,11 @@ export const projects: PortfolioProject[] = [
       'A small product for uploading images, comments, and projects with authentication and persistent data.',
     intro:
       'Minder is a practical app experiment around saving visual material, adding context, and keeping project entries organized.',
+    previewImage: {
+      src: '/projects-img/project-minder-main.gif',
+      alt: 'Animated Minder walkthrough showing the app interface in use.',
+      format: 'gif',
+    },
     sections: [
       {
         id: 'overview',
@@ -199,9 +204,22 @@ export const projects: PortfolioProject[] = [
       },
     ],
     shots: [
-      { label: 'Upload flow', description: 'The image and project creation path.' },
-      { label: 'Project feed', description: 'Published entries with their visual material.' },
-      { label: 'Signed-in state', description: 'Authenticated UI and account-aware controls.' },
+      {
+        label: 'Landing screen',
+        description: 'Initial Minder entry point with login, sign up, and exploration paths.',
+        media: {
+          src: '/projects-img/project-minder-home.png',
+          alt: 'Minder landing screen with login, sign up, and explore minds actions.',
+        },
+      },
+      {
+        label: 'Explore feed',
+        description: 'Public feed view for browsing shared minds and visual posts.',
+        media: {
+          src: '/projects-img/project-minder-feed.png',
+          alt: 'Minder explore feed showing shared entries and interaction controls.',
+        },
+      },
     ],
   },
 ];

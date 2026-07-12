@@ -131,6 +131,7 @@ export default function ProjectArticle({ project }: ProjectArticleProps) {
                 priority
                 draggable={false}
                 sizes="(max-width: 960px) 100vw, 720px"
+                unoptimized={project.previewImage.format === 'gif'}
               />
             ) : (
               <span>Screenshot pending</span>
@@ -152,7 +153,7 @@ export default function ProjectArticle({ project }: ProjectArticleProps) {
 
           <section id="screenshots">
             <h2 className="minimal-reveal-line">Screenshots</h2>
-            <div className="minimal-article-shot-grid">
+            <div className={`minimal-article-shot-grid${project.shots.length === 2 ? ' is-two-up' : ''}`}>
               {project.shots.map((shot, index) => (
                 <figure
                   key={shot.label}

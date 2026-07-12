@@ -1076,6 +1076,10 @@ html, body {
   padding: 24px 0 0;
 }
 
+.minimal-article-shot-grid.is-two-up {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .minimal-article-shot-grid figure {
   margin: 0;
 }
