@@ -1177,6 +1177,7 @@ html, body {
     top: 3px;
     width: 66px;
     height: 66px;
+    translate: -19px 0;
   }
 
   .minimal-inline-player-content {
