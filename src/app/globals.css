@@ -456,11 +456,7 @@ html, body {
   inset: 0 auto 0 0;
   width: 128px;
   overflow: hidden;
-  border: 1px solid #d8d8d5;
   background: #ecece9;
-  box-shadow:
-    4px 0 12px rgba(0, 0, 0, 0.16),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.16);
 }
 
 .minimal-release-cover::before {
@@ -505,7 +501,6 @@ html, body {
   background-image: url('https://intheclouds.io/cdn/shop/files/Custom_Vinyl_Record_12inch_Transparent_3024x.png?v=1741182986');
   background-size: cover;
   background-position: center;
-  box-shadow: 0 5px 12px rgba(0, 0, 0, 0.18);
   animation: vinylSpin 3.2s linear infinite;
   transform-origin: center;
   translate: -64px 0;
@@ -514,7 +509,7 @@ html, body {
 
 .minimal-release-vinyl::before {
   position: absolute;
-  inset: 0;
+  inset: 0.6px;
   border-radius: 50%;
   background: var(--vinyl-dominant-color, #1a1a1a);
   mix-blend-mode: color;
@@ -527,7 +522,6 @@ html, body {
 
 .minimal-release-vinyl::after {
   position: absolute;
-  inset: 0;
   border-radius: 50%;
   background: radial-gradient(circle at 30% 25%, rgba(255, 255, 255, 0.22) 0%, transparent 55%);
   mix-blend-mode: screen;
