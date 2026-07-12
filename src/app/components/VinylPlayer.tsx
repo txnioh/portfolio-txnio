@@ -332,7 +332,7 @@ export function VinylPlayer() {
             role="region"
             aria-label="Record collection"
             onKeyDown={handleLibraryKeyDown}
-            initial={false}
+            initial={{ x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 20 }}
             transition={screenTransition}
