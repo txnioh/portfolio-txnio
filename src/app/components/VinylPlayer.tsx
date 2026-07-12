@@ -7,7 +7,6 @@ import {
   type PanInfo,
   useReducedMotion,
 } from 'framer-motion';
-import { Pause, Play, SkipBack, SkipForward } from 'lucide-react';
 import {
   type KeyboardEvent as ReactKeyboardEvent,
   useCallback,
@@ -56,7 +55,7 @@ function getCoverPose(position: number) {
   const direction = position > 0 ? 1 : -1;
 
   return {
-    x: direction * (44 + (distance - 1) * 18),
+    x: direction * (68 + (distance - 1) * 26),
     rotateY: direction * -60,
     z: -50 - distance * 20,
     scale: 1,
@@ -68,6 +67,7 @@ function getCoverPose(position: number) {
 export function VinylPlayer() {
   const [screen, setScreen] = useState<'player' | 'library'>('player');
   const [collectionPosition, setCollectionPosition] = useState(0);
+  const [dominantColor, setDominantColor] = useState<string>('#1a1a1a');
   const libraryRef = useRef<HTMLDivElement>(null);
   const lastPanXRef = useRef<number | null>(null);
   const isDraggingCollectionRef = useRef(false);
@@ -85,6 +85,32 @@ export function VinylPlayer() {
     togglePlayback,
     tracks,
   } = useGlobalAudioPlayer();
+
+  useEffect(() => {
+    const img = new window.Image();
+    img.crossOrigin = 'anonymous';
+    img.src = activeTrack.cover;
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = 50;
+      canvas.height = 50;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      ctx.drawImage(img, 0, 0, 50, 50);
+      const data = ctx.getImageData(0, 0, 50, 50).data;
+      let r = 0, g = 0, b = 0, count = 0;
+      for (let i = 0; i < data.length; i += 16) {
+        r += data[i];
+        g += data[i + 1];
+        b += data[i + 2];
+        count++;
+      }
+      r = Math.round(r / count);
+      g = Math.round(g / count);
+      b = Math.round(b / count);
+      setDominantColor(`rgb(${r}, ${g}, ${b})`);
+    };
+  }, [activeTrack.cover]);
   const progressPercent = isReady
     ? Math.min(currentTime / duration, 1) * 100
     : 0;
@@ -219,7 +245,10 @@ export function VinylPlayer() {
                 </span>
                 <span
                   className="minimal-release-vinyl"
-                  style={{ animationPlayState: isPlaying ? 'running' : 'paused' }}
+                  style={{
+                    animationPlayState: isPlaying ? 'running' : 'paused',
+                    '--vinyl-dominant-color': dominantColor,
+                  } as React.CSSProperties}
                 >
                   <span className="minimal-release-vinyl-label">
                     <Image
@@ -249,21 +278,21 @@ export function VinylPlayer() {
                     onClick={selectPrevTrack}
                     aria-label="Previous track"
                   >
-                    <SkipBack size={16} />
+                    prev
                   </button>
                   <button
                     type="button"
                     onClick={togglePlayback}
                     aria-label={isPlaying ? `Pause ${activeTrack.title}` : `Play ${activeTrack.title}`}
                   >
-                    {isPlaying ? <Pause size={16} /> : <Play size={16} />}
+                    {isPlaying ? 'pause' : 'play'}
                   </button>
                   <button
                     type="button"
                     onClick={selectNextTrack}
                     aria-label="Next track"
                   >
-                    <SkipForward size={16} />
+                    next
                   </button>
                 </div>
                 <input
@@ -303,7 +332,7 @@ export function VinylPlayer() {
             role="region"
             aria-label="Record collection"
             onKeyDown={handleLibraryKeyDown}
-            initial={{ opacity: 0, x: 20 }}
+            initial={false}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 20 }}
             transition={screenTransition}
