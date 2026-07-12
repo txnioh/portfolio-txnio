@@ -154,15 +154,6 @@ html, body {
   }
 }
 
-@keyframes vinylSpin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 /* Emoji image styles */
 .emoji-image {
   image-rendering: pixelated;
@@ -498,16 +489,26 @@ html, body {
   width: 118px;
   height: 118px;
   border-radius: 50%;
-  background-image: url('https://intheclouds.io/cdn/shop/files/Custom_Vinyl_Record_12inch_Transparent_3024x.png?v=1741182986');
-  background-size: cover;
-  background-position: center;
-  animation: vinylSpin 3.2s linear infinite;
   transform-origin: center;
   translate: -64px 0;
   transition: translate 380ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.minimal-release-vinyl::before {
+.minimal-release-trigger.is-playing .minimal-release-vinyl {
+  translate: 7px 0;
+}
+
+.minimal-release-vinyl-disc {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background-image: url('https://intheclouds.io/cdn/shop/files/Custom_Vinyl_Record_12inch_Transparent_3024x.png?v=1741182986');
+  background-size: cover;
+  background-position: center;
+  transform-origin: center;
+}
+
+.minimal-release-vinyl-disc::before {
   position: absolute;
   inset: 0.6px;
   border-radius: 50%;
@@ -520,7 +521,7 @@ html, body {
   pointer-events: none;
 }
 
-.minimal-release-vinyl::after {
+.minimal-release-vinyl-disc::after {
   position: absolute;
   border-radius: 50%;
   background: radial-gradient(circle at 30% 25%, rgba(255, 255, 255, 0.22) 0%, transparent 55%);
@@ -529,10 +530,6 @@ html, body {
   content: '';
   z-index: 2;
   pointer-events: none;
-}
-
-.minimal-release-trigger.is-playing .minimal-release-vinyl {
-  translate: 7px 0;
 }
 
 .minimal-release-vinyl-label {
@@ -638,45 +635,48 @@ html, body {
   color: #111111;
 }
 
-.minimal-inline-controls input {
-  margin: 0;
-  appearance: none;
-  border: 0;
-  border-radius: 0;
-  cursor: pointer;
-}
-
-.minimal-inline-controls input {
+.minimal-timeline {
+  position: relative;
   width: 100%;
-  height: 2px;
+  height: 18px;
+  border-radius: 999px;
+  cursor: pointer;
+  touch-action: none;
 }
 
-.minimal-inline-controls input:disabled {
+.minimal-timeline-track,
+.minimal-timeline-preview,
+.minimal-timeline-progress {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  height: 4px;
+  border-radius: 999px;
+  transform: translateY(-50%);
+}
+
+.minimal-timeline-track {
+  right: 0;
+  background: #dededb;
+}
+
+.minimal-timeline-preview {
+  background: #b9b9b5;
+  opacity: 0;
+}
+
+.minimal-timeline-progress {
+  background: #111111;
+}
+
+.minimal-timeline:focus-visible {
+  outline: 1px solid rgba(0, 0, 0, 0.55);
+  outline-offset: 3px;
+}
+
+.minimal-timeline.is-disabled {
   cursor: wait;
   opacity: 0.55;
-}
-
-.minimal-inline-controls input::-webkit-slider-thumb {
-  appearance: none;
-  border: 1px solid #111111;
-  border-radius: 0;
-  background: #fdfdfc;
-}
-
-.minimal-inline-controls input::-webkit-slider-thumb {
-  width: 6px;
-  height: 12px;
-}
-
-.minimal-inline-controls input::-moz-range-thumb {
-  border: 1px solid #111111;
-  border-radius: 0;
-  background: #fdfdfc;
-}
-
-.minimal-inline-controls input::-moz-range-thumb {
-  width: 6px;
-  height: 12px;
 }
 
 .minimal-inline-time {
@@ -1267,10 +1267,6 @@ html, body {
     animation: none;
   }
 
-  .minimal-release-vinyl {
-    animation: none;
-    transition: none;
-  }
 }
 
 @media (max-width: 360px) {

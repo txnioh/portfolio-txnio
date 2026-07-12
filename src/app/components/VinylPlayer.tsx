@@ -8,7 +8,9 @@ import {
   useReducedMotion,
 } from 'framer-motion';
 import {
+  type CSSProperties,
   type KeyboardEvent as ReactKeyboardEvent,
+  type PointerEvent as ReactPointerEvent,
   useCallback,
   useEffect,
   useRef,
@@ -25,6 +27,21 @@ const COVER_SPRING = {
   type: 'spring' as const,
   stiffness: 500,
   damping: 48,
+};
+
+const TIMELINE_TRANSITION = {
+  duration: 0.16,
+  ease: [0.22, 1, 0.36, 1] as const,
+};
+
+const VINYL_ROTATION_TRANSITION = {
+  duration: 0.32,
+  ease: 'linear' as const,
+};
+
+const VINYL_SCRUB_TRANSITION = {
+  duration: 0.08,
+  ease: [0.22, 1, 0.36, 1] as const,
 };
 
 const DRAG_STEP = 20;
@@ -68,7 +85,11 @@ export function VinylPlayer() {
   const [screen, setScreen] = useState<'player' | 'library'>('player');
   const [collectionPosition, setCollectionPosition] = useState(0);
   const [dominantColor, setDominantColor] = useState<string>('#1a1a1a');
+  const [previewPercent, setPreviewPercent] = useState<number | null>(null);
+  const [seekPercent, setSeekPercent] = useState<number | null>(null);
+  const [isSeeking, setIsSeeking] = useState(false);
   const libraryRef = useRef<HTMLDivElement>(null);
+  const timelineRef = useRef<HTMLDivElement>(null);
   const lastPanXRef = useRef<number | null>(null);
   const isDraggingCollectionRef = useRef(false);
   const dragReleaseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -114,6 +135,10 @@ export function VinylPlayer() {
   const progressPercent = isReady
     ? Math.min(currentTime / duration, 1) * 100
     : 0;
+  const visibleProgressPercent = seekPercent ?? progressPercent;
+  const visiblePreviewPercent = previewPercent === null
+    ? visibleProgressPercent
+    : Math.max(previewPercent, visibleProgressPercent);
   const selectedIndex = Math.min(
     Math.max(Math.round(collectionPosition), 0),
     tracks.length - 1,
@@ -122,6 +147,19 @@ export function VinylPlayer() {
   const screenTransition = shouldReduceMotion
     ? { duration: 0 }
     : SCREEN_TRANSITION;
+  const timelineTransition = shouldReduceMotion
+    ? { duration: 0 }
+    : TIMELINE_TRANSITION;
+  const timelineHeight = isSeeking ? 8 : 4;
+  const visibleTime = seekPercent === null
+    ? currentTime
+    : (seekPercent / 100) * duration;
+  const vinylRotation = visibleTime * 180;
+  const vinylRotationTransition = shouldReduceMotion
+    ? { duration: 0 }
+    : isSeeking
+      ? VINYL_SCRUB_TRANSITION
+      : VINYL_ROTATION_TRANSITION;
 
   const navigateBy = useCallback((direction: -1 | 1) => {
     setCollectionPosition((currentPosition) => (
@@ -149,6 +187,81 @@ export function VinylPlayer() {
   const selectPrevTrack = useCallback(() => {
     selectTrack((activeTrackIndex - 1 + tracks.length) % tracks.length);
   }, [activeTrackIndex, tracks.length, selectTrack]);
+
+  const getTimelinePercent = useCallback((clientX: number) => {
+    const timeline = timelineRef.current;
+    if (!timeline) return 0;
+
+    const rect = timeline.getBoundingClientRect();
+    if (rect.width <= 0) return 0;
+
+    return Math.min(Math.max(((clientX - rect.left) / rect.width) * 100, 0), 100);
+  }, []);
+
+  const seekToPercent = useCallback((percent: number) => {
+    if (!isReady) return;
+    const nextTime = (percent / 100) * duration;
+    setSeekPercent(percent);
+    seekTo(nextTime);
+  }, [duration, isReady, seekTo]);
+
+  const handleTimelinePointerMove = useCallback((event: ReactPointerEvent<HTMLDivElement>) => {
+    if (!isReady) return;
+
+    const nextPercent = getTimelinePercent(event.clientX);
+    setPreviewPercent(nextPercent);
+
+    if (isSeeking) {
+      seekToPercent(nextPercent);
+    }
+  }, [getTimelinePercent, isReady, isSeeking, seekToPercent]);
+
+  const handleTimelinePointerDown = useCallback((event: ReactPointerEvent<HTMLDivElement>) => {
+    if (!isReady) return;
+
+    event.currentTarget.setPointerCapture(event.pointerId);
+    const nextPercent = getTimelinePercent(event.clientX);
+    setIsSeeking(true);
+    setPreviewPercent(nextPercent);
+    seekToPercent(nextPercent);
+  }, [getTimelinePercent, isReady, seekToPercent]);
+
+  const handleTimelinePointerUp = useCallback((event: ReactPointerEvent<HTMLDivElement>) => {
+    if (!isSeeking) return;
+
+    event.currentTarget.releasePointerCapture(event.pointerId);
+    const nextPercent = getTimelinePercent(event.clientX);
+    seekToPercent(nextPercent);
+    setIsSeeking(false);
+    setSeekPercent(null);
+  }, [getTimelinePercent, isSeeking, seekToPercent]);
+
+  const handleTimelinePointerLeave = useCallback(() => {
+    if (isSeeking) return;
+    setPreviewPercent(null);
+  }, [isSeeking]);
+
+  const handleTimelineKeyDown = useCallback((event: ReactKeyboardEvent<HTMLDivElement>) => {
+    if (!isReady) return;
+
+    const currentSeconds = Math.min(currentTime, duration);
+    let nextTime: number | null = null;
+
+    if (event.key === 'ArrowLeft') {
+      nextTime = currentSeconds - 5;
+    } else if (event.key === 'ArrowRight') {
+      nextTime = currentSeconds + 5;
+    } else if (event.key === 'Home') {
+      nextTime = 0;
+    } else if (event.key === 'End') {
+      nextTime = duration;
+    }
+
+    if (nextTime === null) return;
+
+    event.preventDefault();
+    seekTo(nextTime);
+  }, [currentTime, duration, isReady, seekTo]);
 
   useEffect(() => {
     if (screen !== 'library') return;
@@ -243,24 +356,30 @@ export function VinylPlayer() {
                     className="minimal-vinyl-cover"
                   />
                 </span>
-                <span
+                <motion.span
                   className="minimal-release-vinyl"
-                  style={{
-                    animationPlayState: isPlaying ? 'running' : 'paused',
-                    '--vinyl-dominant-color': dominantColor,
-                  } as React.CSSProperties}
                 >
-                  <span className="minimal-release-vinyl-label">
-                    <Image
-                      src={activeTrack.cover}
-                      alt=""
-                      fill
-                      sizes="30px"
-                      draggable={false}
-                      className="minimal-vinyl-cover"
-                    />
-                  </span>
-                </span>
+                  <motion.span
+                    className="minimal-release-vinyl-disc"
+                    initial={false}
+                    animate={{ rotate: vinylRotation }}
+                    transition={vinylRotationTransition}
+                    style={{
+                      '--vinyl-dominant-color': dominantColor,
+                    } as CSSProperties}
+                  >
+                    <span className="minimal-release-vinyl-label">
+                      <Image
+                        src={activeTrack.cover}
+                        alt=""
+                        fill
+                        sizes="30px"
+                        draggable={false}
+                        className="minimal-vinyl-cover"
+                      />
+                    </span>
+                  </motion.span>
+                </motion.span>
               </button>
             </div>
 
@@ -295,19 +414,50 @@ export function VinylPlayer() {
                     next
                   </button>
                 </div>
-                <input
-                  type="range"
-                  min="0"
-                  max={isReady ? duration : 0}
-                  step="0.1"
-                  value={isReady ? Math.min(currentTime, duration) : 0}
-                  onChange={(event) => seekTo(Number(event.currentTarget.value))}
-                  disabled={!isReady}
+                <div
+                  ref={timelineRef}
+                  className={`minimal-timeline${isSeeking ? ' is-seeking' : ''}${!isReady ? ' is-disabled' : ''}`}
+                  role="slider"
+                  tabIndex={isReady ? 0 : -1}
+                  aria-disabled={!isReady}
                   aria-label="Track progress"
-                  style={{
-                    background: `linear-gradient(to right, #111111 0%, #111111 ${progressPercent}%, #dededb ${progressPercent}%, #dededb 100%)`,
-                  }}
-                />
+                  aria-valuemin={0}
+                  aria-valuemax={isReady ? Math.round(duration) : 0}
+                  aria-valuenow={isReady ? Math.round(Math.min(currentTime, duration)) : 0}
+                  aria-valuetext={isReady ? `${formatTime(currentTime)} of ${formatTime(duration)}` : undefined}
+                  onPointerDown={handleTimelinePointerDown}
+                  onPointerMove={handleTimelinePointerMove}
+                  onPointerUp={handleTimelinePointerUp}
+                  onPointerCancel={handleTimelinePointerUp}
+                  onPointerLeave={handleTimelinePointerLeave}
+                  onKeyDown={handleTimelineKeyDown}
+                >
+                  <motion.span
+                    className="minimal-timeline-track"
+                    initial={false}
+                    animate={{ height: timelineHeight }}
+                    transition={timelineTransition}
+                  />
+                  <motion.span
+                    className="minimal-timeline-preview"
+                    initial={false}
+                    animate={{
+                      width: `${visiblePreviewPercent}%`,
+                      height: timelineHeight,
+                      opacity: previewPercent !== null || isSeeking ? 1 : 0,
+                    }}
+                    transition={timelineTransition}
+                  />
+                  <motion.span
+                    className="minimal-timeline-progress"
+                    initial={false}
+                    animate={{
+                      width: `${visibleProgressPercent}%`,
+                      height: timelineHeight,
+                    }}
+                    transition={timelineTransition}
+                  />
+                </div>
                 <span className="minimal-inline-time">
                   {isReady
                     ? `${formatTime(currentTime)} / ${formatTime(duration)}`
