@@ -4,6 +4,7 @@ import FooterRobotMark from './components/FooterRobotMark';
 import LocalTime from './components/LocalTime';
 import PageEnter from './components/PageEnter';
 import ProjectShowcase from './components/ProjectShowcase';
+import { VinylPlayer } from './components/VinylPlayer';
 
 function ExternalLink({
   href,
@@ -37,31 +38,16 @@ export default function Home() {
               </time>
             </header>
 
+            <VinylPlayer />
+
             <p className="minimal-reveal-line">
               I&apos;m Antonio, also known as txnio. I build things for the web
               and use browser windows as a place for interface experiments.
             </p>
 
             <p className="minimal-reveal-line">
-              I currently work at CEMOSA, where I focus on practical software,
-              automation, and tools that make technical work easier to use.
-            </p>
-
-            <p className="minimal-reveal-line">
-              My stack is mostly TypeScript, React, Next.js, Node.js, Python,
-              .NET, Power Platform, and AI integration when it has a real job to
-              do.
-            </p>
-
-            <p className="minimal-reveal-line">
-              I care about minimal design, motion, cinema, photography, and
-              hypnagogic music.
-            </p>
-
-            <p className="minimal-reveal-line">
-              Recently, I have been exploring interface systems, small OS-like
-              environments, and visual experiments that sit between tool and
-              artwork.
+              I make practical software, automation, and visual interface
+              experiments with TypeScript, React, Next.js, Python, .NET, and AI.
             </p>
 
             <p className="minimal-reveal-line">

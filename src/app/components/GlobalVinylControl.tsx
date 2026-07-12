@@ -8,7 +8,7 @@ interface GlobalVinylControlProps {
 }
 
 export default function GlobalVinylControl({ className = '' }: GlobalVinylControlProps) {
-  const { isPlaying, togglePlayback } = useGlobalAudioPlayer()
+  const { activeTrack, isPlaying, togglePlayback } = useGlobalAudioPlayer()
 
   return (
     <div className={`fixed top-4 right-4 md:top-6 md:right-6 z-[80] ${className}`}>
@@ -20,7 +20,7 @@ export default function GlobalVinylControl({ className = '' }: GlobalVinylContro
         }}
         className="h-14 w-14 md:h-16 md:w-16"
         aria-label={isPlaying ? 'Pause track' : 'Play track'}
-        title="takashi yoshimatsu's - birds are still"
+        title={`${activeTrack.title} — ${activeTrack.artist}`}
       >
         <span
           className="relative block h-full w-full rounded-full"
@@ -39,8 +39,8 @@ export default function GlobalVinylControl({ className = '' }: GlobalVinylContro
             }}
           >
             <Image
-              src="/yoshimatsu.png"
-              alt="Yoshimatsu Memo Flora"
+              src={activeTrack.cover}
+              alt=""
               fill
               sizes="64px"
               className="object-cover"
