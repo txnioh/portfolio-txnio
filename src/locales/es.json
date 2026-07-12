@@ -158,13 +158,7 @@
     },
     "projectDescriptions": {
         "txniOS": "Simulación interactiva de Mac OS 7 con ventanas funcionales y la estética clásica del sistema.",
-        "Cubes": "Una experiencia visual interactiva con cubos 3D utilizando Three.js y React Three Fiber.",
-        "Minder": "Una aplicación para subir imágenes, comentarios y proyectos utilizando Firebase, React, TypeScript, Next.js y autenticación de Google.",
-        "Second Portfolio": "Un portafolio inspirado en el trabajo de Yihui Hu, con un diseño tipo pegatina.",
-        "3D Crystal Effect": "Un efecto visual de cristal 3D implementado con JavaScript.",
-        "Infinite Particles": "Una animación de partículas infinitas creada con JavaScript.",
-        "Floating Images": "Una galería mínima con interacción del mouse para imágenes flotantes.",
-        "Pixel Transition": "Una transición de píxeles simple para la barra de menú.",
-        "Gradient Generator": "Un generador de gradientes implementado en JavaScript."
+        "Spacio": "Una app web para explorar modelos BIM, sensores y capas ambientales en una interfaz espacial.",
+        "Minder": "Una app para subir imágenes, comentarios y proyectos utilizando Firebase, React, TypeScript, Next.js y autenticación de Google."
     }
 }

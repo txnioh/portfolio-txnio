@@ -34,11 +34,11 @@ const projects: Project[] = [
   },
   {
     id: 8,
-    title: "Cubes",
+    title: "Spacio",
     description: "", // Will be populated from translations
-    githubUrl: "https://github.com/txnioh/cubes",
-    demoUrl: "https://cubes-umber.vercel.app",
-    imagePath: "/projects-img/project-cubes.png"
+    githubUrl: "https://github.com/txnioh/spacio",
+    demoUrl: "https://spacio.txnio.com/",
+    imagePath: "/projects-img/project-spacio-bim.gif"
   },
   {
     id: 6,
@@ -47,54 +47,6 @@ const projects: Project[] = [
     githubUrl: "https://github.com/txnioh/minder",
     demoUrl: "https://minder-txnio.vercel.app/",
     imagePath: "/projects-img/project-minder.png"
-  },
-  {
-    id: 7,
-    title: "Second Portfolio",
-    description: "", // Will be populated from translations
-    githubUrl: "https://github.com/txnioh/second-portfolio",
-    demoUrl: "https://second-portfolio-txnio.vercel.app/",
-    imagePath: "/projects-img/project-second-portfolio.png"
-  },
-  {
-    id: 1,
-    title: "3D Crystal Effect",
-    description: "", // Will be populated from translations
-    githubUrl: "https://github.com/txnioh/3d-cristal-effect",
-    demoUrl: "https://3d-cristal-effect.vercel.app/",
-    imagePath: "/projects-img/project-crystal-effect.png"
-  },
-  {
-    id: 2,
-    title: "Infinite Particles",
-    description: "", // Will be populated from translations
-    githubUrl: "https://github.com/txnioh/infinite-particles",
-    demoUrl: "https://infinite-particles-txnio.vercel.app/",
-    imagePath: "/projects-img/project-infinite-particles.png"
-  },
-  {
-    id: 3,
-    title: "Floating Images",
-    description: "", // Will be populated from translations
-    githubUrl: "https://github.com/txnioh/floating-images",
-    demoUrl: "https://floating-images.vercel.app/",
-    imagePath: "/projects-img/project-floating-images.png"
-  },
-  {
-    id: 4,
-    title: "Pixel Transition",
-    description: "", // Will be populated from translations
-    githubUrl: "https://github.com/txnioh/pixel-transition",
-    demoUrl: "https://pixel-transition-eight.vercel.app/",
-    imagePath: "/projects-img/project-pixel-transition.png"
-  },
-  {
-    id: 5,
-    title: "Gradient Generator",
-    description: "", // Will be populated from translations
-    githubUrl: "https://github.com/txnioh/gradient-generator",
-    demoUrl: "https://gradient-generator-txnio.vercel.app/",
-    imagePath: "/projects-img/project-gradient-generator.png"
   },
 ];
 

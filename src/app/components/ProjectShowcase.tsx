@@ -20,7 +20,7 @@ export default function ProjectShowcase() {
               {(projectsByGroup[group] ?? []).map((project) => (
                 <li key={project.slug}>
                   <Link
-                    className="minimal-row-link"
+                    className="minimal-row-link minimal-reveal-line"
                     href={`/projects/${project.slug}`}
                   >
                     <h2>{project.title}</h2>
