@@ -46,7 +46,7 @@ const projects: Project[] = [
     description: "", // Will be populated from translations
     githubUrl: "https://github.com/txnioh/minder",
     demoUrl: "https://minder-txnio.vercel.app/",
-    imagePath: "/projects-img/project-minder.png"
+    imagePath: "/projects-img/project-minder-main.gif"
   },
 ];
 
@@ -293,6 +293,7 @@ const ProjectsPage = () => {
               draggable={false}
               className="object-cover"
               sizes={isMobile ? "(max-width: 768px) 100vw" : "(max-width: 768px) 100vw, 20vw"}
+              unoptimized={project.imagePath.endsWith('.gif')}
             />
 
             {/* Dark overlay for text readability */}

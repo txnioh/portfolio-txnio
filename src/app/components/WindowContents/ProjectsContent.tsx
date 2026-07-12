@@ -151,7 +151,7 @@ const projects: Project[] = [
     description: "", // Will be populated from translations
     githubUrl: "https://github.com/txnioh/minder",
     demoUrl: "https://minder-txnio.vercel.app/",
-    imagePath: "/projects-img/project-minder.png"
+    imagePath: "/projects-img/project-minder-main.gif"
   },
 ];
 
@@ -220,6 +220,7 @@ const ProjectsContent: React.FC = () => {
         width={350}
         height={230}
         draggable={false}
+        unoptimized={project.imagePath.endsWith('.gif')}
       />
       <ProjectDescription>{t(`projectDescriptions.${project.title}`)}</ProjectDescription>
     </ProjectCard>
