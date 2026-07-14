@@ -16,6 +16,8 @@ import {
   useRef,
   useState,
 } from 'react';
+import { useDjMixer } from '../dj/DjMixerContext';
+import { InlineDjDeck } from './DjMixer';
 import { useGlobalAudioPlayer } from './GlobalAudioPlayer';
 
 const SCREEN_TRANSITION = {
@@ -94,6 +96,7 @@ export function VinylPlayer() {
   const isDraggingCollectionRef = useRef(false);
   const dragReleaseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const shouldReduceMotion = useReducedMotion();
+  const [djSessionActive, djDispatch] = useDjMixer((snapshot) => snapshot.sessionActive);
   const {
     activeTrack,
     activeTrackIndex,
@@ -106,6 +109,10 @@ export function VinylPlayer() {
     togglePlayback,
     tracks,
   } = useGlobalAudioPlayer();
+
+  useEffect(() => {
+    if (djSessionActive) setScreen('player');
+  }, [djSessionActive]);
 
   useEffect(() => {
     const img = new window.Image();
@@ -325,7 +332,7 @@ export function VinylPlayer() {
   return (
     <motion.section
       layout
-      className="minimal-inline-player minimal-reveal-line"
+      className={`minimal-inline-player minimal-reveal-line${djSessionActive ? ' is-dj-mode' : ''}`}
       aria-label={screen === 'player' ? 'Now playing' : 'Choose a record'}
       transition={screenTransition}
     >
@@ -339,6 +346,10 @@ export function VinylPlayer() {
             exit={{ opacity: 0, x: -18 }}
             transition={screenTransition}
           >
+            {djSessionActive ? (
+              <InlineDjDeck />
+            ) : (
+              <>
             <div className="minimal-release-picker">
               <button
                 type="button"
@@ -464,14 +475,25 @@ export function VinylPlayer() {
                     : '--:-- / --:--'}
                 </span>
               </div>
-              <button
-                type="button"
-                className="minimal-collection-label"
-                onClick={openLibrary}
-              >
-                Browse {tracks.length} records ↗
-              </button>
+              <div className="minimal-player-links">
+                <button
+                  type="button"
+                  className="minimal-collection-label"
+                  onClick={openLibrary}
+                >
+                  Browse {tracks.length} records ↗
+                </button>
+                <button
+                  type="button"
+                  className="minimal-mix-label"
+                  onClick={() => void djDispatch({ type: 'mode.open' })}
+                >
+                  mix ↗
+                </button>
+              </div>
             </div>
+              </>
+            )}
           </motion.div>
         ) : (
           <motion.div

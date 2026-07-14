@@ -1,14 +1,15 @@
 'use client';
 
-import React, {
+import {
   createContext,
+  type ReactNode,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
-  useRef,
-  useState,
 } from 'react';
+import { DjMixerProvider, useDjMixer } from '../dj/DjMixerContext';
+import { getDominantDeck } from '../dj/mixerMath';
+import type { LoadedDjTrack } from '../dj/types';
 import { audioTracks, type AudioTrack } from '../music';
 
 interface GlobalAudioPlayerContextValue {
@@ -26,152 +27,88 @@ interface GlobalAudioPlayerContextValue {
 
 const GlobalAudioPlayerContext = createContext<GlobalAudioPlayerContextValue | null>(null);
 
-const INITIAL_PLAYBACK_STATE = {
-  isPlaying: false,
-  currentTime: 0,
-  duration: 0,
-};
+function toAudioTrack(track: LoadedDjTrack | null): AudioTrack {
+  if (!track) return audioTracks[0];
+  const catalogTrack = track.catalogIndex === null ? null : audioTracks[track.catalogIndex];
+  return catalogTrack ?? {
+    id: track.id,
+    title: track.title,
+    artist: track.artist,
+    album: track.album,
+    src: '',
+    cover: track.cover ?? '/icons/cdrom.png',
+  };
+}
 
-export function GlobalAudioPlayerProvider({ children }: { children: React.ReactNode }) {
-  const audioRef = useRef<HTMLAudioElement>(null);
-  const [playback, setPlayback] = useState(INITIAL_PLAYBACK_STATE);
-  const [activeTrackIndex, setActiveTrackIndex] = useState(0);
-  const shouldAutoplayTrackRef = useRef(false);
-  const activeTrack = audioTracks[activeTrackIndex];
-  const { currentTime, duration, isPlaying } = playback;
-
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    const handlePlay = () => {
-      setPlayback((current) => ({ ...current, isPlaying: true }));
-    };
-    const handlePause = () => {
-      setPlayback((current) => ({ ...current, isPlaying: false }));
-    };
-    const handleTimeUpdate = () => {
-      setPlayback((current) => ({ ...current, currentTime: audio.currentTime }));
-    };
-    const handleDurationChange = () => {
-      setPlayback((current) => ({
-        ...current,
-        duration: Number.isFinite(audio.duration) ? audio.duration : 0,
-      }));
-    };
-    const handleEnded = () => {
-      setPlayback((current) => ({
-        ...current,
-        isPlaying: false,
-        currentTime: audio.currentTime,
-      }));
-    };
-    const handleEmptied = () => {
-      setPlayback(INITIAL_PLAYBACK_STATE);
-    };
-
-    audio.addEventListener('play', handlePlay);
-    audio.addEventListener('pause', handlePause);
-    audio.addEventListener('timeupdate', handleTimeUpdate);
-    audio.addEventListener('loadedmetadata', handleDurationChange);
-    audio.addEventListener('durationchange', handleDurationChange);
-    audio.addEventListener('ended', handleEnded);
-    audio.addEventListener('emptied', handleEmptied);
-
-    if (audio.readyState >= HTMLMediaElement.HAVE_METADATA) {
-      handleDurationChange();
-      handleTimeUpdate();
-    }
-
-    return () => {
-      audio.removeEventListener('play', handlePlay);
-      audio.removeEventListener('pause', handlePause);
-      audio.removeEventListener('timeupdate', handleTimeUpdate);
-      audio.removeEventListener('loadedmetadata', handleDurationChange);
-      audio.removeEventListener('durationchange', handleDurationChange);
-      audio.removeEventListener('ended', handleEnded);
-      audio.removeEventListener('emptied', handleEmptied);
-    };
-  }, []);
-
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    audio.load();
-
-    if (!shouldAutoplayTrackRef.current) return;
-
-    shouldAutoplayTrackRef.current = false;
-    const playPromise = audio.play();
-    playPromise?.catch(() => {
-      setPlayback((current) => ({ ...current, isPlaying: false }));
-    });
-  }, [activeTrackIndex]);
+function GlobalAudioPlayerAdapter({ children }: { children: ReactNode }) {
+  const [mixer, dispatch] = useDjMixer((snapshot) => snapshot);
+  const dominantDeck = getDominantDeck(
+    mixer.crossfader,
+    mixer.decks.A.level,
+    mixer.decks.B.level,
+    mixer.focusedDeck,
+  );
+  const activeDeckId = mixer.sessionActive ? dominantDeck : mixer.focusedDeck;
+  const activeDeck = mixer.decks[activeDeckId];
+  const activeTrack = useMemo(() => toAudioTrack(activeDeck.track), [activeDeck.track]);
+  const activeTrackIndex = activeDeck.track?.catalogIndex ?? 0;
+  const isPlaying = mixer.decks.A.status === 'playing' || mixer.decks.B.status === 'playing';
 
   const togglePlayback = useCallback(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    if (audio.paused) {
-      const playPromise = audio.play();
-      if (playPromise) {
-        playPromise.catch(() => {
-          setPlayback((current) => ({ ...current, isPlaying: false }));
-        });
-      }
+    if (mixer.sessionActive) {
+      void dispatch({ type: 'mixer.toggleOutput' });
       return;
     }
-
-    audio.pause();
-  }, []);
+    void dispatch({ type: 'deck.toggle', deck: activeDeckId });
+  }, [activeDeckId, dispatch, mixer.sessionActive]);
 
   const seekTo = useCallback((seconds: number) => {
-    const audio = audioRef.current;
-    if (!audio || !Number.isFinite(audio.duration)) return;
-
-    const nextTime = Math.min(Math.max(seconds, 0), audio.duration);
-    audio.currentTime = nextTime;
-    setPlayback((current) => ({ ...current, currentTime: nextTime }));
-  }, []);
+    void dispatch({ type: 'deck.seek', deck: activeDeckId, seconds });
+  }, [activeDeckId, dispatch]);
 
   const selectTrack = useCallback((index: number) => {
-    const audio = audioRef.current;
-    const nextTrack = audioTracks[index];
-    if (!audio || !nextTrack) return;
-
-    if (index === activeTrackIndex) {
-      const playPromise = audio.play();
-      playPromise?.catch(() => {
-        setPlayback((current) => ({ ...current, isPlaying: false }));
-      });
+    if (!audioTracks[index]) return;
+    if (activeDeck.track?.catalogIndex === index) {
+      if (activeDeck.status !== 'playing') void dispatch({ type: 'deck.toggle', deck: activeDeckId });
       return;
     }
+    void dispatch({ type: 'deck.loadAudioTrack', deck: activeDeckId, trackIndex: index, autoplay: true });
+  }, [activeDeck.status, activeDeck.track?.catalogIndex, activeDeckId, dispatch]);
 
-    shouldAutoplayTrackRef.current = true;
-    setActiveTrackIndex(index);
-  }, [activeTrackIndex]);
-
-  const contextValue = useMemo(() => {
-    return {
-      isPlaying,
-      currentTime,
-      duration,
-      isReady: duration > 0,
-      tracks: audioTracks,
-      activeTrack,
-      activeTrackIndex,
-      togglePlayback,
-      seekTo,
-      selectTrack,
-    };
-  }, [activeTrack, activeTrackIndex, currentTime, duration, isPlaying, seekTo, selectTrack, togglePlayback]);
+  const contextValue = useMemo(() => ({
+    isPlaying,
+    currentTime: activeDeck.position,
+    duration: activeDeck.duration,
+    isReady: activeDeck.duration > 0,
+    tracks: audioTracks,
+    activeTrack,
+    activeTrackIndex,
+    togglePlayback,
+    seekTo,
+    selectTrack,
+  }), [
+    activeDeck.duration,
+    activeDeck.position,
+    activeTrack,
+    activeTrackIndex,
+    isPlaying,
+    seekTo,
+    selectTrack,
+    togglePlayback,
+  ]);
 
   return (
     <GlobalAudioPlayerContext.Provider value={contextValue}>
       {children}
-      <audio ref={audioRef} src={activeTrack.src} preload="metadata" />
     </GlobalAudioPlayerContext.Provider>
+  );
+}
+
+export function GlobalAudioPlayerProvider({ children }: { children: ReactNode }) {
+  return (
+    <DjMixerProvider>
+      <GlobalAudioPlayerAdapter>{children}</GlobalAudioPlayerAdapter>
+    </DjMixerProvider>
   );
 }
 

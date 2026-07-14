@@ -404,6 +404,15 @@ html, body {
   color: #111111;
 }
 
+.minimal-inline-player.is-dj-mode {
+  height: 470px;
+  min-height: 470px;
+}
+
+.minimal-inline-player.is-dj-mode .minimal-player-screen {
+  height: 440px;
+}
+
 .minimal-player-screen {
   display: grid;
   width: 100%;
@@ -1276,5 +1285,1163 @@ html, body {
 @media (max-width: 360px) {
   .minimal-row-link {
     padding-left: 40px;
+  }
+}
+
+/* DJ entry */
+.minimal-player-links {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.minimal-mix-label {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+  font: inherit;
+  font-size: 11px;
+  line-height: 14px;
+}
+
+.minimal-mix-label:hover {
+  color: #111111;
+}
+
+.minimal-mix-label:focus-visible {
+  outline: 1px solid #111111;
+  outline-offset: 3px;
+}
+
+.dj-visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+@media (max-width: 640px) {
+  .minimal-mix-label {
+    display: inline-flex;
+    min-height: 30px;
+    align-items: center;
+  }
+}
+
+/* Inline DJ deck */
+.inline-dj-board {
+  position: relative;
+  display: grid;
+  width: 100%;
+  height: 440px;
+  grid-column: 1 / -1;
+  grid-template-columns: minmax(0, 1fr) 104px minmax(0, 1fr);
+  overflow: hidden;
+  border: 1px solid #deded9;
+  background: #fafaf8;
+  color: #111111;
+  font-size: 10px;
+}
+
+.inline-dj-surface {
+  display: contents;
+}
+
+.inline-dj-channel {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  grid-template-columns: 88px minmax(0, 1fr);
+  grid-template-rows: 112px 128px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  padding: 7px 9px;
+}
+
+.inline-dj-channel.is-b {
+  grid-template-columns: minmax(0, 1fr) 88px;
+}
+
+.inline-dj-channel.is-b .inline-dj-platter {
+  grid-row: 1;
+  grid-column: 2;
+}
+
+.inline-dj-channel.is-b .inline-dj-track {
+  grid-row: 1;
+  grid-column: 1;
+}
+
+.inline-dj-platter {
+  position: relative;
+  display: grid;
+  width: 84px;
+  height: 84px;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: conic-gradient(#111111 0 var(--deck-progress), #dadad5 var(--deck-progress) 360deg);
+  box-shadow: inset 0 0 0 5px #fafaf8, inset 0 0 0 6px #c8c8c3;
+  color: #111111;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.inline-dj-platter.is-grabbed {
+  cursor: grabbing;
+}
+
+.inline-dj-platter.is-grabbed .inline-dj-disc {
+  box-shadow: 0 0 0 2px #fafaf8, 0 0 0 3px #111111;
+}
+
+.inline-dj-platter:disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
+}
+
+.inline-dj-disc {
+  position: relative;
+  display: grid;
+  width: 62px;
+  height: 62px;
+  place-items: center;
+  border: 1px solid #bababa;
+  border-radius: 50%;
+  background:
+    repeating-radial-gradient(circle, #252525 0 1px, #171717 2px 4px),
+    #181818;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.13);
+  transform: rotate(var(--disc-angle));
+}
+
+.inline-dj-disc::before,
+.inline-dj-disc::after {
+  position: absolute;
+  border-radius: 50%;
+  content: '';
+}
+
+.inline-dj-disc::before {
+  inset: 19px;
+  background: #f4f4f1;
+}
+
+.inline-dj-disc::after {
+  inset: 29px;
+  background: #111111;
+}
+
+.inline-dj-disc i {
+  position: relative;
+  z-index: 1;
+  color: #111111;
+  font-size: 7px;
+  font-style: normal;
+}
+
+.inline-dj-track {
+  display: grid;
+  min-width: 0;
+  grid-template-rows: 15px 25px 29px 14px 28px;
+}
+
+.inline-dj-track header,
+.inline-dj-panel > header,
+.inline-dj-library > header {
+  display: flex;
+  min-width: 0;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.inline-dj-track header > span,
+.inline-dj-panel header span,
+.inline-dj-library header span {
+  overflow: hidden;
+  color: rgba(0, 0, 0, 0.4);
+  font-size: 8px;
+  font-weight: 560;
+  letter-spacing: 0.08em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.inline-dj-track header button,
+.inline-dj-actions button,
+.inline-dj-panel button,
+.inline-dj-library button {
+  border: 0;
+  background: transparent;
+  color: rgba(0, 0, 0, 0.48);
+  cursor: pointer;
+  font: inherit;
+}
+
+.inline-dj-track header button {
+  min-width: 32px;
+  padding: 0;
+  text-align: right;
+}
+
+.inline-dj-track > p {
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+}
+
+.inline-dj-track > p strong,
+.inline-dj-track > p span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.inline-dj-track > p strong {
+  font-size: 11px;
+  font-weight: 550;
+  line-height: 14px;
+}
+
+.inline-dj-track > p span {
+  color: rgba(0, 0, 0, 0.42);
+  font-size: 9px;
+  line-height: 11px;
+}
+
+.inline-dj-waveform {
+  position: relative;
+  min-width: 0;
+  height: 27px;
+  overflow: hidden;
+  border-top: 1px solid #e2e2de;
+  border-bottom: 1px solid #e2e2de;
+  cursor: ew-resize;
+  touch-action: none;
+}
+
+.inline-dj-waveform.is-loading {
+  opacity: 0.35;
+}
+
+.inline-dj-waveform-bars {
+  display: flex;
+  height: 100%;
+  gap: 1px;
+  align-items: center;
+}
+
+.inline-dj-waveform-bars i {
+  min-width: 1px;
+  flex: 1;
+  background: #cececa;
+}
+
+.inline-dj-waveform-bars i.is-played {
+  background: #111111;
+}
+
+.inline-dj-playhead {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: #111111;
+}
+
+.inline-dj-readout {
+  display: flex;
+  min-width: 0;
+  justify-content: space-between;
+  align-items: center;
+  color: rgba(0, 0, 0, 0.46);
+  font-size: 8px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.inline-dj-readout span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.inline-dj-readout span:last-child {
+  margin-left: 5px;
+  text-align: right;
+}
+
+.inline-dj-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 3px;
+}
+
+.inline-dj-actions button {
+  min-width: 0;
+  padding: 0 3px;
+  border-top: 1px solid #dfdfda;
+  color: rgba(0, 0, 0, 0.48);
+  font-size: 9px;
+}
+
+.inline-dj-actions button:hover,
+.inline-dj-actions button.is-active,
+.inline-dj-track header button:hover,
+.inline-dj-panel button:hover,
+.inline-dj-library button:hover {
+  color: #111111;
+}
+
+.inline-dj-actions button:disabled,
+.inline-dj-library button:disabled {
+  cursor: not-allowed;
+  opacity: 0.32;
+}
+
+.inline-dj-error {
+  position: absolute;
+  z-index: 3;
+  right: 8px;
+  top: 116px;
+  bottom: auto;
+  left: 8px;
+  height: 12px;
+  margin: 0;
+  overflow: hidden;
+  background: rgba(250, 250, 248, 0.94);
+  color: rgba(0, 0, 0, 0.58);
+  font-size: 7px;
+  line-height: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.inline-dj-error:empty {
+  display: none;
+}
+
+.inline-dj-deck-controls {
+  display: grid;
+  min-width: 0;
+  align-self: stretch;
+  grid-row: 2;
+  grid-column: 1 / -1;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 2px 5px;
+  align-items: center;
+  padding-top: 5px;
+  border-top: 1px solid #e4e4df;
+}
+
+.inline-dj-performance {
+  display: grid;
+  min-width: 0;
+  grid-row: 3;
+  grid-column: 1 / -1;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 3px;
+  align-items: center;
+  padding-top: 6px;
+  border-top: 1px solid #e4e4df;
+}
+
+.inline-dj-hot-cues {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: repeat(4, minmax(42px, 1fr));
+  gap: 3px;
+}
+
+.inline-dj-hot-cues button,
+.inline-dj-loop-controls button,
+.inline-dj-nudge-controls button {
+  display: grid;
+  min-width: 44px;
+  min-height: 44px;
+  place-items: center;
+  padding: 2px;
+  border: 1px solid #deded9;
+  background: transparent;
+  color: rgba(0, 0, 0, 0.48);
+  cursor: pointer;
+  font: inherit;
+  touch-action: manipulation;
+}
+
+.inline-dj-hot-cues button.is-set,
+.inline-dj-loop-controls button.is-active,
+.inline-dj-nudge-controls button.is-active {
+  border-color: #111111;
+  color: #111111;
+}
+
+.inline-dj-hot-cues button:disabled,
+.inline-dj-loop-controls button:disabled {
+  cursor: not-allowed;
+  opacity: 0.32;
+}
+
+.inline-dj-hot-cues span,
+.inline-dj-loop-controls strong {
+  font-size: 10px;
+  font-weight: 560;
+}
+
+.inline-dj-hot-cues small,
+.inline-dj-nudge-controls small {
+  display: block;
+  color: rgba(0, 0, 0, 0.4);
+  font-size: 7px;
+  font-weight: 450;
+}
+
+.inline-dj-performance-tools {
+  display: grid;
+  gap: 3px;
+}
+
+.inline-dj-loop-controls {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
+  gap: 2px;
+}
+
+.inline-dj-loop-controls button:nth-child(2) {
+  display: flex;
+  min-width: 0;
+  gap: 3px;
+  justify-content: center;
+  font-size: 8px;
+}
+
+.inline-dj-nudge-controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(44px, 1fr));
+  gap: 2px;
+}
+
+.inline-dj-nudge-controls button {
+  grid-template-columns: auto auto;
+  gap: 4px;
+  touch-action: none;
+}
+
+.inline-dj-knob {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  height: 76px;
+  grid-template-rows: 12px 44px 12px;
+  place-items: center;
+  color: rgba(0, 0, 0, 0.46);
+  font-size: 7px;
+  letter-spacing: 0.06em;
+}
+
+.inline-dj-knob-dial {
+  position: relative;
+  display: block;
+  box-sizing: border-box;
+  width: 44px;
+  height: 44px;
+  border: 1px solid #bdbdb8;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 32%, #fdfdfc 0, #e6e6e2 70%, #d2d2cd 100%);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+  cursor: ns-resize;
+  touch-action: none;
+}
+
+.inline-dj-knob-dial b {
+  position: absolute;
+  top: 4px;
+  left: calc(50% - 1px);
+  width: 2px;
+  height: 11px;
+  background: #111111;
+  transform: rotate(var(--knob-rotation));
+  transform-origin: 1px 18px;
+}
+
+.inline-dj-knob output {
+  overflow: hidden;
+  max-width: 100%;
+  color: #111111;
+  font-size: 7px;
+  letter-spacing: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.inline-dj-knob-dial:focus-visible {
+  outline: 1px solid #111111;
+  outline-offset: 2px;
+}
+
+.inline-dj-tempo-control {
+  grid-column: 1 / -1;
+  padding: 0 4px;
+}
+
+.inline-dj-tempo-control .inline-dj-range {
+  margin: 0;
+}
+
+.inline-dj-mixer {
+  position: relative;
+  display: grid;
+  grid-template-rows: 90px minmax(0, 1fr) 54px;
+  border-right: 1px solid #deded9;
+  border-left: 1px solid #deded9;
+}
+
+.inline-dj-mixer-head {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  overflow: hidden;
+  border-bottom: 1px solid #e4e4df;
+}
+
+.inline-dj-mixer-head .inline-dj-knob {
+  height: 78px;
+  grid-template-rows: 12px 44px 12px;
+}
+
+.inline-dj-mix-button {
+  display: grid;
+  min-width: 0;
+  place-items: center;
+  height: 100%;
+  padding: 7px 3px 2px;
+  border: 0;
+  border-right: 1px solid #e4e4df;
+  background: transparent;
+  color: #111111;
+  cursor: pointer;
+  font: inherit;
+}
+
+.inline-dj-mix-button > span {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+}
+
+.inline-dj-mix-button > i {
+  display: flex;
+  width: 18px;
+  height: 27px;
+  gap: 4px;
+  align-items: flex-end;
+}
+
+.inline-dj-mix-button b {
+  width: 7px;
+  min-height: 2px;
+  background: #111111;
+}
+
+.inline-dj-mix-button i.is-limiting b {
+  background: #d92f2f;
+}
+
+.inline-dj-mix-button small {
+  color: rgba(0, 0, 0, 0.4);
+  font-size: 8px;
+  font-weight: 450;
+}
+
+.inline-dj-channel-faders {
+  display: grid;
+  min-height: 0;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  border-bottom: 1px solid #e4e4df;
+}
+
+.inline-dj-channel-faders label {
+  display: grid;
+  min-width: 0;
+  height: 100%;
+  grid-template-rows: 14px minmax(0, 1fr);
+  place-items: center;
+  color: rgba(0, 0, 0, 0.46);
+  font-size: 7px;
+}
+
+.inline-dj-channel-faders input {
+  width: 44px;
+  height: 100px;
+  margin: 0;
+  accent-color: #111111;
+  cursor: ns-resize;
+  direction: rtl;
+  writing-mode: vertical-lr;
+}
+
+.inline-dj-crossfader {
+  display: grid;
+  grid-template-rows: 9px 44px;
+  padding: 0 8px;
+}
+
+.inline-dj-crossfader > span {
+  display: flex;
+  justify-content: space-between;
+  color: rgba(0, 0, 0, 0.42);
+  font-size: 7px;
+}
+
+.inline-dj-crossfader i {
+  font-style: normal;
+}
+
+.inline-dj-crossfader input,
+.inline-dj-range input {
+  width: 100%;
+  height: 44px;
+  margin: 0;
+  accent-color: #111111;
+  cursor: ew-resize;
+}
+
+.inline-dj-panel,
+.inline-dj-library {
+  position: absolute;
+  z-index: 5;
+  inset: 0;
+  box-sizing: border-box;
+  background: rgba(250, 250, 248, 0.98);
+}
+
+.inline-dj-panel > header,
+.inline-dj-library > header {
+  position: relative;
+  height: 35px;
+  padding: 0 10px;
+  border-bottom: 1px solid #deded9;
+  text-align: left;
+}
+
+.inline-dj-panel > header > div,
+.inline-dj-library > header > div {
+  min-width: 0;
+  padding-right: 52px;
+}
+
+.inline-dj-panel header span,
+.inline-dj-panel header strong,
+.inline-dj-library header span,
+.inline-dj-library header strong {
+  display: block;
+}
+
+.inline-dj-panel header strong,
+.inline-dj-library header strong {
+  margin-top: 1px;
+  font-size: 10px;
+  font-weight: 550;
+}
+
+.inline-dj-panel header button,
+.inline-dj-library header button {
+  position: absolute;
+  top: 0;
+  right: 10px;
+  min-width: 44px;
+  height: 34px;
+  padding: 0;
+  text-align: right;
+}
+
+.inline-dj-panel-controls {
+  display: grid;
+  box-sizing: border-box;
+  height: calc(100% - 35px);
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 8px;
+  align-items: center;
+  padding: 0 12px;
+  overflow-x: auto;
+}
+
+.inline-dj-panel-controls.is-mixer {
+  grid-template-columns: repeat(4, minmax(0, 1fr)) 82px 92px;
+  gap: 6px;
+  padding: 0 8px;
+}
+
+.inline-dj-panel.is-deck-adjust .inline-dj-panel-controls {
+  height: calc(100% - 123px);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  overflow: hidden;
+}
+
+.inline-dj-adjust-controls {
+  display: grid;
+  box-sizing: border-box;
+  height: 88px;
+  grid-template-columns: 66px 78px 50px 108px minmax(185px, 1fr);
+  gap: 4px;
+  align-items: center;
+  padding: 6px;
+  overflow-x: auto;
+  border-top: 1px solid #deded9;
+}
+
+.inline-dj-adjust-controls label {
+  display: grid;
+  min-width: 0;
+  color: rgba(0, 0, 0, 0.46);
+  font-size: 8px;
+  letter-spacing: 0.06em;
+}
+
+.inline-dj-adjust-controls input {
+  box-sizing: border-box;
+  width: 100%;
+  height: 44px;
+  margin-top: 3px;
+  padding: 0 6px;
+  border: 1px solid #deded9;
+  border-radius: 0;
+  background: transparent;
+  color: #111111;
+  font: inherit;
+  letter-spacing: 0;
+}
+
+.inline-dj-adjust-controls button {
+  min-width: 112px;
+  min-height: 44px;
+  padding: 0 8px;
+  border: 1px solid #deded9;
+}
+
+.inline-dj-clear-cues {
+  display: grid;
+  min-width: 185px;
+  color: rgba(0, 0, 0, 0.46);
+  font-size: 8px;
+  letter-spacing: 0.06em;
+}
+
+.inline-dj-clear-cues > div {
+  display: grid;
+  grid-template-columns: repeat(4, 44px);
+  gap: 3px;
+  margin-top: 3px;
+}
+
+.inline-dj-clear-cues button {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+}
+
+.inline-dj-echo-control {
+  display: grid;
+  min-width: 96px;
+  grid-template-rows: 13px 88px 13px;
+  place-items: center;
+  color: rgba(0, 0, 0, 0.46);
+  font-size: 7px;
+  letter-spacing: 0.06em;
+}
+
+.inline-dj-echo-pad {
+  position: relative;
+  box-sizing: border-box;
+  width: 88px;
+  height: 88px;
+  border: 1px solid #cfcfca;
+  background:
+    linear-gradient(90deg, transparent calc(50% - 0.5px), #e2e2de 50%, transparent calc(50% + 0.5px)),
+    linear-gradient(transparent calc(50% - 0.5px), #e2e2de 50%, transparent calc(50% + 0.5px));
+  cursor: crosshair;
+  touch-action: none;
+}
+
+.inline-dj-echo-pad i {
+  position: absolute;
+  top: var(--echo-y);
+  left: var(--echo-x);
+  width: 9px;
+  height: 9px;
+  border: 1px solid #111111;
+  border-radius: 50%;
+  background: #fafaf8;
+  translate: -50% -50%;
+}
+
+.inline-dj-echo-control output {
+  color: #111111;
+  font-size: 7px;
+  letter-spacing: 0;
+}
+
+.inline-dj-range {
+  display: block;
+  min-width: 0;
+}
+
+.inline-dj-range > span {
+  display: flex;
+  justify-content: space-between;
+  color: rgba(0, 0, 0, 0.46);
+  font-size: 8px;
+  letter-spacing: 0.06em;
+}
+
+.inline-dj-range output {
+  color: #111111;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+
+.inline-dj-range input {
+  height: 44px;
+}
+
+.inline-dj-panel-button {
+  min-width: 0;
+  min-height: 44px;
+  padding: 0 6px;
+  border: 1px solid #deded9 !important;
+}
+
+.inline-dj-crate {
+  display: flex;
+  box-sizing: border-box;
+  height: calc(100% - 35px);
+  gap: 6px;
+  padding: 5px 7px;
+  overflow-x: auto;
+}
+
+.inline-dj-crate > button {
+  display: block;
+  min-width: 154px;
+  padding: 7px 9px;
+  border: 1px solid #e0e0db;
+  text-align: left;
+}
+
+.inline-dj-crate span,
+.inline-dj-crate strong,
+.inline-dj-crate small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.inline-dj-crate span {
+  color: rgba(0, 0, 0, 0.4);
+  font-size: 8px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.inline-dj-crate strong {
+  margin-top: 5px;
+  font-size: 10px;
+  font-weight: 550;
+}
+
+.inline-dj-crate small {
+  margin-top: 2px;
+  color: rgba(0, 0, 0, 0.42);
+  font-size: 8px;
+}
+
+.inline-dj-file {
+  background: #f5f5f1 !important;
+}
+
+.inline-dj-platter:focus-visible,
+.inline-dj-track button:focus-visible,
+.inline-dj-waveform:focus-visible,
+.inline-dj-mix-button:focus-visible,
+.inline-dj-crossfader input:focus-visible,
+.inline-dj-panel button:focus-visible,
+.inline-dj-panel input:focus-visible,
+.inline-dj-hot-cues button:focus-visible,
+.inline-dj-loop-controls button:focus-visible,
+.inline-dj-nudge-controls button:focus-visible,
+.inline-dj-echo-pad:focus-visible,
+.inline-dj-library button:focus-visible {
+  outline: 1px solid #111111;
+  outline-offset: 2px;
+}
+
+@media (max-width: 720px) {
+  .inline-dj-board {
+    grid-template-columns: minmax(0, 1fr) 88px minmax(0, 1fr);
+  }
+
+  .inline-dj-channel,
+  .inline-dj-channel.is-b {
+    grid-template-columns: 50px minmax(0, 1fr);
+    grid-template-rows: 122px 128px minmax(0, 1fr);
+    gap: 5px;
+    padding: 5px;
+  }
+
+  .inline-dj-channel.is-b .inline-dj-platter {
+    grid-row: 1;
+    grid-column: 1;
+  }
+
+  .inline-dj-channel.is-b .inline-dj-track {
+    grid-row: 1;
+    grid-column: 2;
+  }
+
+  .inline-dj-platter {
+    width: 48px;
+    height: 48px;
+  }
+
+  .inline-dj-disc {
+    width: 34px;
+    height: 34px;
+  }
+
+  .inline-dj-disc::before {
+    inset: 10px;
+  }
+
+  .inline-dj-disc::after {
+    inset: 16px;
+  }
+
+  .inline-dj-track {
+    grid-template-rows: 15px 25px 25px 13px 44px;
+  }
+
+  .inline-dj-track header {
+    position: relative;
+  }
+
+  .inline-dj-track > p span,
+  .inline-dj-readout span:last-child {
+    display: none;
+  }
+
+  .inline-dj-waveform {
+    height: 23px;
+  }
+
+  .inline-dj-actions button,
+  .inline-dj-track header button {
+    min-height: 44px;
+  }
+
+  .inline-dj-track header button {
+    position: absolute;
+    z-index: 2;
+    top: -4px;
+    right: 0;
+    display: flex;
+    min-width: 44px;
+    justify-content: flex-end;
+    align-items: flex-start;
+    padding-top: 4px;
+    font-size: 0;
+  }
+
+  .inline-dj-track header button::after {
+    color: rgba(0, 0, 0, 0.48);
+    font-size: 12px;
+    content: '+';
+  }
+
+  .inline-dj-actions {
+    gap: 1px;
+  }
+
+  .inline-dj-actions button {
+    padding: 0 1px;
+    font-size: 8px;
+  }
+
+  .inline-dj-mix-button {
+    min-height: 62px;
+  }
+
+  .inline-dj-crossfader {
+    padding: 0 5px;
+  }
+
+  .inline-dj-performance {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 4px;
+  }
+
+  .inline-dj-hot-cues {
+    grid-template-columns: repeat(2, minmax(44px, 1fr));
+  }
+}
+
+@media (max-width: 430px) {
+  .minimal-inline-player.is-dj-mode {
+    height: 600px;
+    min-height: 600px;
+  }
+
+  .minimal-inline-player.is-dj-mode .minimal-player-screen {
+    height: 580px;
+  }
+
+  .inline-dj-board {
+    height: 580px;
+    grid-template-columns: minmax(0, 1fr) 88px minmax(0, 1fr);
+  }
+
+  .inline-dj-channel,
+  .inline-dj-channel.is-b {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: 122px 190px minmax(0, 1fr);
+  }
+
+  .inline-dj-platter {
+    position: absolute;
+    top: 4px;
+    width: 44px;
+    height: 44px;
+  }
+
+  .inline-dj-channel.is-a .inline-dj-platter {
+    left: 4px;
+  }
+
+  .inline-dj-channel.is-b .inline-dj-platter {
+    right: 4px;
+    left: auto;
+  }
+
+  .inline-dj-channel.is-b .inline-dj-track,
+  .inline-dj-track {
+    grid-row: 1;
+    grid-column: 1;
+  }
+
+  .inline-dj-channel.is-a .inline-dj-track header {
+    padding-left: 46px;
+  }
+
+  .inline-dj-channel.is-b .inline-dj-track header {
+    padding-right: 46px;
+  }
+
+  .inline-dj-channel.is-b .inline-dj-track header button {
+    right: auto;
+    left: 0;
+    justify-content: flex-start;
+  }
+
+  .inline-dj-channel.is-a .inline-dj-track > p {
+    box-sizing: border-box;
+    padding-left: 46px;
+  }
+
+  .inline-dj-channel.is-b .inline-dj-track > p {
+    box-sizing: border-box;
+    padding-right: 46px;
+  }
+
+  .inline-dj-disc {
+    width: 31px;
+    height: 31px;
+  }
+
+  .inline-dj-disc::before {
+    inset: 9px;
+  }
+
+  .inline-dj-disc::after {
+    inset: 14px;
+  }
+
+  .inline-dj-track > p {
+    padding-top: 2px;
+  }
+
+  .inline-dj-track > p strong {
+    font-size: 9px;
+  }
+
+  .inline-dj-readout {
+    font-size: 7px;
+  }
+
+  .inline-dj-deck-controls {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 3px;
+  }
+
+  .inline-dj-knob {
+    height: 70px;
+  }
+
+  .inline-dj-panel-controls {
+    grid-auto-columns: 106px;
+    grid-template-columns: none;
+    grid-auto-flow: column;
+  }
+
+  .inline-dj-panel-controls.is-mixer {
+    grid-template-columns: none;
+  }
+
+  .inline-dj-panel.is-deck-adjust .inline-dj-panel-controls {
+    grid-auto-columns: auto;
+    grid-auto-flow: row;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-rows: repeat(3, minmax(0, 1fr));
+  }
+
+  .inline-dj-performance-tools {
+    gap: 3px;
+  }
+
+  .inline-dj-loop-controls {
+    grid-template-columns: repeat(2, minmax(44px, 1fr));
+  }
+
+  .inline-dj-loop-controls button:first-child {
+    grid-row: 2;
+    grid-column: 1;
+  }
+
+  .inline-dj-loop-controls button:nth-child(2) {
+    grid-row: 1;
+    grid-column: 1 / -1;
+  }
+
+  .inline-dj-loop-controls button:last-child {
+    grid-row: 2;
+    grid-column: 2;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .inline-dj-disc {
+    transition: none;
   }
 }
