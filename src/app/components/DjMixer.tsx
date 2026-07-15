@@ -5,7 +5,6 @@ import {
   type CSSProperties,
   type KeyboardEvent,
   type PointerEvent,
-  useEffect,
   useMemo,
   useRef,
   useState,
@@ -22,7 +21,6 @@ import { djTracks } from '../music';
 
 const LOOP_LENGTHS: readonly LoopBeats[] = [1, 2, 4, 8, 16];
 const DECK_IDS: readonly DeckId[] = ['A', 'B'];
-const HOT_CUE_SLOTS = [0, 1, 2, 3] as const;
 type FxMode = 'echo' | 'filter';
 
 function formatTime(seconds: number) {
@@ -341,9 +339,13 @@ function Platter({ deck, dispatch }: { deck: DeckState; dispatch: DjDispatch }) 
       }}
     >
       <span className="ydj-record">
-        <i>{deck.id}</i>
+        <span
+          className="ydj-record-label"
+          style={deck.track?.cover ? { backgroundImage: `url(${deck.track.cover})` } : undefined}
+        >
+          <i>{deck.id}</i>
+        </span>
       </span>
-      <span className="ydj-tonearm" aria-hidden="true" />
       <span className="ydj-hand" aria-hidden="true">GRAB</span>
     </button>
   );
@@ -391,13 +393,11 @@ function DeckTransport({
   mode,
   dispatch,
   onModeChange,
-  onOpenPro,
 }: {
   deck: DeckState;
   mode: FxMode;
   dispatch: DjDispatch;
   onModeChange: (mode: FxMode) => void;
-  onOpenPro: () => void;
 }) {
   const loopIndex = LOOP_LENGTHS.indexOf(deck.loop.beats);
   const changeLoop = (direction: -1 | 1) => {
@@ -406,13 +406,20 @@ function DeckTransport({
   };
 
   return (
-    <div className="ydj-transport">
-      <button type="button" className="ydj-pro-button" onClick={onOpenPro}>pro</button>
-      <div className="ydj-fx-select" role="group" aria-label={`Deck ${deck.id} effect`}>
-        <button type="button" className={mode === 'echo' ? 'is-active' : ''} aria-pressed={mode === 'echo'} onClick={() => onModeChange('echo')}>ECHO</button>
-        <button type="button" className={mode === 'filter' ? 'is-active' : ''} aria-pressed={mode === 'filter'} onClick={() => onModeChange('filter')}>FILTER</button>
+    <div className="ydj-transport" data-slot="button-group">
+      <button
+        type="button"
+        className={`ydj-sync-button${deck.synced ? ' is-active' : ''}`}
+        data-slot="toggle"
+        disabled={!deck.bpm}
+        aria-pressed={deck.synced}
+        onClick={() => void dispatch({ type: 'deck.toggleSync', deck: deck.id })}
+      >SYNC</button>
+      <div className="ydj-fx-select" data-slot="toggle-group" role="group" aria-label={`Deck ${deck.id} effect`}>
+        <button type="button" data-slot="toggle-group-item" className={mode === 'echo' ? 'is-active' : ''} aria-pressed={mode === 'echo'} onClick={() => onModeChange('echo')}>ECHO</button>
+        <button type="button" data-slot="toggle-group-item" className={mode === 'filter' ? 'is-active' : ''} aria-pressed={mode === 'filter'} onClick={() => onModeChange('filter')}>FILTER</button>
       </div>
-      <div className="ydj-loop" aria-label={`Deck ${deck.id} beat loop`}>
+      <div className="ydj-loop" data-slot="button-group" aria-label={`Deck ${deck.id} beat loop`}>
         <button type="button" disabled={loopIndex === 0} aria-label="Shorter loop" onClick={() => changeLoop(-1)}>−</button>
         <button
           type="button"
@@ -446,7 +453,6 @@ function Deck({
   dispatch,
   onSelectTarget,
   onModeChange,
-  onOpenPro,
 }: {
   deck: DeckState;
   isMaster: boolean;
@@ -455,10 +461,9 @@ function Deck({
   dispatch: DjDispatch;
   onSelectTarget: () => void;
   onModeChange: (mode: FxMode) => void;
-  onOpenPro: () => void;
 }) {
   return (
-    <section className={`ydj-deck is-${deck.id.toLowerCase()}`} aria-label={`Deck ${deck.id}`}>
+    <section className={`ydj-deck is-${deck.id.toLowerCase()}`} data-slot="card" data-surface="secondary" aria-label={`Deck ${deck.id}`}>
       <DeckStrip deck={deck} isMaster={isMaster} isTarget={isTarget} dispatch={dispatch} onSelectTarget={onSelectTarget} />
       <div className="ydj-deck-body">
         <FxPad deck={deck} mode={mode} dispatch={dispatch} />
@@ -469,7 +474,6 @@ function Deck({
         mode={mode}
         dispatch={dispatch}
         onModeChange={onModeChange}
-        onOpenPro={onOpenPro}
       />
     </section>
   );
@@ -521,18 +525,17 @@ function ChannelFader({ deck, value, peak, onChange }: { deck: DeckId; value: nu
   );
 }
 
-function Mixer({ dispatch, onOpen }: { dispatch: DjDispatch; onOpen: () => void }) {
+function Mixer({ dispatch }: { dispatch: DjDispatch }) {
   const [state] = useDjMixer((snapshot) => snapshot);
   const masterBpm = state.masterDeck
     ? getEffectiveBpm(state.decks[state.masterDeck].bpm, state.decks[state.masterDeck].tempoPercent)
     : null;
 
   return (
-    <aside className="ydj-mixer" aria-label="Mixer">
-      <button type="button" className="ydj-bpm" onClick={onOpen}>
+    <aside className="ydj-mixer" data-slot="card" data-surface="card" aria-label="Mixer">
+      <div className="ydj-bpm" aria-label={`${masterBpm ? masterBpm.toFixed(0) : 'Unknown'} master BPM`}>
         <span>{masterBpm ? masterBpm.toFixed(0) : '—'}</span> BPM
-        <i aria-hidden="true">⌃<br />⌄</i>
-      </button>
+      </div>
       <div className="ydj-mixer-body">
         {DECK_IDS.map((deckId) => (
           <div key={deckId} className={`ydj-channel-strip is-${deckId.toLowerCase()}`}>
@@ -625,151 +628,6 @@ function CrossfaderPad({ value, onChange }: { value: number; onChange: (value: n
   );
 }
 
-function DeckPanel({ deck, dispatch, onClose }: { deck: DeckState; dispatch: DjDispatch; onClose: () => void }) {
-  const tapTimesRef = useRef<number[]>([]);
-  const setNudge = (value: -1 | 0 | 1) => void dispatch({ type: 'deck.setNudge', deck: deck.id, value });
-  const nudgeKeyDown = (event: KeyboardEvent<HTMLButtonElement>, value: -1 | 1) => {
-    if (event.key !== ' ' && event.key !== 'Enter') return;
-    event.preventDefault();
-    setNudge(value);
-  };
-  const adjustBpm = (amount: number) => void dispatch({
-    type: 'deck.setBpm',
-    deck: deck.id,
-    value: Math.min(Math.max((deck.bpm ?? 140) + amount, 60), 220),
-  });
-  const tapBpm = () => {
-    const now = performance.now();
-    const previous = tapTimesRef.current.at(-1);
-    tapTimesRef.current = previous && now - previous < 2000
-      ? [...tapTimesRef.current.slice(-3), now]
-      : [now];
-    if (tapTimesRef.current.length < 2) return;
-    const intervals = tapTimesRef.current.slice(1).map((time, index) => time - tapTimesRef.current[index]);
-    const bpm = 60000 / (intervals.reduce((sum, interval) => sum + interval, 0) / intervals.length);
-    void dispatch({ type: 'deck.setBpm', deck: deck.id, value: Math.min(Math.max(bpm, 60), 220) });
-  };
-  const camelotKeys = Array.from({ length: 24 }, (_, index) => `${(index % 12) + 1}${index < 12 ? 'A' : 'B'}`);
-  const changeKey = (direction: -1 | 1) => {
-    const currentIndex = camelotKeys.indexOf(deck.keyCamelot ?? '');
-    const nextIndex = ((currentIndex < 0 ? (direction === 1 ? -1 : 0) : currentIndex) + direction + camelotKeys.length) % camelotKeys.length;
-    void dispatch({ type: 'deck.setKey', deck: deck.id, value: camelotKeys[nextIndex] });
-  };
-  return (
-    <section className="ydj-options" aria-label={`Deck ${deck.id} performance controls`}>
-      <header>
-        <div><span>DECK {deck.id} / PERFORMANCE</span><strong>{deck.track?.title ?? 'No track loaded'}</strong></div>
-        <button type="button" onClick={onClose}>done</button>
-      </header>
-      <div className="ydj-options-grid is-deck">
-        <div className="ydj-panel-block is-transport">
-          <button type="button" disabled={!deck.track} onClick={() => void dispatch({ type: 'deck.cue', deck: deck.id })}>CUE</button>
-          <button
-            type="button"
-            className={deck.synced ? 'is-active' : ''}
-            disabled={!deck.bpm}
-            onClick={() => void dispatch({ type: 'deck.toggleSync', deck: deck.id })}
-          >SYNC</button>
-          <button type="button" disabled={!deck.track} onClick={() => void dispatch({ type: 'deck.setCue', deck: deck.id })}>SET CUE</button>
-          <button
-            type="button"
-            aria-pressed={deck.nudge === -1}
-            onPointerDown={() => setNudge(-1)}
-            onPointerUp={() => setNudge(0)}
-            onPointerCancel={() => setNudge(0)}
-            onPointerLeave={() => setNudge(0)}
-            onKeyDown={(event) => nudgeKeyDown(event, -1)}
-            onKeyUp={() => setNudge(0)}
-            onBlur={() => setNudge(0)}
-          >− BEND</button>
-          <button
-            type="button"
-            aria-pressed={deck.nudge === 1}
-            onPointerDown={() => setNudge(1)}
-            onPointerUp={() => setNudge(0)}
-            onPointerCancel={() => setNudge(0)}
-            onPointerLeave={() => setNudge(0)}
-            onKeyDown={(event) => nudgeKeyDown(event, 1)}
-            onKeyUp={() => setNudge(0)}
-            onBlur={() => setNudge(0)}
-          >+ BEND</button>
-        </div>
-        <div className="ydj-performance-dials">
-          <Knob label="Tempo" value={deck.tempoPercent} min={-16} max={16} step={0.1} resetValue={0} display={`${deck.tempoPercent >= 0 ? '+' : ''}${deck.tempoPercent.toFixed(1)}%`} onChange={(value) => void dispatch({ type: 'deck.setTempo', deck: deck.id, value })} />
-          <Knob label="High" value={deck.eq.high} min={-24} max={6} step={1} resetValue={0} display={`${deck.eq.high} dB`} onChange={(value) => void dispatch({ type: 'deck.setEq', deck: deck.id, band: 'high', value })} />
-        </div>
-        <div className="ydj-hot-cues" aria-label="Hot cues">
-          {HOT_CUE_SLOTS.map((index) => (
-            <button
-              type="button"
-              key={index}
-              className={deck.hotCues[index] === null ? '' : 'is-active'}
-              disabled={!deck.track}
-              aria-label={deck.hotCues[index] === null
-                ? `Set hot cue ${index + 1}`
-                : `Jump to hot cue ${index + 1} at ${formatTime(deck.hotCues[index] ?? 0)}`}
-              onClick={() => void dispatch({ type: 'deck.hotCue', deck: deck.id, index })}
-            >
-              <span>{index + 1}</span><small>{deck.hotCues[index] === null ? 'hot cue' : formatTime(deck.hotCues[index] ?? 0)}</small>
-            </button>
-          ))}
-        </div>
-        <div className="ydj-beat-settings">
-          <div className="ydj-bpm-cluster">
-            <button type="button" onClick={() => adjustBpm(-0.1)} aria-label="Lower BPM">−</button>
-            <button type="button" className="is-readout" onClick={tapBpm}><strong>{deck.bpm?.toFixed(1) ?? '—'}</strong><small>TAP BPM</small></button>
-            <button type="button" onClick={() => adjustBpm(0.1)} aria-label="Raise BPM">+</button>
-          </div>
-          <button type="button" className="ydj-grid-here" disabled={!deck.track} onClick={() => void dispatch({ type: 'deck.setBeatOffset', deck: deck.id, value: deck.position })}>
-            <strong>{formatTime(deck.beatOffsetSec)}</strong><small>GRID HERE</small>
-          </button>
-          <div className="ydj-key-cluster">
-            <button type="button" onClick={() => changeKey(-1)} aria-label="Previous musical key">‹</button>
-            <span><strong>{deck.keyCamelot ?? '—'}</strong><small>KEY</small></span>
-            <button type="button" onClick={() => changeKey(1)} aria-label="Next musical key">›</button>
-          </div>
-          {HOT_CUE_SLOTS.map((index) => (
-            <button
-              type="button"
-              key={index}
-              disabled={deck.hotCues[index] === null}
-              aria-label={`Clear hot cue ${index + 1}`}
-              onClick={() => void dispatch({ type: 'deck.clearHotCue', deck: deck.id, index })}
-            >×{index + 1}</button>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function MixerPanel({ dispatch, onClose }: { dispatch: DjDispatch; onClose: () => void }) {
-  const [state] = useDjMixer((snapshot) => snapshot);
-  const endSet = () => {
-    const playing = state.decks.A.status === 'playing' || state.decks.B.status === 'playing';
-    if (playing && !window.confirm('End the DJ set and return to the vinyl player?')) return;
-    void dispatch({ type: 'mode.end' });
-  };
-  return (
-    <section className="ydj-options" aria-label="Master mixer controls">
-      <header>
-        <div><span>MASTER MIXER</span><strong>GROOVY HARD TECHNO</strong></div>
-        <button type="button" onClick={onClose}>done</button>
-      </header>
-      <div className="ydj-options-grid is-mixer">
-        <div className="ydj-mixer-dials">
-          <Knob label="A" value={state.decks.A.level} min={0} max={1} step={0.01} display={`${Math.round(state.decks.A.level * 100)}%`} onChange={(value) => void dispatch({ type: 'deck.setLevel', deck: 'A', value })} />
-          <Knob label="Master" value={state.masterLevel} min={0} max={1} step={0.01} resetValue={0.82} display={`${Math.round(state.masterLevel * 100)}%`} onChange={(value) => void dispatch({ type: 'mixer.setMaster', value })} />
-          <Knob label="B" value={state.decks.B.level} min={0} max={1} step={0.01} display={`${Math.round(state.decks.B.level * 100)}%`} onChange={(value) => void dispatch({ type: 'deck.setLevel', deck: 'B', value })} />
-        </div>
-        <CrossfaderPad value={state.crossfader} onChange={(value) => void dispatch({ type: 'mixer.setCrossfader', value })} />
-        <button type="button" className={state.outputPaused ? '' : 'is-active'} onClick={() => void dispatch({ type: 'mixer.toggleOutput' })}>{state.outputPaused ? 'RESUME MIX' : 'OUTPUT LIVE'}</button>
-        <button type="button" onClick={endSet}>END SET</button>
-      </div>
-    </section>
-  );
-}
-
 function Library({
   target,
   dispatch,
@@ -810,22 +668,22 @@ function Library({
   };
 
   return (
-    <section className={`ydj-library${dense ? ' is-dense' : ''}`} aria-label="DJ set library">
-      <nav className="ydj-library-rail" aria-label="Library filters">
+    <section className={`ydj-library${dense ? ' is-dense' : ''}`} data-slot="card" data-surface="muted" aria-label="DJ set library">
+      <nav className="ydj-library-rail" data-slot="toggle-group" aria-label="Library filters">
         {([
           ['all', '★', 'SET'],
           ['available', '▶', 'READY'],
           ['pending', '+', 'ADD'],
         ] as const).map(([value, icon, label]) => (
-          <button type="button" key={value} className={filter === value ? 'is-active' : ''} aria-pressed={filter === value} onClick={() => setFilter(value)} title={label}>
+          <button type="button" data-slot="toggle-group-item" key={value} className={filter === value ? 'is-active' : ''} aria-pressed={filter === value} onClick={() => setFilter(value)} title={label}>
             <span>{icon}</span><small>{label}</small>
           </button>
         ))}
       </nav>
       <div className="ydj-library-main">
         <header className="ydj-library-toolbar">
-          <div className="ydj-library-target" aria-label="Default load target">
-            {DECK_IDS.map((deck) => <button type="button" key={deck} className={target === deck ? 'is-active' : ''} aria-pressed={target === deck} onClick={() => onTargetChange(deck)}>DECK {deck}</button>)}
+          <div className="ydj-library-target" data-slot="toggle-group" aria-label="Default load target">
+            {DECK_IDS.map((deck) => <button type="button" data-slot="toggle-group-item" key={deck} className={target === deck ? 'is-active' : ''} aria-pressed={target === deck} onClick={() => onTargetChange(deck)}>DECK {deck}</button>)}
           </div>
           <label className="ydj-search"><span>⌕</span><input type="search" value={query} placeholder="Search set" aria-label="Search the set" onChange={(event) => setQuery(event.currentTarget.value)} /></label>
           <button type="button" className="ydj-toolbar-button" onClick={() => setSort(sort === 'set' ? 'artist' : 'set')}>SORT · {sort === 'set' ? 'SET' : 'A–Z'}</button>
@@ -865,32 +723,8 @@ function Library({
 
 export function InlineDjDeck() {
   const [state, dispatch] = useDjMixer((snapshot) => snapshot);
-  const [panel, setPanel] = useState<DeckId | 'mixer' | null>(null);
   const [target, setTarget] = useState<DeckId>('A');
   const [fxModes, setFxModes] = useState<Record<DeckId, FxMode>>({ A: 'echo', B: 'echo' });
-  const boardRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!panel) return;
-    const board = boardRef.current;
-    const options = board?.querySelector<HTMLElement>('.ydj-options');
-    const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    const focusableSelector = 'button:not([disabled]), input:not([disabled]):not([hidden]), [tabindex="0"]';
-    const frame = window.requestAnimationFrame(() => options?.querySelector<HTMLElement>(focusableSelector)?.focus());
-    const onKeyDown = (event: globalThis.KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        event.preventDefault();
-        setPanel(null);
-        return;
-      }
-    };
-    document.addEventListener('keydown', onKeyDown);
-    return () => {
-      window.cancelAnimationFrame(frame);
-      document.removeEventListener('keydown', onKeyDown);
-      previousFocus?.focus();
-    };
-  }, [panel]);
 
   const endSet = () => {
     const playing = state.decks.A.status === 'playing' || state.decks.B.status === 'playing';
@@ -899,20 +733,19 @@ export function InlineDjDeck() {
   };
 
   return (
-    <div ref={boardRef} className="inline-dj-board ydj-board" aria-label="Groovy hard techno DJ console">
+    <div className="inline-dj-board ydj-board" data-slot="card" aria-label="Groovy hard techno DJ console">
       <div className="ydj-surface">
-        <header className="ydj-appbar">
+        <header className="ydj-appbar" data-slot="card-header">
           <div className="ydj-brand"><strong>TXN<span>DJ</span></strong><small>groovy hard techno console</small></div>
           <div className="ydj-app-status">
             <button type="button" className={state.outputPaused ? '' : 'is-live'} onClick={() => void dispatch({ type: 'mixer.toggleOutput' })}>
               <i aria-hidden="true" />{state.outputPaused ? 'RESUME' : 'LIVE'}
             </button>
-            <button type="button" onClick={() => setPanel('mixer')}>MIX</button>
             <button type="button" onClick={endSet}>END SET</button>
           </div>
           <div className="ydj-app-meta"><span>{state.audioStatus}</span><strong>{Math.round(state.masterLevel * 100)}</strong><small>MASTER</small></div>
         </header>
-        <div className="ydj-console">
+        <div className="ydj-console" data-slot="card-content">
           <Deck
             deck={state.decks.A}
             isMaster={state.masterDeck === 'A'}
@@ -921,9 +754,8 @@ export function InlineDjDeck() {
             dispatch={dispatch}
             onSelectTarget={() => setTarget('A')}
             onModeChange={(mode) => setFxModes((current) => ({ ...current, A: mode }))}
-            onOpenPro={() => setPanel('A')}
           />
-          <Mixer dispatch={dispatch} onOpen={() => setPanel('mixer')} />
+          <Mixer dispatch={dispatch} />
           <Deck
             deck={state.decks.B}
             isMaster={state.masterDeck === 'B'}
@@ -932,13 +764,9 @@ export function InlineDjDeck() {
             dispatch={dispatch}
             onSelectTarget={() => setTarget('B')}
             onModeChange={(mode) => setFxModes((current) => ({ ...current, B: mode }))}
-            onOpenPro={() => setPanel('B')}
           />
         </div>
-        {panel === 'A' && <DeckPanel deck={state.decks.A} dispatch={dispatch} onClose={() => setPanel(null)} />}
-        {panel === 'B' && <DeckPanel deck={state.decks.B} dispatch={dispatch} onClose={() => setPanel(null)} />}
-        {panel === 'mixer' && <MixerPanel dispatch={dispatch} onClose={() => setPanel(null)} />}
-        {!panel && <Library target={target} dispatch={dispatch} onTargetChange={setTarget} />}
+        <Library target={target} dispatch={dispatch} onTargetChange={setTarget} />
       </div>
       {state.audioStatus === 'blocked' && <p className="dj-visually-hidden" aria-live="polite">Audio is blocked. Press a deck control to resume.</p>}
     </div>

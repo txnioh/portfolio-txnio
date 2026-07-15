@@ -405,12 +405,12 @@ html, body {
 }
 
 .minimal-inline-player.is-dj-mode {
-  height: 470px;
-  min-height: 470px;
+  height: 486px;
+  min-height: 486px;
 }
 
 .minimal-inline-player.is-dj-mode .minimal-player-screen {
-  height: 440px;
+  height: 456px;
 }
 
 .minimal-player-screen {
@@ -2300,12 +2300,12 @@ html, body {
 
 @media (max-width: 430px) {
   .minimal-inline-player.is-dj-mode {
-    height: 600px;
-    min-height: 600px;
+    height: 626px;
+    min-height: 626px;
   }
 
   .minimal-inline-player.is-dj-mode .minimal-player-screen {
-    height: 580px;
+    height: 596px;
   }
 
   .inline-dj-board {
@@ -2460,7 +2460,7 @@ html, body {
   left: 50%;
   display: block;
   width: min(1360px, calc(100vw - 32px));
-  height: 440px;
+  height: 456px;
   overflow: hidden;
   border: 1px solid #252525;
   background: #080808;
@@ -2846,55 +2846,53 @@ html, body {
   height: calc(100% - 5px);
   place-items: center;
   border-radius: 50%;
-  background:
-    repeating-radial-gradient(circle, transparent 0 2px, rgba(255, 255, 255, 0.035) 3px 4px),
-    radial-gradient(circle, #d9d7cf 0 2px, #bfbdb6 3px 7px, #f2f1ed 8px 23%, #14151a 24% 100%);
+  background-image: url('https://intheclouds.io/cdn/shop/files/Custom_Vinyl_Record_12inch_Transparent_3024x.png?v=1741182986');
+  background-position: center;
+  background-size: cover;
   transform: rotate(var(--disc-angle));
 }
 
 .ydj-record::after {
   position: absolute;
-  top: 8px;
-  left: calc(50% - 1px);
-  width: 2px;
-  height: 16px;
-  background: #f0efeb;
+  inset: 1px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 25%, rgba(255, 255, 255, 0.22), transparent 55%);
+  mix-blend-mode: screen;
+  opacity: 0.5;
+  content: '';
+  pointer-events: none;
+}
+
+.ydj-record-label {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: 34%;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 50%;
+  background-color: var(--portfolio-bg);
+  background-position: center;
+  background-size: cover;
+  place-items: center;
+}
+
+.ydj-record-label::after {
+  position: absolute;
+  inset: 43%;
+  border-radius: 50%;
+  background: var(--portfolio-bg);
   content: '';
 }
 
-.ydj-record i {
+.ydj-record-label i {
   position: relative;
   z-index: 1;
+  display: none;
   color: #111111;
   font-size: 9px;
   font-style: normal;
   font-weight: 700;
-}
-
-.ydj-tonearm {
-  position: absolute;
-  top: 5px;
-  right: 8px;
-  width: 4px;
-  height: 69%;
-  border-radius: 4px;
-  background: linear-gradient(90deg, #8f8f8d, #e2e2df, #777776);
-  box-shadow: 0 -4px 0 3px #a9a9a5;
-  transform: rotate(-9deg);
-  transform-origin: 50% 5px;
-  pointer-events: none;
-}
-
-.ydj-tonearm::after {
-  position: absolute;
-  right: -3px;
-  bottom: -5px;
-  width: 10px;
-  height: 16px;
-  border-radius: 2px;
-  background: #a4a4a1;
-  content: '';
-  transform: rotate(23deg);
 }
 
 .ydj-hand {
@@ -2936,7 +2934,7 @@ html, body {
 .ydj-deck.is-b .ydj-play { grid-column: 1; grid-row: 1; }
 .ydj-deck.is-b .ydj-loop { grid-column: 2; grid-row: 1; }
 .ydj-deck.is-b .ydj-fx-select { grid-column: 3; grid-row: 1; }
-.ydj-deck.is-b .ydj-pro-button { grid-column: 4; grid-row: 1; }
+.ydj-deck.is-b .ydj-sync-button { grid-column: 4; grid-row: 1; }
 
 .ydj-transport button {
   height: 38px;
@@ -2952,10 +2950,14 @@ html, body {
   opacity: 0.4;
 }
 
-.ydj-pro-button {
+.ydj-sync-button {
   padding: 0;
-  color: #bdbdb9 !important;
   font-size: 9px !important;
+}
+
+.ydj-sync-button.is-active {
+  color: #ff8b2a;
+  box-shadow: inset 0 -2px #ff8b2a;
 }
 
 .ydj-fx-select {
@@ -3018,7 +3020,6 @@ html, body {
   border: 0;
   background: transparent;
   color: #d8d8d5;
-  cursor: pointer;
   font-size: 8px;
 }
 
@@ -3431,183 +3432,6 @@ html, body {
   font-size: 9px;
 }
 
-.ydj-options {
-  display: grid;
-  min-width: 860px;
-  width: 100%;
-  max-width: none;
-  height: 182px;
-  max-height: none;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  grid-template-rows: 40px minmax(0, 1fr);
-  background: rgba(15, 16, 26, 0.985);
-  color: #ecece8;
-}
-
-.ydj-board .ydj-options > header {
-  display: flex;
-  min-width: 0;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 14px;
-  border-bottom: 1px solid #313344;
-  background: #0b0b0d;
-}
-
-.ydj-options > header span,
-.ydj-options > header strong {
-  display: block;
-}
-
-.ydj-options > header span {
-  color: #ff8b2a;
-  font-size: 7px;
-  letter-spacing: 0.1em;
-}
-
-.ydj-options > header strong {
-  margin-top: 2px;
-  font-size: 10px;
-  font-weight: 500;
-}
-
-.ydj-options > header button,
-.ydj-options-grid button {
-  min-width: 44px;
-  min-height: 34px;
-  border: 1px solid #3a3b45;
-  background: #252630;
-  color: #d3d3d0;
-  cursor: pointer;
-}
-
-.ydj-options-grid {
-  display: grid;
-  min-width: 0;
-  gap: 16px;
-  align-items: center;
-  padding: 18px;
-  overflow: auto;
-}
-
-.ydj-options-grid.is-deck {
-  gap: 8px;
-  grid-template-columns: minmax(250px, 1.2fr) minmax(150px, 0.7fr) minmax(250px, 1.25fr);
-  grid-template-rows: repeat(2, minmax(0, 1fr));
-  padding: 8px;
-}
-
-.ydj-options-grid.is-mixer {
-  grid-template-columns: minmax(240px, 1.25fr) minmax(250px, 1.5fr) 110px 100px;
-}
-
-.ydj-panel-block.is-transport {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(44px, 1fr));
-  gap: 5px;
-}
-
-.ydj-panel-block button.is-active,
-.ydj-hot-cues button.is-active {
-  border-color: #ff8b2a;
-  color: #ff8b2a;
-}
-
-.ydj-hot-cues {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(54px, 1fr));
-  gap: 5px;
-}
-
-.ydj-hot-cues button span,
-.ydj-hot-cues button small {
-  display: block;
-}
-
-.ydj-hot-cues button small {
-  margin-top: 3px;
-  color: #73737b;
-  font-size: 7px;
-}
-
-.ydj-beat-settings {
-  display: grid;
-  grid-column: 1 / -1;
-  grid-template-columns: 190px 110px 160px repeat(4, 44px);
-  gap: 8px;
-  align-items: center;
-}
-
-.ydj-performance-dials,
-.ydj-mixer-dials {
-  display: grid;
-  min-width: 0;
-  grid-template-columns: repeat(2, minmax(58px, 1fr));
-  align-items: center;
-}
-
-.ydj-mixer-dials {
-  grid-template-columns: repeat(3, minmax(58px, 1fr));
-}
-
-.ydj-performance-dials .ydj-knob,
-.ydj-mixer-dials .ydj-knob {
-  height: 58px;
-  grid-template-rows: 37px 12px;
-}
-
-.ydj-performance-dials .ydj-knob-dial,
-.ydj-mixer-dials .ydj-knob-dial {
-  width: 32px;
-  height: 32px;
-}
-
-.ydj-bpm-cluster,
-.ydj-key-cluster {
-  display: grid;
-  height: 44px;
-  grid-template-columns: 44px minmax(72px, 1fr) 44px;
-}
-
-.ydj-bpm-cluster button + button,
-.ydj-key-cluster > * + * {
-  border-left: 0;
-}
-
-.ydj-bpm-cluster .is-readout,
-.ydj-grid-here,
-.ydj-key-cluster span {
-  display: grid;
-  place-content: center;
-  text-align: center;
-}
-
-.ydj-bpm-cluster strong,
-.ydj-grid-here strong,
-.ydj-key-cluster strong {
-  font-size: 11px;
-  font-variant-numeric: tabular-nums;
-}
-
-.ydj-bpm-cluster small,
-.ydj-grid-here small,
-.ydj-key-cluster small {
-  display: block;
-  margin-top: 2px;
-  color: #747580;
-  font-size: 6px;
-  letter-spacing: 0.08em;
-}
-
-.ydj-key-cluster span {
-  border-top: 1px solid #3a3b45;
-  border-bottom: 1px solid #3a3b45;
-  background: #15161e;
-}
-
 .ydj-performance-crossfader {
   display: grid;
   min-width: 0;
@@ -3642,11 +3466,6 @@ html, body {
   pointer-events: none;
 }
 
-.ydj-options-grid.is-mixer > button.is-active {
-  border-color: #ff8b2a;
-  color: #ff8b2a;
-}
-
 .ydj-board button:focus-visible,
 .ydj-board input:focus-visible,
 .ydj-knob-dial:focus-visible,
@@ -3660,6 +3479,459 @@ html, body {
 .ydj-performance-crossfader > div:focus-visible {
   outline: 1px solid #ff8b2a;
   outline-offset: 2px;
+}
+
+/* DJ console — portfolio theme */
+.inline-dj-board.ydj-board {
+  --background: var(--portfolio-bg);
+  --foreground: var(--portfolio-text);
+  --card: var(--portfolio-close-bg);
+  --card-foreground: var(--portfolio-text);
+  --primary: var(--portfolio-link-grad-mid-strong);
+  --primary-foreground: var(--portfolio-bg);
+  --secondary: var(--portfolio-toggle-bg);
+  --secondary-foreground: var(--portfolio-text);
+  --muted: var(--portfolio-toggle-bg);
+  --muted-foreground: var(--portfolio-text-muted);
+  --accent: var(--portfolio-toggle-bg-hover);
+  --accent-foreground: var(--portfolio-text);
+  --radius: 0.75rem;
+  --card-spacing: 0.5rem;
+  --ydj-accent: var(--primary);
+  --ydj-bg: var(--background);
+  --ydj-ink: var(--foreground);
+  --ydj-line: var(--portfolio-toggle-border);
+  --ydj-muted: var(--muted-foreground);
+  --ydj-soft: var(--secondary);
+  --ydj-soft-hover: var(--accent);
+  border-color: var(--ydj-line);
+  background: var(--ydj-bg);
+  color: var(--ydj-ink);
+  font-family: var(--font-geist-sans), Arial, sans-serif;
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}
+
+.ydj-surface,
+.ydj-track-table {
+  scrollbar-color: var(--ydj-line) transparent;
+}
+
+.ydj-board .ydj-appbar {
+  border-color: var(--ydj-line);
+  background: var(--ydj-bg);
+}
+
+.ydj-brand strong,
+.ydj-app-status button.is-live,
+.ydj-app-meta strong,
+.ydj-track-line strong,
+.ydj-bpm,
+.ydj-search input {
+  color: var(--ydj-ink);
+}
+
+.ydj-brand small,
+.ydj-app-status button,
+.ydj-app-meta,
+.ydj-track-line button,
+.ydj-track-line > span,
+.ydj-track-bpm,
+.ydj-knob,
+.ydj-channel-fader,
+.ydj-library-rail button,
+.ydj-library-target button,
+.ydj-search,
+.ydj-toolbar-button,
+.ydj-local-button,
+.ydj-track-row,
+.ydj-phase,
+.ydj-pending,
+.ydj-performance-crossfader {
+  color: var(--ydj-muted);
+}
+
+.ydj-brand strong span,
+.ydj-library-toolbar .ydj-local-button,
+.ydj-library-rail button.is-active,
+.ydj-ready,
+.ydj-track-line button.is-target,
+.ydj-fx-select button.is-active,
+.ydj-loop button.is-active,
+.ydj-play.is-playing,
+.ydj-knob:last-child > span,
+.ydj-sync-button.is-active {
+  color: var(--ydj-accent);
+}
+
+.ydj-app-status button,
+.ydj-app-status button:first-child,
+.ydj-track-line button.is-target,
+.ydj-waveform,
+.ydj-transport,
+.ydj-mixer,
+.ydj-mixer-body,
+.ydj-crossfader,
+.ydj-library,
+.ydj-library-rail,
+.ydj-library-rail button,
+.ydj-board .ydj-library-toolbar,
+.ydj-library-target,
+.ydj-library-target button + button,
+.ydj-search,
+.ydj-local-button,
+.ydj-track-row,
+.ydj-performance-crossfader > div {
+  border-color: var(--ydj-line);
+}
+
+.ydj-app-status button i,
+.ydj-track-line > i,
+.ydj-channel-fader > i {
+  background: var(--ydj-line);
+}
+
+.ydj-app-status button.is-live i,
+.ydj-track-line > i.is-live,
+.ydj-channel-fader > i b {
+  background: var(--ydj-accent);
+  box-shadow: none;
+}
+
+.ydj-console,
+.ydj-mixer,
+.ydj-library {
+  background: transparent;
+}
+
+.ydj-waveform-bars i {
+  background: var(--ydj-line);
+  opacity: 0.7;
+}
+
+.ydj-waveform-bars i.is-played,
+.ydj-waveform-start,
+.ydj-playhead {
+  background: var(--ydj-ink);
+}
+
+.ydj-fx-pad {
+  border-color: var(--ydj-line);
+  background:
+    linear-gradient(90deg, transparent calc(50% - 0.5px), var(--ydj-line) 50%, transparent calc(50% + 0.5px)),
+    linear-gradient(transparent calc(50% - 0.5px), var(--ydj-line) 50%, transparent calc(50% + 0.5px)),
+    var(--ydj-soft);
+  box-shadow: none;
+}
+
+.ydj-fx-pad > span {
+  border-color: var(--ydj-ink);
+  background: var(--ydj-bg);
+  box-shadow: 0 0 0 2px var(--ydj-soft);
+}
+
+.ydj-platter {
+  background: conic-gradient(var(--ydj-accent) 0 var(--deck-progress), var(--ydj-soft) var(--deck-progress) 360deg);
+  box-shadow: 0 0 0 1px var(--ydj-line);
+}
+
+.ydj-hand {
+  border-color: var(--ydj-line);
+  background: var(--ydj-bg);
+  color: var(--ydj-ink);
+}
+
+.ydj-transport button,
+.ydj-load-cell button {
+  border-color: var(--ydj-line);
+  background: var(--ydj-soft);
+  color: var(--ydj-ink);
+}
+
+.ydj-transport button:hover,
+.ydj-load-cell button:hover,
+.ydj-track-row:hover {
+  background: var(--ydj-soft-hover);
+}
+
+.ydj-fx-select button.is-active,
+.ydj-loop button.is-active {
+  box-shadow: inset 0 -2px var(--ydj-accent);
+}
+
+.ydj-bpm::after {
+  background: var(--ydj-accent);
+}
+
+.ydj-knob-dial {
+  border-color: var(--ydj-line);
+  background: var(--ydj-soft);
+  box-shadow: 0 0 0 1px var(--ydj-line);
+}
+
+.ydj-knob-dial::after {
+  border-top-color: var(--ydj-muted);
+}
+
+.ydj-knob-dial i {
+  background: var(--ydj-ink);
+}
+
+.ydj-channel-fader-track {
+  border-color: var(--ydj-line);
+  background:
+    linear-gradient(90deg, transparent 46%, var(--ydj-line) 46% 54%, transparent 54%),
+    repeating-linear-gradient(0deg, transparent 0 8px, var(--ydj-line) 8px 9px);
+}
+
+.ydj-channel-fader-track > b,
+.ydj-performance-crossfader i {
+  border-color: var(--ydj-line);
+  background: var(--ydj-ink);
+  box-shadow: none;
+}
+
+.ydj-performance-crossfader > div {
+  background:
+    linear-gradient(90deg, transparent 49.8%, var(--ydj-line) 50%, transparent 50.2%),
+    repeating-linear-gradient(90deg, transparent 0 24px, var(--ydj-soft) 24px 25px);
+}
+
+.ydj-library-rail {
+  background: var(--ydj-soft);
+}
+
+.ydj-library-target button.is-active,
+.ydj-load-cell button:first-child:hover,
+.ydj-load-cell button:first-child:focus-visible,
+.ydj-load-cell button:last-child:hover,
+.ydj-load-cell button:last-child:focus-visible {
+  background: var(--ydj-ink);
+  color: var(--ydj-bg);
+}
+
+.ydj-search input::placeholder,
+.ydj-empty-library {
+  color: var(--ydj-muted);
+}
+
+.inline-dj-board.ydj-board {
+  overflow: hidden;
+  border: 0;
+  border-radius: calc(var(--radius) + 0.25rem);
+  background: transparent;
+}
+
+.ydj-surface {
+  gap: var(--card-spacing);
+}
+
+.ydj-board .ydj-appbar {
+  border: 0;
+  border-radius: var(--radius);
+  background: var(--ydj-soft);
+}
+
+.ydj-app-status {
+  gap: 4px;
+  padding: 3px;
+}
+
+.ydj-app-status button,
+.ydj-track-line button,
+.ydj-transport button,
+.ydj-library-rail button,
+.ydj-library-target,
+.ydj-library-target button,
+.ydj-search,
+.ydj-local-button,
+.ydj-load-cell button,
+.ydj-channel-fader-track,
+.ydj-performance-crossfader > div,
+.ydj-knob-dial,
+.ydj-fx-pad {
+  border: 0;
+  border-radius: calc(var(--radius) - 0.25rem);
+}
+
+.ydj-app-status button {
+  background: var(--ydj-bg);
+}
+
+.ydj-console {
+  gap: var(--card-spacing);
+  background: transparent;
+}
+
+.ydj-deck,
+.ydj-mixer {
+  overflow: hidden;
+  border: 0;
+  border-radius: var(--radius);
+}
+
+.ydj-deck {
+  background: var(--ydj-soft);
+}
+
+.ydj-mixer {
+  background: var(--portfolio-close-bg);
+}
+
+.ydj-waveform,
+.ydj-transport,
+.ydj-mixer-body,
+.ydj-crossfader,
+.ydj-library,
+.ydj-library-rail,
+.ydj-library-rail button,
+.ydj-board .ydj-library-toolbar,
+.ydj-library-target button + button,
+.ydj-track-row {
+  border: 0;
+}
+
+.ydj-transport button,
+.ydj-load-cell button {
+  background: var(--ydj-bg);
+}
+
+.ydj-fx-select,
+.ydj-loop,
+.ydj-library-target {
+  gap: 3px;
+}
+
+.ydj-fx-select button,
+.ydj-loop button {
+  border-radius: calc(var(--radius) - 0.25rem);
+}
+
+.ydj-knob-dial {
+  background: var(--ydj-bg);
+  box-shadow: none;
+}
+
+.ydj-library {
+  gap: var(--card-spacing);
+  padding: var(--card-spacing);
+  overflow: hidden;
+  border-radius: var(--radius);
+  background: var(--ydj-soft);
+}
+
+.ydj-library-rail {
+  overflow: hidden;
+  border-radius: calc(var(--radius) - 0.25rem);
+  background: var(--ydj-soft-hover);
+}
+
+.ydj-library-main {
+  overflow: hidden;
+  border-radius: calc(var(--radius) - 0.25rem);
+  background: var(--ydj-bg);
+}
+
+.ydj-board .ydj-library-toolbar {
+  gap: 6px;
+  padding-right: 6px;
+  padding-left: 6px;
+}
+
+.ydj-search,
+.ydj-local-button,
+.ydj-library-target {
+  background: var(--ydj-soft);
+}
+
+.ydj-search {
+  padding-right: 7px;
+}
+
+.ydj-track-table tbody {
+  padding: 3px 5px 5px;
+}
+
+.ydj-track-row {
+  width: 100%;
+  margin-top: 3px;
+  border-radius: calc(var(--radius) - 0.375rem);
+  background: var(--ydj-soft);
+}
+
+.ydj-track-row:hover {
+  background: var(--ydj-soft-hover);
+}
+
+.ydj-channel-fader-track,
+.ydj-performance-crossfader > div {
+  background-color: var(--ydj-soft);
+}
+
+.ydj-board [data-slot='card'] {
+  color: var(--card-foreground);
+}
+
+.ydj-board [data-slot='card'][data-surface='card'] {
+  background: var(--card);
+}
+
+.ydj-board [data-slot='card'][data-surface='secondary'] {
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+}
+
+.ydj-board [data-slot='card'][data-surface='muted'] {
+  background: var(--muted);
+}
+
+.ydj-board > [data-slot='card'] {
+  background: transparent;
+}
+
+.ydj-board [data-slot='card-header'] {
+  padding-right: var(--card-spacing);
+  padding-left: var(--card-spacing);
+  background: var(--secondary);
+}
+
+.ydj-board [data-slot='card-content'] {
+  gap: var(--card-spacing);
+}
+
+.ydj-board [data-slot='button-group'],
+.ydj-board [data-slot='toggle-group'] {
+  gap: calc(var(--card-spacing) / 2);
+}
+
+.ydj-board [data-slot='toggle'],
+.ydj-board [data-slot='toggle-group-item'] {
+  border: 0;
+  border-radius: calc(var(--radius) - 0.25rem);
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+}
+
+.ydj-board [data-slot='toggle'][aria-pressed='true'],
+.ydj-board [data-slot='toggle-group-item'][aria-pressed='true'] {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  box-shadow: none;
+}
+
+.ydj-board [data-slot='toggle']:hover,
+.ydj-board [data-slot='toggle-group-item']:hover {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.ydj-board button:focus-visible,
+.ydj-board input:focus-visible,
+.ydj-knob-dial:focus-visible,
+.ydj-waveform:focus-visible,
+.ydj-fx-pad:focus-visible,
+.ydj-channel-fader-track:focus-visible,
+.ydj-performance-crossfader > div:focus-visible {
+  outline-color: var(--ydj-ink);
 }
 
 @media (max-width: 900px) {
@@ -3725,7 +3997,7 @@ html, body {
 
 @media (max-width: 430px) {
   .inline-dj-board.ydj-board {
-    height: 580px;
+    height: 596px;
   }
 
   .ydj-surface {
@@ -3744,10 +4016,6 @@ html, body {
   }
 
   .ydj-library {
-    height: 276px;
-  }
-
-  .ydj-options {
     height: 276px;
   }
 
