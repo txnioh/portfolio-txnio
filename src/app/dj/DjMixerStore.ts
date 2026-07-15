@@ -30,6 +30,8 @@ type Listener = () => void;
 type DeckRuntime = {
   buffer: AudioBuffer | null;
   source: AudioBufferSourceNode | null;
+  scratchSource: AudioBufferSourceNode | null;
+  scratchGain: GainNode | null;
   startedAt: number;
   startOffset: number;
   playbackRate: number;
@@ -53,6 +55,8 @@ function createDeckRuntime(): DeckRuntime {
   return {
     buffer: null,
     source: null,
+    scratchSource: null,
+    scratchGain: null,
     startedAt: 0,
     startOffset: 0,
     playbackRate: 1,
@@ -254,6 +258,9 @@ export class DjMixerStore {
         return;
       case 'deck.startJog':
         this.startJog(command.deck);
+        return;
+      case 'deck.scratch':
+        this.scratchDeck(command.deck, command.seconds, command.rate);
         return;
       case 'deck.endJog':
         await this.endJog(command.deck);
@@ -737,6 +744,7 @@ export class DjMixerStore {
 
   private stopRuntime(deck: DeckId) {
     const runtime = this.runtimes[deck];
+    this.stopScratch(deck);
     if (!runtime.source) return;
     runtime.source.onended = null;
     try {
@@ -746,6 +754,33 @@ export class DjMixerStore {
     }
     runtime.source.disconnect();
     runtime.source = null;
+  }
+
+  private stopScratch(deck: DeckId) {
+    const runtime = this.runtimes[deck];
+    const source = runtime.scratchSource;
+    const gain = runtime.scratchGain;
+    if (!source) return;
+    runtime.scratchSource = null;
+    runtime.scratchGain = null;
+    source.onended = () => {
+      source.disconnect();
+      gain?.disconnect();
+    };
+    try {
+      if (gain && this.audioContext?.state === 'running') {
+        const now = this.audioContext.currentTime;
+        gain.gain.cancelAndHoldAtTime(now);
+        gain.gain.linearRampToValueAtTime(0, now + 0.004);
+        source.stop(now + 0.005);
+      } else {
+        source.stop();
+      }
+    } catch {
+      // The short scratch grain may already have ended.
+      source.disconnect();
+      gain?.disconnect();
+    }
   }
 
   private getPosition(deck: DeckId) {
@@ -783,11 +818,73 @@ export class DjMixerStore {
     runtime.resumeAfterJog = this.snapshot.decks[deck].status === 'playing';
     if (runtime.resumeAfterJog) this.pauseDeck(deck);
     this.update({ type: 'deck.patch', deck, patch: { jogging: true } });
+    if (runtime.buffer) void this.resumeAudioContext();
+  }
+
+  private scratchDeck(deck: DeckId, seconds: number, rate: number) {
+    const state = this.snapshot.decks[deck];
+    const runtime = this.runtimes[deck];
+    const context = this.audioContext;
+    const buffer = runtime.buffer;
+    const input = runtime.lowEq;
+    const position = clamp(seconds, 0, state.duration);
+    runtime.startOffset = position;
+    this.update({ type: 'deck.patch', deck, patch: { position } });
+    if (!state.jogging || !context || context.state !== 'running' || !buffer || !input) return;
+
+    this.stopScratch(deck);
+    const speed = clamp(Math.abs(rate), 0.35, 3);
+    const wallDuration = 0.055;
+    let grainBuffer = buffer;
+    let offset = Math.min(position, Math.max(0, buffer.duration - 0.01));
+    let sourceDuration = Math.min(wallDuration * speed, Math.max(0.01, buffer.duration - offset));
+
+    if (rate < 0) {
+      const requestedFrames = Math.max(1, Math.ceil(wallDuration * speed * buffer.sampleRate));
+      const endFrame = Math.min(buffer.length, Math.max(1, Math.floor(position * buffer.sampleRate)));
+      const frames = Math.max(1, Math.min(requestedFrames, endFrame));
+      const startFrame = Math.max(0, endFrame - frames);
+      grainBuffer = context.createBuffer(buffer.numberOfChannels, frames, buffer.sampleRate);
+      for (let channel = 0; channel < buffer.numberOfChannels; channel += 1) {
+        const sourceData = buffer.getChannelData(channel);
+        const targetData = grainBuffer.getChannelData(channel);
+        for (let frame = 0; frame < frames; frame += 1) {
+          targetData[frame] = sourceData[startFrame + frames - frame - 1] ?? 0;
+        }
+      }
+      offset = 0;
+      sourceDuration = grainBuffer.duration;
+    }
+
+    const source = context.createBufferSource();
+    const gain = context.createGain();
+    const now = context.currentTime;
+    const audibleDuration = Math.max(0.008, sourceDuration / speed);
+    source.buffer = grainBuffer;
+    source.playbackRate.value = speed;
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(0.78, now + 0.004);
+    gain.gain.setValueAtTime(0.78, now + Math.max(0.005, audibleDuration - 0.008));
+    gain.gain.linearRampToValueAtTime(0, now + audibleDuration);
+    source.connect(gain);
+    gain.connect(input);
+    source.onended = () => {
+      source.disconnect();
+      gain.disconnect();
+      if (runtime.scratchSource === source) {
+        runtime.scratchSource = null;
+        runtime.scratchGain = null;
+      }
+    };
+    runtime.scratchSource = source;
+    runtime.scratchGain = gain;
+    source.start(now, offset, sourceDuration);
   }
 
   private async endJog(deck: DeckId) {
     const runtime = this.runtimes[deck];
     const shouldResume = runtime.resumeAfterJog;
+    this.stopScratch(deck);
     runtime.resumeAfterJog = false;
     this.update({ type: 'deck.patch', deck, patch: { jogging: false } });
     if (shouldResume) await this.playDeck(deck);

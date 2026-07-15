@@ -108,6 +108,7 @@ export type DjCommand =
   | { type: 'deck.setCue'; deck: DeckId }
   | { type: 'deck.seek'; deck: DeckId; seconds: number }
   | { type: 'deck.startJog'; deck: DeckId }
+  | { type: 'deck.scratch'; deck: DeckId; seconds: number; rate: number }
   | { type: 'deck.endJog'; deck: DeckId }
   | { type: 'deck.setTempo'; deck: DeckId; value: number }
   | { type: 'deck.setNudge'; deck: DeckId; value: -1 | 0 | 1 }

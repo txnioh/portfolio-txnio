@@ -87,8 +87,9 @@ describe('DjMixerStore commands', () => {
   it('tracks a platter grab without changing an idle deck transport', async () => {
     const store = new DjMixerStore();
 
-    await store.dispatch({ type: 'deck.startJog', deck: 'A' });
+    const startJog = store.dispatch({ type: 'deck.startJog', deck: 'A' });
     expect(store.getSnapshot().decks.A.jogging).toBe(true);
+    await startJog;
 
     await store.dispatch({ type: 'deck.endJog', deck: 'A' });
     expect(store.getSnapshot().decks.A.jogging).toBe(false);

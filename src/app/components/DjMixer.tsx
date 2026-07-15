@@ -11,17 +11,19 @@ import {
   useState,
 } from 'react';
 import { useDjMixer } from '../dj/DjMixerContext';
+import {
+  getLibraryTracks,
+  type LibraryFilter,
+  type LibrarySort,
+} from '../dj/libraryView';
 import { getEffectiveBpm } from '../dj/mixerMath';
 import type { DeckId, DeckState, DjDispatch, LoopBeats } from '../dj/types';
 import { djTracks } from '../music';
 
 const LOOP_LENGTHS: readonly LoopBeats[] = [1, 2, 4, 8, 16];
-const HOT_CUE_SLOTS = [
-  { id: 'one', index: 0 },
-  { id: 'two', index: 1 },
-  { id: 'three', index: 2 },
-  { id: 'four', index: 3 },
-] as const;
+const DECK_IDS: readonly DeckId[] = ['A', 'B'];
+const HOT_CUE_SLOTS = [0, 1, 2, 3] as const;
+type FxMode = 'echo' | 'filter';
 
 function formatTime(seconds: number) {
   if (!Number.isFinite(seconds)) return '--:--';
@@ -29,57 +31,54 @@ function formatTime(seconds: number) {
   return `${Math.floor(safeSeconds / 60)}:${String(safeSeconds % 60).padStart(2, '0')}`;
 }
 
-function CompactWaveform({ deck, dispatch }: { deck: DeckState; dispatch: DjDispatch }) {
+function releaseCapturedPointer<T extends HTMLElement>(event: PointerEvent<T>) {
+  if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+    event.currentTarget.releasePointerCapture(event.pointerId);
+  }
+}
+
+function pointerAngle(event: PointerEvent<HTMLButtonElement>) {
+  const rect = event.currentTarget.getBoundingClientRect();
+  return Math.atan2(
+    event.clientY - (rect.top + rect.height / 2),
+    event.clientX - (rect.left + rect.width / 2),
+  );
+}
+
+function Waveform({ deck, dispatch }: { deck: DeckState; dispatch: DjDispatch }) {
   const waveformRef = useRef<HTMLDivElement>(null);
   const bars = useMemo(() => {
-    if (deck.waveform.length <= 72) return deck.waveform;
-    const stride = deck.waveform.length / 72;
-    return Array.from({ length: 72 }, (_, index) => deck.waveform[Math.floor(index * stride)] ?? 0);
+    if (deck.waveform.length <= 96) return deck.waveform;
+    const stride = deck.waveform.length / 96;
+    return Array.from({ length: 96 }, (_, index) => deck.waveform[Math.floor(index * stride)] ?? 0);
   }, [deck.waveform]);
   const progress = deck.duration > 0 ? Math.min(deck.position / deck.duration, 1) : 0;
+  const visibleBars = bars.length > 0
+    ? bars
+    : Array.from({ length: 72 }, (_, index) => 0.1 + ((index * 7) % 13) / 18);
 
   const seekFromClientX = (clientX: number) => {
     const waveform = waveformRef.current;
     if (!waveform || deck.duration <= 0) return;
     const rect = waveform.getBoundingClientRect();
-    const percent = Math.min(Math.max((clientX - rect.left) / rect.width, 0), 1);
-    void dispatch({ type: 'deck.seek', deck: deck.id, seconds: percent * deck.duration });
+    const ratio = Math.min(Math.max((clientX - rect.left) / rect.width, 0), 1);
+    void dispatch({ type: 'deck.seek', deck: deck.id, seconds: ratio * deck.duration });
   };
-
-  const onPointerDown = (event: PointerEvent<HTMLDivElement>) => {
-    event.currentTarget.setPointerCapture(event.pointerId);
-    seekFromClientX(event.clientX);
-  };
-
-  const onPointerMove = (event: PointerEvent<HTMLDivElement>) => {
-    if (event.currentTarget.hasPointerCapture(event.pointerId)) seekFromClientX(event.clientX);
-  };
-
-  const releasePointer = (event: PointerEvent<HTMLDivElement>) => {
-    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
-      event.currentTarget.releasePointerCapture(event.pointerId);
-    }
-  };
-
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    let nextPosition: number | null = null;
-    if (event.key === 'ArrowLeft') nextPosition = deck.position - 4;
-    if (event.key === 'ArrowRight') nextPosition = deck.position + 4;
-    if (event.key === 'Home') nextPosition = 0;
-    if (event.key === 'End') nextPosition = deck.duration;
-    if (nextPosition === null) return;
+    let next: number | null = null;
+    if (event.key === 'ArrowLeft') next = deck.position - 4;
+    else if (event.key === 'ArrowRight') next = deck.position + 4;
+    else if (event.key === 'Home') next = 0;
+    else if (event.key === 'End') next = deck.duration;
+    if (next === null) return;
     event.preventDefault();
-    void dispatch({ type: 'deck.seek', deck: deck.id, seconds: nextPosition });
+    void dispatch({ type: 'deck.seek', deck: deck.id, seconds: next });
   };
-
-  const visibleBars = bars.length > 0 ? bars : Array.from({ length: 56 }, (_, index) => (
-    0.12 + ((index * 7) % 11) / 55
-  ));
 
   return (
     <div
       ref={waveformRef}
-      className={`inline-dj-waveform${deck.status === 'loading' ? ' is-loading' : ''}`}
+      className={`ydj-waveform${deck.status === 'loading' ? ' is-loading' : ''}`}
       role="slider"
       tabIndex={deck.duration > 0 ? 0 : -1}
       aria-label={`Deck ${deck.id} track position`}
@@ -87,13 +86,19 @@ function CompactWaveform({ deck, dispatch }: { deck: DeckState; dispatch: DjDisp
       aria-valuemax={Math.round(deck.duration)}
       aria-valuenow={Math.round(deck.position)}
       aria-valuetext={`${formatTime(deck.position)} of ${formatTime(deck.duration)}`}
-      onPointerDown={onPointerDown}
-      onPointerMove={onPointerMove}
-      onPointerUp={releasePointer}
-      onPointerCancel={releasePointer}
+      onPointerDown={(event) => {
+        event.currentTarget.setPointerCapture(event.pointerId);
+        seekFromClientX(event.clientX);
+      }}
+      onPointerMove={(event) => {
+        if (event.currentTarget.hasPointerCapture(event.pointerId)) seekFromClientX(event.clientX);
+      }}
+      onPointerUp={releaseCapturedPointer}
+      onPointerCancel={releaseCapturedPointer}
       onKeyDown={onKeyDown}
     >
-      <div className="inline-dj-waveform-bars" aria-hidden="true">
+      <span className="ydj-waveform-start" aria-hidden="true" />
+      <div className="ydj-waveform-bars" aria-hidden="true">
         {visibleBars.map((peak, index) => (
           <i
             key={`${deck.id}-${index}`}
@@ -102,12 +107,12 @@ function CompactWaveform({ deck, dispatch }: { deck: DeckState; dispatch: DjDisp
           />
         ))}
       </div>
-      <span className="inline-dj-playhead" aria-hidden="true" style={{ left: `${progress * 100}%` }} />
+      <span className="ydj-playhead" aria-hidden="true" style={{ left: `${progress * 100}%` }} />
     </div>
   );
 }
 
-function InlineKnob({
+function Knob({
   label,
   value,
   min,
@@ -126,53 +131,30 @@ function InlineKnob({
   resetValue?: number;
   onChange: (value: number) => void;
 }) {
-  const gestureRef = useRef({ pointerId: -1, originX: 0, originY: 0, originValue: value });
+  const gestureRef = useRef({ originX: 0, originY: 0, originValue: value });
   const rotation = -135 + ((value - min) / (max - min)) * 270;
   const updateValue = (nextValue: number) => {
     const clamped = Math.min(Math.max(nextValue, min), max);
     const stepped = Number((Math.round(clamped / step) * step).toFixed(4));
     onChange(stepped);
   };
-  const onPointerDown = (event: PointerEvent<HTMLDivElement>) => {
-    event.currentTarget.focus();
-    event.currentTarget.setPointerCapture(event.pointerId);
-    gestureRef.current = {
-      pointerId: event.pointerId,
-      originX: event.clientX,
-      originY: event.clientY,
-      originValue: value,
-    };
-  };
-  const onPointerMove = (event: PointerEvent<HTMLDivElement>) => {
-    if (!event.currentTarget.hasPointerCapture(event.pointerId)) return;
-    const vertical = gestureRef.current.originY - event.clientY;
-    const horizontal = (event.clientX - gestureRef.current.originX) * 0.35;
-    updateValue(gestureRef.current.originValue + ((vertical + horizontal) / 140) * (max - min));
-  };
-  const releasePointer = (event: PointerEvent<HTMLDivElement>) => {
-    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
-      event.currentTarget.releasePointerCapture(event.pointerId);
-    }
-  };
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    let nextValue: number | null = null;
-    if (event.key === 'ArrowUp' || event.key === 'ArrowRight') nextValue = value + step;
-    else if (event.key === 'ArrowDown' || event.key === 'ArrowLeft') nextValue = value - step;
-    else if (event.key === 'PageUp') nextValue = value + step * 5;
-    else if (event.key === 'PageDown') nextValue = value - step * 5;
-    else if (event.key === 'Home') nextValue = min;
-    else if (event.key === 'End') nextValue = max;
-    if (nextValue === null) return;
+    let next: number | null = null;
+    if (event.key === 'ArrowUp' || event.key === 'ArrowRight') next = value + step;
+    else if (event.key === 'ArrowDown' || event.key === 'ArrowLeft') next = value - step;
+    else if (event.key === 'PageUp') next = value + step * 5;
+    else if (event.key === 'PageDown') next = value - step * 5;
+    else if (event.key === 'Home') next = min;
+    else if (event.key === 'End') next = max;
+    if (next === null) return;
     event.preventDefault();
-    updateValue(nextValue);
+    updateValue(next);
   };
-  const neutralValue = resetValue ?? (min <= 0 && max >= 0 ? 0 : min);
 
   return (
-    <div className="inline-dj-knob">
-      <span>{label}</span>
+    <div className="ydj-knob">
       <div
-        className="inline-dj-knob-dial"
+        className="ydj-knob-dial"
         role="slider"
         tabIndex={0}
         aria-label={label}
@@ -180,56 +162,65 @@ function InlineKnob({
         aria-valuemax={max}
         aria-valuenow={value}
         aria-valuetext={display}
-        title="Drag up/down · double-click to reset"
+        title={`${label}: ${display}. Drag up or down; double-click to reset.`}
         style={{ '--knob-rotation': `${rotation}deg` } as CSSProperties}
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={releasePointer}
-        onPointerCancel={releasePointer}
-        onDoubleClick={() => updateValue(neutralValue)}
+        onPointerDown={(event) => {
+          event.currentTarget.focus();
+          event.currentTarget.setPointerCapture(event.pointerId);
+          gestureRef.current = {
+            originX: event.clientX,
+            originY: event.clientY,
+            originValue: value,
+          };
+        }}
+        onPointerMove={(event) => {
+          if (!event.currentTarget.hasPointerCapture(event.pointerId)) return;
+          const vertical = gestureRef.current.originY - event.clientY;
+          const horizontal = (event.clientX - gestureRef.current.originX) * 0.35;
+          updateValue(gestureRef.current.originValue + ((vertical + horizontal) / 140) * (max - min));
+        }}
+        onPointerUp={releaseCapturedPointer}
+        onPointerCancel={releaseCapturedPointer}
+        onDoubleClick={() => updateValue(resetValue ?? (min <= 0 && max >= 0 ? 0 : min))}
         onKeyDown={onKeyDown}
       >
-        <b aria-hidden="true" />
+        <i aria-hidden="true" />
       </div>
-      <output>{display}</output>
+      <span>{label}</span>
     </div>
   );
 }
 
-function EchoPad({ deck, dispatch }: { deck: DeckState; dispatch: DjDispatch }) {
+function FxPad({ deck, mode, dispatch }: { deck: DeckState; mode: FxMode; dispatch: DjDispatch }) {
   const padRef = useRef<HTMLDivElement>(null);
-  const x = (deck.echo.time - 0.06) / 0.42;
-  const y = 1 - deck.echo.wet / 0.72;
+  const x = mode === 'echo' ? (deck.echo.time - 0.06) / 0.42 : (deck.filter + 1) / 2;
+  const y = mode === 'echo' ? 1 - deck.echo.wet / 0.72 : 0.5;
 
-  const setFromPointer = (clientX: number, clientY: number) => {
+  const update = (clientX: number, clientY: number) => {
     const pad = padRef.current;
     if (!pad) return;
     const rect = pad.getBoundingClientRect();
     const nextX = Math.min(Math.max((clientX - rect.left) / rect.width, 0), 1);
     const nextY = Math.min(Math.max((clientY - rect.top) / rect.height, 0), 1);
-    void dispatch({
-      type: 'deck.setEcho',
-      deck: deck.id,
-      time: 0.06 + nextX * 0.42,
-      wet: (1 - nextY) * 0.72,
-    });
-  };
-
-  const onPointerDown = (event: PointerEvent<HTMLDivElement>) => {
-    event.currentTarget.setPointerCapture(event.pointerId);
-    setFromPointer(event.clientX, event.clientY);
-  };
-  const onPointerMove = (event: PointerEvent<HTMLDivElement>) => {
-    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
-      setFromPointer(event.clientX, event.clientY);
-    }
-  };
-  const releasePointer = (event: PointerEvent<HTMLDivElement>) => {
-    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
-      event.currentTarget.releasePointerCapture(event.pointerId);
+    if (mode === 'echo') {
+      void dispatch({
+        type: 'deck.setEcho',
+        deck: deck.id,
+        time: 0.06 + nextX * 0.42,
+        wet: (1 - nextY) * 0.72,
+      });
+    } else {
+      void dispatch({ type: 'deck.setFilter', deck: deck.id, value: nextX * 2 - 1 });
     }
   };
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (mode === 'filter') {
+      if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight' && event.key !== 'Home') return;
+      event.preventDefault();
+      const value = event.key === 'Home' ? 0 : deck.filter + (event.key === 'ArrowRight' ? 0.05 : -0.05);
+      void dispatch({ type: 'deck.setFilter', deck: deck.id, value });
+      return;
+    }
     let time = deck.echo.time;
     let wet = deck.echo.wet;
     if (event.key === 'ArrowLeft') time -= 0.02;
@@ -243,285 +234,334 @@ function EchoPad({ deck, dispatch }: { deck: DeckState; dispatch: DjDispatch }) 
   };
 
   return (
-    <div className="inline-dj-echo-control">
-      <span>ECHO PAD</span>
-      <div
-        ref={padRef}
-        className="inline-dj-echo-pad"
-        role="slider"
-        tabIndex={0}
-        aria-label={`Deck ${deck.id} echo pad. Horizontal controls delay time, vertical controls amount`}
-        aria-valuemin={0}
-        aria-valuemax={72}
-        aria-valuenow={Math.round(deck.echo.wet * 100)}
-        aria-valuetext={`${Math.round(deck.echo.wet * 100)} percent at ${Math.round(deck.echo.time * 1000)} milliseconds`}
-        style={{ '--echo-x': `${x * 100}%`, '--echo-y': `${y * 100}%` } as CSSProperties}
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={releasePointer}
-        onPointerCancel={releasePointer}
-        onKeyDown={onKeyDown}
-      >
-        <i aria-hidden="true" />
-      </div>
-      <output>{Math.round(deck.echo.wet * 100)} · {Math.round(deck.echo.time * 1000)} ms</output>
+    <div
+      ref={padRef}
+      className="ydj-fx-pad"
+      role="slider"
+      tabIndex={0}
+      aria-label={`Deck ${deck.id} ${mode} touch pad`}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuenow={Math.round(x * 100)}
+      aria-valuetext={mode === 'echo'
+        ? `${Math.round(deck.echo.time * 1000)} milliseconds, ${Math.round(deck.echo.wet * 100)} percent wet`
+        : deck.filter === 0 ? 'Filter open' : deck.filter < 0 ? 'Low-pass filter' : 'High-pass filter'}
+      style={{ '--fx-x': `${x * 100}%`, '--fx-y': `${y * 100}%` } as CSSProperties}
+      onPointerDown={(event) => {
+        event.currentTarget.setPointerCapture(event.pointerId);
+        update(event.clientX, event.clientY);
+      }}
+      onPointerMove={(event) => {
+        if (event.currentTarget.hasPointerCapture(event.pointerId)) update(event.clientX, event.clientY);
+      }}
+      onPointerUp={releaseCapturedPointer}
+      onPointerCancel={releaseCapturedPointer}
+      onKeyDown={onKeyDown}
+    >
+      <span aria-hidden="true" />
     </div>
   );
 }
 
-function PerformanceControls({ deck, dispatch }: { deck: DeckState; dispatch: DjDispatch }) {
-  const loopIndex = LOOP_LENGTHS.indexOf(deck.loop.beats);
-  const changeLoopLength = (direction: -1 | 1) => {
-    const nextIndex = Math.min(Math.max(loopIndex + direction, 0), LOOP_LENGTHS.length - 1);
-    void dispatch({ type: 'deck.setLoopBeats', deck: deck.id, value: LOOP_LENGTHS[nextIndex] });
-  };
-  const setNudge = (value: -1 | 0 | 1) => {
-    void dispatch({ type: 'deck.setNudge', deck: deck.id, value });
-  };
-  const nudgeKeyDown = (event: KeyboardEvent<HTMLButtonElement>, value: -1 | 1) => {
-    if (event.key !== ' ' && event.key !== 'Enter') return;
-    event.preventDefault();
-    setNudge(value);
-  };
-
-  return (
-    <div className="inline-dj-performance" aria-label={`Deck ${deck.id} performance controls`}>
-      <div className="inline-dj-hot-cues" aria-label="Hot cues">
-        {HOT_CUE_SLOTS.map((slot) => {
-          const cue = deck.hotCues[slot.index];
-          return (
-          <button
-            type="button"
-            key={slot.id}
-            className={cue === null ? '' : 'is-set'}
-            disabled={deck.duration <= 0}
-            aria-label={cue === null
-              ? `Set hot cue ${slot.index + 1} on deck ${deck.id}`
-              : `Jump to hot cue ${slot.index + 1} at ${formatTime(cue)} on deck ${deck.id}`}
-            onClick={() => void dispatch({
-              type: 'deck.hotCue',
-              deck: deck.id,
-              index: slot.index,
-            })}
-          >
-            <span>{slot.index + 1}</span>
-            <small>{cue === null ? 'set' : formatTime(cue)}</small>
-          </button>
-          );
-        })}
-      </div>
-      <div className="inline-dj-performance-tools">
-        <div className="inline-dj-loop-controls" aria-label="Beat loop">
-          <button type="button" disabled={loopIndex === 0} aria-label="Shorter loop" onClick={() => changeLoopLength(-1)}>−</button>
-          <button
-            type="button"
-            className={deck.loop.enabled ? 'is-active' : ''}
-            disabled={!deck.bpm || deck.duration <= 0}
-            aria-pressed={deck.loop.enabled}
-            onClick={() => void dispatch({ type: 'deck.toggleLoop', deck: deck.id })}
-          >
-            loop <strong>{deck.loop.beats}</strong>
-          </button>
-          <button type="button" disabled={loopIndex === LOOP_LENGTHS.length - 1} aria-label="Longer loop" onClick={() => changeLoopLength(1)}>+</button>
-        </div>
-        <div className="inline-dj-nudge-controls" aria-label="Pitch bend">
-          {([-1, 1] as const).map((direction) => (
-            <button
-              type="button"
-              key={direction}
-              className={deck.nudge === direction ? 'is-active' : ''}
-              aria-label={`${direction < 0 ? 'Slow down' : 'Speed up'} deck ${deck.id} while held`}
-              onPointerDown={() => setNudge(direction)}
-              onPointerUp={() => setNudge(0)}
-              onPointerCancel={() => setNudge(0)}
-              onPointerLeave={() => setNudge(0)}
-              onKeyDown={(event) => nudgeKeyDown(event, direction)}
-              onKeyUp={() => setNudge(0)}
-              onBlur={() => setNudge(0)}
-            >
-              {direction < 0 ? '−' : '+'}<small>bend</small>
-            </button>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function HardwareDeck({
-  deck,
-  isMaster,
-  dispatch,
-  onOpenTone,
-}: {
-  deck: DeckState;
-  isMaster: boolean;
-  dispatch: DjDispatch;
-  onOpenTone: () => void;
-}) {
-  const jogRef = useRef({ pointerId: -1, originX: 0, originPosition: 0, dragged: false, lastUpdate: 0 });
+function Platter({ deck, dispatch }: { deck: DeckState; dispatch: DjDispatch }) {
+  const gestureRef = useRef({
+    active: false,
+    lastAngle: 0,
+    accumulated: 0,
+    pendingDelta: 0,
+    originPosition: 0,
+    lastUpdate: 0,
+    lastPointerAt: 0,
+  });
   const progress = deck.duration > 0 ? Math.min(deck.position / deck.duration, 1) : 0;
-  const effectiveBpm = getEffectiveBpm(deck.bpm, deck.tempoPercent);
   const isPlaying = deck.status === 'playing';
-
-  const onJogPointerDown = (event: PointerEvent<HTMLButtonElement>) => {
-    event.currentTarget.setPointerCapture(event.pointerId);
-    jogRef.current = {
-      pointerId: event.pointerId,
-      originX: event.clientX,
-      originPosition: deck.position,
-      dragged: false,
-      lastUpdate: 0,
-    };
-  };
-  const onJogPointerMove = (event: PointerEvent<HTMLButtonElement>) => {
-    if (!event.currentTarget.hasPointerCapture(event.pointerId)) return;
-    const movement = event.clientX - jogRef.current.originX;
-    if (Math.abs(movement) < 4) return;
-    if (!jogRef.current.dragged) {
-      jogRef.current.dragged = true;
-      void dispatch({ type: 'deck.startJog', deck: deck.id });
-    }
-    if (event.timeStamp - jogRef.current.lastUpdate < 28) return;
-    jogRef.current.lastUpdate = event.timeStamp;
+  const movePlatter = (event: PointerEvent<HTMLButtonElement>) => {
+    if (!gestureRef.current.active || !event.currentTarget.hasPointerCapture(event.pointerId)) return;
+    const angle = pointerAngle(event);
+    let delta = angle - gestureRef.current.lastAngle;
+    if (delta > Math.PI) delta -= Math.PI * 2;
+    if (delta < -Math.PI) delta += Math.PI * 2;
+    gestureRef.current.lastAngle = angle;
+    gestureRef.current.accumulated += delta;
+    gestureRef.current.pendingDelta += delta;
+    if (event.timeStamp - gestureRef.current.lastUpdate < 24) return;
+    const elapsedSeconds = Math.max(0.016, (event.timeStamp - gestureRef.current.lastPointerAt) / 1000);
+    const scratchRate = (gestureRef.current.pendingDelta / (Math.PI * 2)) * 1.8 / elapsedSeconds;
+    gestureRef.current.pendingDelta = 0;
+    gestureRef.current.lastUpdate = event.timeStamp;
+    gestureRef.current.lastPointerAt = event.timeStamp;
     void dispatch({
-      type: 'deck.seek',
+      type: 'deck.scratch',
       deck: deck.id,
-      seconds: jogRef.current.originPosition + movement * 0.025,
+      seconds: gestureRef.current.originPosition + (gestureRef.current.accumulated / (Math.PI * 2)) * 1.8,
+      rate: scratchRate,
     });
   };
-  const onJogPointerUp = (event: PointerEvent<HTMLButtonElement>) => {
-    const wasDragged = jogRef.current.dragged;
+  const finishGesture = (event: PointerEvent<HTMLButtonElement>) => {
+    if (!gestureRef.current.active) return;
+    movePlatter(event);
+    gestureRef.current.active = false;
     if (event.currentTarget.hasPointerCapture(event.pointerId)) {
       event.currentTarget.releasePointerCapture(event.pointerId);
     }
-    if (wasDragged) {
-      void dispatch({
-        type: 'deck.seek',
-        deck: deck.id,
-        seconds: jogRef.current.originPosition + (event.clientX - jogRef.current.originX) * 0.025,
-      });
-      void dispatch({ type: 'deck.endJog', deck: deck.id });
-    } else {
-      void dispatch({ type: 'deck.toggle', deck: deck.id });
-    }
-  };
-  const onJogKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
-    if (event.repeat || (event.key !== ' ' && event.key !== 'Enter')) return;
-    event.preventDefault();
-    void dispatch({ type: 'deck.toggle', deck: deck.id });
+    void dispatch({ type: 'deck.endJog', deck: deck.id });
   };
 
   return (
-    <section className={`inline-dj-channel is-${deck.id.toLowerCase()}`} aria-label={`Deck ${deck.id}`}>
+    <button
+      type="button"
+      className={`ydj-platter${isPlaying ? ' is-playing' : ''}${deck.jogging ? ' is-grabbed' : ''}`}
+      disabled={!deck.track || deck.status === 'loading'}
+      aria-label={`Deck ${deck.id} record. Touch and turn to scratch.`}
+      style={{
+        '--deck-progress': `${progress * 360}deg`,
+        '--disc-angle': `${deck.position * 92}deg`,
+      } as CSSProperties}
+      onPointerDown={(event) => {
+        event.preventDefault();
+        event.currentTarget.setPointerCapture(event.pointerId);
+        gestureRef.current = {
+          active: true,
+          lastAngle: pointerAngle(event),
+          accumulated: 0,
+          pendingDelta: 0,
+          originPosition: deck.position,
+          lastUpdate: 0,
+          lastPointerAt: event.timeStamp,
+        };
+        void dispatch({ type: 'deck.startJog', deck: deck.id });
+      }}
+      onPointerMove={movePlatter}
+      onPointerUp={finishGesture}
+      onPointerCancel={finishGesture}
+      onKeyDown={(event) => {
+        if (event.repeat || (event.key !== ' ' && event.key !== 'Enter')) return;
+        event.preventDefault();
+        void dispatch({ type: 'deck.toggle', deck: deck.id });
+      }}
+    >
+      <span className="ydj-record">
+        <i>{deck.id}</i>
+      </span>
+      <span className="ydj-tonearm" aria-hidden="true" />
+      <span className="ydj-hand" aria-hidden="true">GRAB</span>
+    </button>
+  );
+}
+
+function DeckStrip({
+  deck,
+  isMaster,
+  isTarget,
+  dispatch,
+  onSelectTarget,
+}: {
+  deck: DeckState;
+  isMaster: boolean;
+  isTarget: boolean;
+  dispatch: DjDispatch;
+  onSelectTarget: () => void;
+}) {
+  const effectiveBpm = getEffectiveBpm(deck.bpm, deck.tempoPercent);
+  return (
+    <div className="ydj-track-strip">
+      <div className="ydj-track-line">
+        <button type="button" className={isTarget ? 'is-target' : ''} onClick={onSelectTarget}>
+          DECK {deck.id}{isMaster ? ' · MASTER' : ''}
+        </button>
+        <strong title={deck.track ? `${deck.track.artist} — ${deck.track.title}` : undefined}>
+          {deck.status === 'loading' ? 'Loading audio…' : deck.track ? `${deck.track.artist} — ${deck.track.title}` : 'Load a song from the library below'}
+        </strong>
+        <span>{formatTime(deck.position)} / {formatTime(deck.duration)}</span>
+        <i className={deck.status === 'playing' ? 'is-live' : ''} aria-hidden="true" />
+      </div>
+      <Waveform deck={deck} dispatch={dispatch} />
+      <p className="ydj-track-error" aria-live="polite" title={deck.error ?? undefined}>
+        {deck.error && (
+          <><span aria-hidden="true">!</span><span className="dj-visually-hidden">{deck.error}</span></>
+        )}
+      </p>
+      <span className="ydj-track-bpm">{effectiveBpm ? `${effectiveBpm.toFixed(1)} BPM` : 'BPM —'}</span>
+    </div>
+  );
+}
+
+function DeckTransport({
+  deck,
+  mode,
+  dispatch,
+  onModeChange,
+  onOpenPro,
+}: {
+  deck: DeckState;
+  mode: FxMode;
+  dispatch: DjDispatch;
+  onModeChange: (mode: FxMode) => void;
+  onOpenPro: () => void;
+}) {
+  const loopIndex = LOOP_LENGTHS.indexOf(deck.loop.beats);
+  const changeLoop = (direction: -1 | 1) => {
+    const index = Math.min(Math.max(loopIndex + direction, 0), LOOP_LENGTHS.length - 1);
+    void dispatch({ type: 'deck.setLoopBeats', deck: deck.id, value: LOOP_LENGTHS[index] });
+  };
+
+  return (
+    <div className="ydj-transport">
+      <button type="button" className="ydj-pro-button" onClick={onOpenPro}>pro</button>
+      <label className="ydj-fx-select">
+        <span className="dj-visually-hidden">Deck {deck.id} effect</span>
+        <select value={mode} onChange={(event) => onModeChange(event.currentTarget.value as FxMode)}>
+          <option value="echo">FX 1 · Echo</option>
+          <option value="filter">FX 2 · Filter</option>
+        </select>
+      </label>
+      <div className="ydj-loop" aria-label={`Deck ${deck.id} beat loop`}>
+        <button type="button" disabled={loopIndex === 0} aria-label="Shorter loop" onClick={() => changeLoop(-1)}>−</button>
+        <button
+          type="button"
+          className={deck.loop.enabled ? 'is-active' : ''}
+          disabled={!deck.bpm || deck.duration <= 0}
+          aria-pressed={deck.loop.enabled}
+          onClick={() => void dispatch({ type: 'deck.toggleLoop', deck: deck.id })}
+        >
+          ↻ <strong>{deck.loop.beats}</strong>
+        </button>
+        <button type="button" disabled={loopIndex === LOOP_LENGTHS.length - 1} aria-label="Longer loop" onClick={() => changeLoop(1)}>+</button>
+      </div>
       <button
         type="button"
-        className={`inline-dj-platter${isPlaying ? ' is-playing' : ''}${deck.jogging ? ' is-grabbed' : ''}`}
+        className={`ydj-play${deck.status === 'playing' ? ' is-playing' : ''}`}
         disabled={!deck.track || deck.status === 'loading'}
-        aria-label={`${isPlaying ? 'Pause' : 'Play'} deck ${deck.id}: ${deck.track?.title ?? 'empty deck'}`}
-        style={{
-          '--deck-progress': `${progress * 360}deg`,
-          '--disc-angle': `${deck.position * 88}deg`,
-        } as CSSProperties}
-        onPointerDown={onJogPointerDown}
-        onPointerMove={onJogPointerMove}
-        onPointerUp={onJogPointerUp}
-        onPointerCancel={(event) => {
-          if (event.currentTarget.hasPointerCapture(event.pointerId)) {
-            event.currentTarget.releasePointerCapture(event.pointerId);
-          }
-          if (jogRef.current.dragged) void dispatch({ type: 'deck.endJog', deck: deck.id });
-        }}
-        onKeyDown={onJogKeyDown}
+        aria-label={`${deck.status === 'playing' ? 'Pause' : 'Play'} deck ${deck.id}`}
+        onClick={() => void dispatch({ type: 'deck.toggle', deck: deck.id })}
       >
-        <span className="inline-dj-disc">
-          <i>{deck.jogging ? 'HAND' : isPlaying ? 'Ⅱ' : '▶'}</i>
-        </span>
+        {deck.status === 'playing' ? 'Ⅱ' : '▶'}
       </button>
+    </div>
+  );
+}
 
-      <div className="inline-dj-track">
-        <header>
-          <span>
-            {deck.status === 'loading'
-              ? `AUDIO ${deck.id} · LOADING`
-              : isMaster ? `AUDIO ${deck.id} · MASTER` : `AUDIO ${deck.id}`}
-          </span>
-          <button type="button" onClick={() => void dispatch({ type: 'library.open', deck: deck.id })}>
-            load
-          </button>
-        </header>
-        <p title={deck.track ? `${deck.track.title} — ${deck.track.artist}` : undefined}>
-          <strong>{deck.track?.title ?? 'No track loaded'}</strong>
-          <span>{deck.track?.artist ?? 'Choose from the set'}</span>
-        </p>
-        <CompactWaveform deck={deck} dispatch={dispatch} />
-        <div className="inline-dj-readout">
-          <span>{formatTime(deck.position)} · −{formatTime(Math.max(0, deck.duration - deck.position))}</span>
-          <span>
-            {effectiveBpm ? `${effectiveBpm.toFixed(1)} BPM${deck.track?.bpmEstimated ? ' ~' : ''}` : 'BPM —'} · {deck.keyCamelot ?? 'KEY —'}
-          </span>
-        </div>
-        <div className="inline-dj-actions">
-          <button
-            type="button"
-            disabled={deck.duration <= 0}
-            onClick={() => void dispatch({ type: 'deck.cue', deck: deck.id })}
-          >
-            cue
-          </button>
-          <button
-            type="button"
-            className={deck.synced ? 'is-active' : ''}
-            disabled={!deck.bpm}
-            onClick={() => void dispatch({ type: 'deck.toggleSync', deck: deck.id })}
-          >
-            sync
-          </button>
-          <button type="button" onClick={onOpenTone}>adjust</button>
-        </div>
-        <p className="inline-dj-error" aria-live="polite" title={deck.error ?? undefined}>{deck.error}</p>
+function Deck({
+  deck,
+  isMaster,
+  isTarget,
+  mode,
+  dispatch,
+  onSelectTarget,
+  onModeChange,
+  onOpenPro,
+}: {
+  deck: DeckState;
+  isMaster: boolean;
+  isTarget: boolean;
+  mode: FxMode;
+  dispatch: DjDispatch;
+  onSelectTarget: () => void;
+  onModeChange: (mode: FxMode) => void;
+  onOpenPro: () => void;
+}) {
+  return (
+    <section className={`ydj-deck is-${deck.id.toLowerCase()}`} aria-label={`Deck ${deck.id}`}>
+      <DeckStrip deck={deck} isMaster={isMaster} isTarget={isTarget} dispatch={dispatch} onSelectTarget={onSelectTarget} />
+      <div className="ydj-deck-body">
+        <FxPad deck={deck} mode={mode} dispatch={dispatch} />
+        <Platter deck={deck} dispatch={dispatch} />
       </div>
-
-      <div className="inline-dj-deck-controls" aria-label={`Deck ${deck.id} mixer controls`}>
-        {(['low', 'mid', 'high'] as const).map((band) => (
-          <InlineKnob
-            key={band}
-            label={band.toUpperCase()}
-            value={deck.eq[band]}
-            min={-24}
-            max={6}
-            step={1}
-            display={`${deck.eq[band] > 0 ? '+' : ''}${deck.eq[band]}`}
-            onChange={(value) => void dispatch({ type: 'deck.setEq', deck: deck.id, band, value })}
-          />
-        ))}
-        <InlineKnob
-          label="FILTER"
-          value={deck.filter}
-          min={-1}
-          max={1}
-          step={0.01}
-          display={deck.filter === 0 ? 'OPEN' : deck.filter < 0 ? 'LP' : 'HP'}
-          onChange={(value) => void dispatch({ type: 'deck.setFilter', deck: deck.id, value })}
-        />
-        <div className="inline-dj-tempo-control">
-          <InlineRange
-            label="TEMPO"
-            value={deck.tempoPercent}
-            min={-16}
-            max={16}
-            step={0.1}
-            display={`${deck.tempoPercent >= 0 ? '+' : ''}${deck.tempoPercent.toFixed(1)}%`}
-            onChange={(value) => void dispatch({ type: 'deck.setTempo', deck: deck.id, value })}
-          />
-        </div>
-      </div>
-      <PerformanceControls deck={deck} dispatch={dispatch} />
+      <DeckTransport
+        deck={deck}
+        mode={mode}
+        dispatch={dispatch}
+        onModeChange={onModeChange}
+        onOpenPro={onOpenPro}
+      />
     </section>
   );
 }
 
-function InlineRange({
+function Mixer({ dispatch, onOpen }: { dispatch: DjDispatch; onOpen: () => void }) {
+  const [state] = useDjMixer((snapshot) => snapshot);
+  const masterBpm = state.masterDeck
+    ? getEffectiveBpm(state.decks[state.masterDeck].bpm, state.decks[state.masterDeck].tempoPercent)
+    : null;
+
+  return (
+    <aside className="ydj-mixer" aria-label="Mixer">
+      <button type="button" className="ydj-bpm" onClick={onOpen}>
+        <span>{masterBpm ? masterBpm.toFixed(0) : '—'}</span> BPM
+        <i aria-hidden="true">⌃<br />⌄</i>
+      </button>
+      <div className="ydj-mixer-body">
+        {DECK_IDS.map((deckId) => (
+          <div key={deckId} className={`ydj-channel-strip is-${deckId.toLowerCase()}`}>
+            <div className="ydj-channel-tone">
+              <Knob
+                label="Mid"
+                value={state.decks[deckId].eq.mid}
+                min={-24}
+                max={6}
+                step={1}
+                display={`${state.decks[deckId].eq.mid} dB`}
+                onChange={(value) => void dispatch({ type: 'deck.setEq', deck: deckId, band: 'mid', value })}
+              />
+              <Knob
+                label="Bass"
+                value={state.decks[deckId].eq.low}
+                min={-24}
+                max={6}
+                step={1}
+                display={`${state.decks[deckId].eq.low} dB`}
+                onChange={(value) => void dispatch({ type: 'deck.setEq', deck: deckId, band: 'low', value })}
+              />
+              <Knob
+                label="Filter"
+                value={state.decks[deckId].filter}
+                min={-1}
+                max={1}
+                step={0.01}
+                display={state.decks[deckId].filter === 0 ? 'Open' : state.decks[deckId].filter < 0 ? 'Low-pass' : 'High-pass'}
+                onChange={(value) => void dispatch({ type: 'deck.setFilter', deck: deckId, value })}
+              />
+            </div>
+            <label className="ydj-channel-fader">
+              <span>{deckId}</span>
+              <input
+                type="range"
+                min={0}
+                max={1}
+                step={0.01}
+                value={state.decks[deckId].level}
+                aria-label={`Deck ${deckId} channel fader`}
+                onChange={(event) => void dispatch({
+                  type: 'deck.setLevel',
+                  deck: deckId,
+                  value: Number(event.currentTarget.value),
+                })}
+              />
+              <i className={state.decks[deckId].peak > 0.96 ? 'is-hot' : ''} aria-hidden="true">
+                <b style={{ height: `${Math.max(2, Math.min(100, state.decks[deckId].peak * 100))}%` }} />
+              </i>
+            </label>
+          </div>
+        ))}
+      </div>
+      <label className="ydj-crossfader">
+        <span>A</span>
+        <input
+          type="range"
+          min={-1}
+          max={1}
+          step={0.01}
+          value={state.crossfader}
+          aria-label="Crossfader"
+          onChange={(event) => void dispatch({ type: 'mixer.setCrossfader', value: Number(event.currentTarget.value) })}
+        />
+        <span>B</span>
+      </label>
+    </aside>
+  );
+}
+
+function Range({
   label,
   value,
   min,
@@ -539,7 +579,7 @@ function InlineRange({
   onChange: (value: number) => void;
 }) {
   return (
-    <label className="inline-dj-range">
+    <label className="ydj-range">
       <span>{label}<output>{display}</output></span>
       <input
         type="range"
@@ -553,15 +593,53 @@ function InlineRange({
   );
 }
 
-function TonePanel({ deck, dispatch, onClose }: { deck: DeckState; dispatch: DjDispatch; onClose: () => void }) {
+function DeckPanel({ deck, dispatch, onClose }: { deck: DeckState; dispatch: DjDispatch; onClose: () => void }) {
+  const setNudge = (value: -1 | 0 | 1) => void dispatch({ type: 'deck.setNudge', deck: deck.id, value });
+  const nudgeKeyDown = (event: KeyboardEvent<HTMLButtonElement>, value: -1 | 1) => {
+    if (event.key !== ' ' && event.key !== 'Enter') return;
+    event.preventDefault();
+    setNudge(value);
+  };
   return (
-    <section className="inline-dj-panel is-deck-adjust" role="dialog" aria-modal="true" aria-label={`Deck ${deck.id} tone and beat controls`}>
+    <dialog open className="ydj-overlay" aria-label={`Deck ${deck.id} performance controls`}>
       <header>
-        <div><span>DECK {deck.id}</span><strong>{deck.track?.title ?? 'No track loaded'}</strong></div>
+        <div><span>DECK {deck.id} / PERFORMANCE</span><strong>{deck.track?.title ?? 'No track loaded'}</strong></div>
         <button type="button" onClick={onClose}>done</button>
       </header>
-      <div className="inline-dj-panel-controls">
-        <InlineRange
+      <div className="ydj-overlay-grid is-deck">
+        <div className="ydj-panel-block is-transport">
+          <button type="button" disabled={!deck.track} onClick={() => void dispatch({ type: 'deck.cue', deck: deck.id })}>CUE</button>
+          <button
+            type="button"
+            className={deck.synced ? 'is-active' : ''}
+            disabled={!deck.bpm}
+            onClick={() => void dispatch({ type: 'deck.toggleSync', deck: deck.id })}
+          >SYNC</button>
+          <button type="button" disabled={!deck.track} onClick={() => void dispatch({ type: 'deck.setCue', deck: deck.id })}>SET CUE</button>
+          <button
+            type="button"
+            aria-pressed={deck.nudge === -1}
+            onPointerDown={() => setNudge(-1)}
+            onPointerUp={() => setNudge(0)}
+            onPointerCancel={() => setNudge(0)}
+            onPointerLeave={() => setNudge(0)}
+            onKeyDown={(event) => nudgeKeyDown(event, -1)}
+            onKeyUp={() => setNudge(0)}
+            onBlur={() => setNudge(0)}
+          >− BEND</button>
+          <button
+            type="button"
+            aria-pressed={deck.nudge === 1}
+            onPointerDown={() => setNudge(1)}
+            onPointerUp={() => setNudge(0)}
+            onPointerCancel={() => setNudge(0)}
+            onPointerLeave={() => setNudge(0)}
+            onKeyDown={(event) => nudgeKeyDown(event, 1)}
+            onKeyUp={() => setNudge(0)}
+            onBlur={() => setNudge(0)}
+          >+ BEND</button>
+        </div>
+        <Range
           label="TEMPO"
           value={deck.tempoPercent}
           min={-16}
@@ -570,218 +648,170 @@ function TonePanel({ deck, dispatch, onClose }: { deck: DeckState; dispatch: DjD
           display={`${deck.tempoPercent >= 0 ? '+' : ''}${deck.tempoPercent.toFixed(1)}%`}
           onChange={(value) => void dispatch({ type: 'deck.setTempo', deck: deck.id, value })}
         />
-        {(['low', 'mid', 'high'] as const).map((band) => (
-          <InlineRange
-            key={band}
-            label={band.toUpperCase()}
-            value={deck.eq[band]}
-            min={-24}
-            max={6}
-            step={1}
-            display={`${deck.eq[band] > 0 ? '+' : ''}${deck.eq[band]} dB`}
-            onChange={(value) => void dispatch({ type: 'deck.setEq', deck: deck.id, band, value })}
-          />
-        ))}
-        <InlineRange
-          label="FILTER"
-          value={deck.filter}
-          min={-1}
-          max={1}
-          step={0.01}
-          display={deck.filter === 0 ? 'OPEN' : deck.filter < 0 ? 'LP' : 'HP'}
-          onChange={(value) => void dispatch({ type: 'deck.setFilter', deck: deck.id, value })}
+        <Range
+          label="HIGH"
+          value={deck.eq.high}
+          min={-24}
+          max={6}
+          step={1}
+          display={`${deck.eq.high} dB`}
+          onChange={(value) => void dispatch({ type: 'deck.setEq', deck: deck.id, band: 'high', value })}
         />
-        <InlineRange
-          label="LEVEL"
-          value={deck.level}
-          min={0}
-          max={1}
-          step={0.01}
-          display={`${Math.round(deck.level * 100)}%`}
-          onChange={(value) => void dispatch({ type: 'deck.setLevel', deck: deck.id, value })}
-        />
-        <EchoPad deck={deck} dispatch={dispatch} />
-      </div>
-      <div className="inline-dj-adjust-controls">
-        <label>
-          <span>BPM</span>
-          <input
-            type="number"
-            min={60}
-            max={220}
-            step={0.1}
-            value={deck.bpm ?? ''}
-            onChange={(event) => {
-              const value = Number(event.currentTarget.value);
-              if (value > 0) void dispatch({ type: 'deck.setBpm', deck: deck.id, value });
-            }}
-          />
-        </label>
-        <label>
-          <span>FIRST BEAT</span>
-          <input
-            type="number"
-            min={0}
-            max={Math.max(0, deck.duration)}
-            step={0.01}
-            value={deck.beatOffsetSec}
-            onChange={(event) => void dispatch({
-              type: 'deck.setBeatOffset',
-              deck: deck.id,
-              value: Number(event.currentTarget.value),
-            })}
-          />
-        </label>
-        <label>
-          <span>KEY</span>
-          <input
-            type="text"
-            maxLength={4}
-            placeholder="8A"
-            value={deck.keyCamelot ?? ''}
-            onChange={(event) => void dispatch({ type: 'deck.setKey', deck: deck.id, value: event.currentTarget.value })}
-          />
-        </label>
-        <button type="button" onClick={() => void dispatch({ type: 'deck.setCue', deck: deck.id })}>
-          set cue · {formatTime(deck.position)}
-        </button>
-        <div className="inline-dj-clear-cues">
-          <span>CLEAR HOT CUES</span>
-          <div>
-            {HOT_CUE_SLOTS.map((slot) => {
-              const cue = deck.hotCues[slot.index];
-              return (
-              <button
-                type="button"
-                key={slot.id}
-                disabled={cue === null}
-                aria-label={`Clear hot cue ${slot.index + 1} on deck ${deck.id}`}
-                onClick={() => void dispatch({
-                  type: 'deck.clearHotCue',
-                  deck: deck.id,
-                  index: slot.index,
-                })}
-              >
-                ×{slot.index + 1}
-              </button>
-              );
-            })}
-          </div>
+        <div className="ydj-hot-cues" aria-label="Hot cues">
+          {HOT_CUE_SLOTS.map((index) => (
+            <button
+              type="button"
+              key={index}
+              className={deck.hotCues[index] === null ? '' : 'is-active'}
+              disabled={!deck.track}
+              aria-label={deck.hotCues[index] === null
+                ? `Set hot cue ${index + 1}`
+                : `Jump to hot cue ${index + 1} at ${formatTime(deck.hotCues[index] ?? 0)}`}
+              onClick={() => void dispatch({ type: 'deck.hotCue', deck: deck.id, index })}
+            >
+              <span>{index + 1}</span><small>{deck.hotCues[index] === null ? 'hot cue' : formatTime(deck.hotCues[index] ?? 0)}</small>
+            </button>
+          ))}
+        </div>
+        <div className="ydj-beat-settings">
+          <label>BPM<input type="number" min={60} max={220} step={0.1} value={deck.bpm ?? ''} onChange={(event) => {
+            const value = Number(event.currentTarget.value);
+            if (value > 0) void dispatch({ type: 'deck.setBpm', deck: deck.id, value });
+          }} /></label>
+          <label>FIRST BEAT<input type="number" min={0} max={Math.max(0, deck.duration)} step={0.01} value={deck.beatOffsetSec} onChange={(event) => void dispatch({
+            type: 'deck.setBeatOffset', deck: deck.id, value: Number(event.currentTarget.value),
+          })} /></label>
+          <label>KEY<input type="text" maxLength={4} placeholder="8A" value={deck.keyCamelot ?? ''} onChange={(event) => void dispatch({
+            type: 'deck.setKey', deck: deck.id, value: event.currentTarget.value,
+          })} /></label>
+          {HOT_CUE_SLOTS.map((index) => (
+            <button
+              type="button"
+              key={index}
+              disabled={deck.hotCues[index] === null}
+              aria-label={`Clear hot cue ${index + 1}`}
+              onClick={() => void dispatch({ type: 'deck.clearHotCue', deck: deck.id, index })}
+            >×{index + 1}</button>
+          ))}
         </div>
       </div>
-    </section>
+    </dialog>
   );
 }
 
-function MixerPanel({
-  dispatch,
-  onClose,
-}: {
-  dispatch: DjDispatch;
-  onClose: () => void;
-}) {
+function MixerPanel({ dispatch, onClose }: { dispatch: DjDispatch; onClose: () => void }) {
   const [state] = useDjMixer((snapshot) => snapshot);
   const endSet = () => {
-    const isPlaying = state.decks.A.status === 'playing' || state.decks.B.status === 'playing';
-    if (isPlaying && !window.confirm('End the DJ set and return to the vinyl player?')) return;
+    const playing = state.decks.A.status === 'playing' || state.decks.B.status === 'playing';
+    if (playing && !window.confirm('End the DJ set and return to the vinyl player?')) return;
     void dispatch({ type: 'mode.end' });
   };
-
   return (
-    <section className="inline-dj-panel" role="dialog" aria-modal="true" aria-label="Master mixer controls">
+    <dialog open className="ydj-overlay" aria-label="Master mixer controls">
       <header>
         <div><span>MASTER MIXER</span><strong>GROOVY HARD TECHNO</strong></div>
         <button type="button" onClick={onClose}>done</button>
       </header>
-      <div className="inline-dj-panel-controls is-mixer">
-        <InlineRange
-          label="CHANNEL A"
-          value={state.decks.A.level}
-          min={0}
-          max={1}
-          step={0.01}
-          display={`${Math.round(state.decks.A.level * 100)}%`}
-          onChange={(value) => void dispatch({ type: 'deck.setLevel', deck: 'A', value })}
-        />
-        <InlineRange
-          label="CROSSFADER"
-          value={state.crossfader}
-          min={-1}
-          max={1}
-          step={0.01}
-          display={state.crossfader === 0 ? 'A / B' : state.crossfader < 0 ? 'A' : 'B'}
-          onChange={(value) => void dispatch({ type: 'mixer.setCrossfader', value })}
-        />
-        <InlineRange
-          label="CHANNEL B"
-          value={state.decks.B.level}
-          min={0}
-          max={1}
-          step={0.01}
-          display={`${Math.round(state.decks.B.level * 100)}%`}
-          onChange={(value) => void dispatch({ type: 'deck.setLevel', deck: 'B', value })}
-        />
-        <InlineRange
-          label="MASTER"
-          value={state.masterLevel}
-          min={0}
-          max={1}
-          step={0.01}
-          display={`${Math.round(state.masterLevel * 100)}%`}
-          onChange={(value) => void dispatch({ type: 'mixer.setMaster', value })}
-        />
-        <button type="button" className="inline-dj-panel-button" onClick={() => void dispatch({ type: 'mixer.toggleOutput' })}>
-          {state.outputPaused ? 'resume mix' : 'pause mix'}
-        </button>
-        <button type="button" className="inline-dj-panel-button" onClick={endSet}>return to vinyl</button>
+      <div className="ydj-overlay-grid is-mixer">
+        <Range label="CHANNEL A" value={state.decks.A.level} min={0} max={1} step={0.01} display={`${Math.round(state.decks.A.level * 100)}%`} onChange={(value) => void dispatch({ type: 'deck.setLevel', deck: 'A', value })} />
+        <Range label="CROSSFADER" value={state.crossfader} min={-1} max={1} step={0.01} display={state.crossfader === 0 ? 'A / B' : state.crossfader < 0 ? 'A' : 'B'} onChange={(value) => void dispatch({ type: 'mixer.setCrossfader', value })} />
+        <Range label="CHANNEL B" value={state.decks.B.level} min={0} max={1} step={0.01} display={`${Math.round(state.decks.B.level * 100)}%`} onChange={(value) => void dispatch({ type: 'deck.setLevel', deck: 'B', value })} />
+        <Range label="MASTER" value={state.masterLevel} min={0} max={1} step={0.01} display={`${Math.round(state.masterLevel * 100)}%`} onChange={(value) => void dispatch({ type: 'mixer.setMaster', value })} />
+        <button type="button" onClick={() => void dispatch({ type: 'mixer.toggleOutput' })}>{state.outputPaused ? 'RESUME MIX' : 'PAUSE MIX'}</button>
+        <button type="button" onClick={endSet}>RETURN TO VINYL</button>
       </div>
-    </section>
+    </dialog>
   );
 }
 
-function InlineLibrary({ deck, dispatch }: { deck: DeckId; dispatch: DjDispatch }) {
+function Library({
+  target,
+  dispatch,
+  onTargetChange,
+}: {
+  target: DeckId;
+  dispatch: DjDispatch;
+  onTargetChange: (deck: DeckId) => void;
+}) {
   const [state] = useDjMixer((snapshot) => snapshot);
+  const [filter, setFilter] = useState<LibraryFilter>('all');
+  const [sort, setSort] = useState<LibrarySort>('set');
+  const [query, setQuery] = useState('');
+  const [dense, setDense] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const isPlaying = state.decks[deck].status === 'playing';
-  const confirmReplace = () => !isPlaying || window.confirm(`Deck ${deck} is playing. Replace its track?`);
+  const fileDeckRef = useRef<DeckId>(target);
+  const tracks = useMemo(() => getLibraryTracks(djTracks, query, filter, sort), [filter, query, sort]);
 
-  const loadCatalog = (trackId: string) => {
-    if (!confirmReplace()) return;
+  const confirmReplace = (deck: DeckId) => (
+    state.decks[deck].status !== 'playing' || window.confirm(`Deck ${deck} is playing. Replace its track?`)
+  );
+  const loadCatalog = (deck: DeckId, trackId: string) => {
+    if (!confirmReplace(deck)) return;
+    onTargetChange(deck);
     void dispatch({ type: 'deck.loadCatalog', deck, trackId });
-    void dispatch({ type: 'library.close' });
   };
-
+  const openFile = (deck: DeckId) => {
+    if (!confirmReplace(deck)) return;
+    fileDeckRef.current = deck;
+    onTargetChange(deck);
+    fileInputRef.current?.click();
+  };
   const loadFile = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.currentTarget.files?.[0];
     event.currentTarget.value = '';
-    if (!file || !confirmReplace()) return;
-    void dispatch({ type: 'deck.loadFile', deck, file });
-    void dispatch({ type: 'library.close' });
+    if (!file) return;
+    void dispatch({ type: 'deck.loadFile', deck: fileDeckRef.current, file });
   };
 
   return (
-    <section className="inline-dj-library" role="dialog" aria-modal="true" aria-label={`Load a track into deck ${deck}`}>
-      <header>
-        <div><span>SET CRATE / DECK {deck}</span><strong>Choose a track</strong></div>
-        <button type="button" onClick={() => void dispatch({ type: 'library.close' })}>done</button>
-      </header>
-      <div className="inline-dj-crate">
-        <button type="button" className="inline-dj-file" onClick={() => fileInputRef.current?.click()}>
-          <span>LOCAL</span><strong>MP3 / WAV</strong><small>max 100 MB · 8 min</small>
-        </button>
-        <input ref={fileInputRef} hidden type="file" accept=".mp3,.wav,audio/mpeg,audio/wav" onChange={loadFile} />
-        {djTracks.map((track) => (
-          <button
-            type="button"
-            key={track.id}
-            disabled={!track.available}
-            onClick={() => loadCatalog(track.id)}
-          >
-            <span>{String(track.setOrder).padStart(2, '0')} · {track.setPhase}</span>
-            <strong>{track.title}</strong>
-            <small>{track.available ? track.artist : `${track.artist} · asset pending`}</small>
+    <section className={`ydj-library${dense ? ' is-dense' : ''}`} aria-label="DJ set library">
+      <nav className="ydj-library-rail" aria-label="Library filters">
+        {([
+          ['all', '★', 'SET'],
+          ['available', '▶', 'READY'],
+          ['pending', '+', 'ADD'],
+        ] as const).map(([value, icon, label]) => (
+          <button type="button" key={value} className={filter === value ? 'is-active' : ''} aria-pressed={filter === value} onClick={() => setFilter(value)} title={label}>
+            <span>{icon}</span><small>{label}</small>
           </button>
         ))}
+      </nav>
+      <div className="ydj-library-main">
+        <header className="ydj-library-toolbar">
+          <div className="ydj-library-target" aria-label="Default load target">
+            {DECK_IDS.map((deck) => <button type="button" key={deck} className={target === deck ? 'is-active' : ''} aria-pressed={target === deck} onClick={() => onTargetChange(deck)}>DECK {deck}</button>)}
+          </div>
+          <label className="ydj-search"><span>⌕</span><input type="search" value={query} placeholder="Search set" aria-label="Search the set" onChange={(event) => setQuery(event.currentTarget.value)} /></label>
+          <button type="button" className="ydj-toolbar-button" onClick={() => setSort(sort === 'set' ? 'artist' : 'set')}>SORT · {sort === 'set' ? 'SET' : 'A–Z'}</button>
+          <button type="button" className="ydj-toolbar-button is-icon" aria-label="Toggle library density" onClick={() => setDense((value) => !value)}>{dense ? '☷' : '▦'}</button>
+          <button type="button" className="ydj-local-button" onClick={() => openFile(target)}>+ LOCAL AUDIO</button>
+          <input ref={fileInputRef} hidden type="file" accept=".mp3,.wav,audio/mpeg,audio/wav" onChange={loadFile} />
+        </header>
+        <table className="ydj-track-table" aria-label={`${tracks.length} tracks`}>
+          <tbody>
+          {tracks.length === 0 ? <tr><td className="ydj-empty-library" colSpan={7}>No tracks match this view.</td></tr> : tracks.map((track) => (
+            <tr className="ydj-track-row" key={track.id}>
+              <td className="ydj-load-cell">
+                {DECK_IDS.map((deck) => (
+                  <button
+                    type="button"
+                    key={deck}
+                    aria-label={`${track.available ? 'Load' : 'Choose a local file for'} ${track.artist} ${track.title} on deck ${deck}`}
+                    title={`${track.available ? 'Load' : 'Add file to'} deck ${deck}`}
+                    onClick={() => track.available ? loadCatalog(deck, track.id) : openFile(deck)}
+                  >{deck === 'A' ? '▶' : '▷'}</button>
+                ))}
+              </td>
+              <td className="ydj-order">{String(track.setOrder).padStart(2, '0')}</td>
+              <td><strong>{track.artist}</strong></td>
+              <td className="ydj-title">{track.title}</td>
+              <td className="ydj-phase">{track.setPhase}</td>
+              <td className="ydj-row-bpm">{track.bpm ? track.bpm.toFixed(1) : '—'}</td>
+              <td className={track.available ? 'ydj-ready' : 'ydj-pending'}>{track.available ? 'READY' : 'ADD'}</td>
+            </tr>
+          ))}
+          </tbody>
+        </table>
       </div>
     </section>
   );
@@ -790,28 +820,21 @@ function InlineLibrary({ deck, dispatch }: { deck: DeckId; dispatch: DjDispatch 
 export function InlineDjDeck() {
   const [state, dispatch] = useDjMixer((snapshot) => snapshot);
   const [panel, setPanel] = useState<DeckId | 'mixer' | null>(null);
+  const [target, setTarget] = useState<DeckId>('A');
+  const [fxModes, setFxModes] = useState<Record<DeckId, FxMode>>({ A: 'echo', B: 'echo' });
   const boardRef = useRef<HTMLDivElement>(null);
-  const overlayKey = state.libraryDeck ? `library-${state.libraryDeck}` : panel;
 
   useEffect(() => {
-    if (!overlayKey) return;
+    if (!panel) return;
     const board = boardRef.current;
-    const overlay = board?.querySelector<HTMLElement>('[role="dialog"]');
+    const overlay = board?.querySelector<HTMLElement>('dialog[open]');
     const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     const focusableSelector = 'button:not([disabled]), input:not([disabled]):not([hidden]), [tabindex="0"]';
-    const frame = window.requestAnimationFrame(() => {
-      overlay?.querySelector<HTMLElement>(focusableSelector)?.focus();
-    });
-
-    const closeOverlay = () => {
-      if (state.libraryDeck) void dispatch({ type: 'library.close' });
-      else setPanel(null);
-    };
-
+    const frame = window.requestAnimationFrame(() => overlay?.querySelector<HTMLElement>(focusableSelector)?.focus());
     const onKeyDown = (event: globalThis.KeyboardEvent) => {
       if (event.key === 'Escape') {
         event.preventDefault();
-        closeOverlay();
+        setPanel(null);
         return;
       }
       if (event.key !== 'Tab' || !overlay) return;
@@ -827,98 +850,63 @@ export function InlineDjDeck() {
         first.focus();
       }
     };
-
     document.addEventListener('keydown', onKeyDown);
     return () => {
       window.cancelAnimationFrame(frame);
       document.removeEventListener('keydown', onKeyDown);
       previousFocus?.focus();
     };
-  }, [dispatch, overlayKey, state.libraryDeck]);
+  }, [panel]);
+
+  const endSet = () => {
+    const playing = state.decks.A.status === 'playing' || state.decks.B.status === 'playing';
+    if (playing && !window.confirm('End the DJ set and return to the vinyl player?')) return;
+    void dispatch({ type: 'mode.end' });
+  };
 
   return (
-    <div ref={boardRef} className="inline-dj-board" aria-label="Groovy hard techno DJ deck">
-      <div className="inline-dj-surface" inert={overlayKey ? true : undefined}>
-      <HardwareDeck
-        deck={state.decks.A}
-        isMaster={state.masterDeck === 'A'}
-        dispatch={dispatch}
-        onOpenTone={() => setPanel('A')}
-      />
-
-      <aside className="inline-dj-mixer" aria-label="Mixer">
-        <div className="inline-dj-mixer-head">
-          <button type="button" className="inline-dj-mix-button" onClick={() => setPanel('mixer')}>
-            <span>MIX</span>
-            <i className={state.masterPeak > 0.98 ? 'is-limiting' : ''} aria-hidden="true">
-              <b style={{ height: `${Math.min(100, state.decks.A.peak * 100)}%` }} />
-              <b style={{ height: `${Math.min(100, state.decks.B.peak * 100)}%` }} />
-            </i>
-            <small>{state.audioStatus === 'blocked' ? 'blocked' : state.outputPaused ? 'paused' : 'adjust'}</small>
-          </button>
-          <InlineKnob
-            label="MASTER"
-            value={state.masterLevel}
-            min={0}
-            max={1}
-            step={0.01}
-            display={`${Math.round(state.masterLevel * 100)}%`}
-            resetValue={0.82}
-            onChange={(value) => void dispatch({ type: 'mixer.setMaster', value })}
+    <div ref={boardRef} className="inline-dj-board ydj-board" aria-label="Groovy hard techno DJ console">
+      <div className="ydj-surface" inert={panel ? true : undefined}>
+        <header className="ydj-appbar">
+          <div className="ydj-brand"><strong>TXN<span>DJ</span></strong><small>groovy hard techno console</small></div>
+          <div className="ydj-app-status">
+            <button type="button" className={state.outputPaused ? '' : 'is-live'} onClick={() => void dispatch({ type: 'mixer.toggleOutput' })}>
+              <i aria-hidden="true" />{state.outputPaused ? 'RESUME' : 'LIVE'}
+            </button>
+            <button type="button" onClick={() => setPanel('mixer')}>MIX</button>
+            <button type="button" onClick={endSet}>END SET</button>
+          </div>
+          <div className="ydj-app-meta"><span>{state.audioStatus}</span><strong>{Math.round(state.masterLevel * 100)}</strong><small>MASTER</small></div>
+        </header>
+        <div className="ydj-console">
+          <Deck
+            deck={state.decks.A}
+            isMaster={state.masterDeck === 'A'}
+            isTarget={target === 'A'}
+            mode={fxModes.A}
+            dispatch={dispatch}
+            onSelectTarget={() => setTarget('A')}
+            onModeChange={(mode) => setFxModes((current) => ({ ...current, A: mode }))}
+            onOpenPro={() => setPanel('A')}
+          />
+          <Mixer dispatch={dispatch} onOpen={() => setPanel('mixer')} />
+          <Deck
+            deck={state.decks.B}
+            isMaster={state.masterDeck === 'B'}
+            isTarget={target === 'B'}
+            mode={fxModes.B}
+            dispatch={dispatch}
+            onSelectTarget={() => setTarget('B')}
+            onModeChange={(mode) => setFxModes((current) => ({ ...current, B: mode }))}
+            onOpenPro={() => setPanel('B')}
           />
         </div>
-        <div className="inline-dj-channel-faders" aria-label="Channel faders">
-          {(['A', 'B'] as const).map((deck) => (
-            <label key={deck}>
-              <span>{deck}</span>
-              <input
-                type="range"
-                min={0}
-                max={1}
-                step={0.01}
-                value={state.decks[deck].level}
-                aria-label={`Deck ${deck} channel fader`}
-                onChange={(event) => void dispatch({
-                  type: 'deck.setLevel',
-                  deck,
-                  value: Number(event.currentTarget.value),
-                })}
-              />
-            </label>
-          ))}
-        </div>
-        <label className="inline-dj-crossfader">
-          <span><i>A</i><i>B</i></span>
-          <input
-            type="range"
-            min={-1}
-            max={1}
-            step={0.01}
-            value={state.crossfader}
-            aria-label="Crossfader"
-            onChange={(event) => void dispatch({
-              type: 'mixer.setCrossfader',
-              value: Number(event.currentTarget.value),
-            })}
-          />
-        </label>
-      </aside>
-
-      <HardwareDeck
-        deck={state.decks.B}
-        isMaster={state.masterDeck === 'B'}
-        dispatch={dispatch}
-        onOpenTone={() => setPanel('B')}
-      />
+        <Library target={target} dispatch={dispatch} onTargetChange={setTarget} />
       </div>
-
-      {panel === 'A' && <TonePanel deck={state.decks.A} dispatch={dispatch} onClose={() => setPanel(null)} />}
-      {panel === 'B' && <TonePanel deck={state.decks.B} dispatch={dispatch} onClose={() => setPanel(null)} />}
+      {panel === 'A' && <DeckPanel deck={state.decks.A} dispatch={dispatch} onClose={() => setPanel(null)} />}
+      {panel === 'B' && <DeckPanel deck={state.decks.B} dispatch={dispatch} onClose={() => setPanel(null)} />}
       {panel === 'mixer' && <MixerPanel dispatch={dispatch} onClose={() => setPanel(null)} />}
-      {state.libraryDeck && <InlineLibrary deck={state.libraryDeck} dispatch={dispatch} />}
-      {state.audioStatus === 'blocked' && (
-        <p className="dj-visually-hidden" aria-live="polite">Audio is blocked — press a deck to resume.</p>
-      )}
+      {state.audioStatus === 'blocked' && <p className="dj-visually-hidden" aria-live="polite">Audio is blocked. Press a deck control to resume.</p>}
     </div>
   );
 }
