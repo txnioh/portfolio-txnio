@@ -2938,8 +2938,7 @@ html, body {
 .ydj-deck.is-b .ydj-fx-select { grid-column: 3; grid-row: 1; }
 .ydj-deck.is-b .ydj-pro-button { grid-column: 4; grid-row: 1; }
 
-.ydj-transport button,
-.ydj-fx-select select {
+.ydj-transport button {
   height: 38px;
   border: 1px solid #080910;
   border-radius: 1px;
@@ -2959,15 +2958,20 @@ html, body {
   font-size: 9px !important;
 }
 
-.ydj-fx-select,
-.ydj-fx-select select {
+.ydj-fx-select {
+  display: grid;
   min-width: 0;
   width: 100%;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.ydj-fx-select select {
-  padding: 0 9px;
-  appearance: auto;
+.ydj-fx-select button + button {
+  border-left: 0;
+}
+
+.ydj-fx-select button.is-active {
+  color: #ff8b2a;
+  box-shadow: inset 0 -2px #ff8b2a;
 }
 
 .ydj-loop {
@@ -3131,14 +3135,29 @@ html, body {
   font-size: 7px;
 }
 
-.ydj-channel-fader input {
-  width: 30px;
+.ydj-channel-fader-track {
+  position: relative;
+  width: 20px;
   height: 94px;
   margin: 0;
-  accent-color: #a3a3a0;
+  border: 1px solid #090a0f;
+  background:
+    linear-gradient(90deg, transparent 46%, #08090d 46% 54%, transparent 54%),
+    repeating-linear-gradient(0deg, #242630 0 8px, #343640 8px 9px);
   cursor: ns-resize;
-  direction: rtl;
-  writing-mode: vertical-lr;
+  touch-action: none;
+}
+
+.ydj-channel-fader-track > b {
+  position: absolute;
+  left: 50%;
+  width: 28px;
+  height: 13px;
+  border: 1px solid #08090e;
+  background: linear-gradient(#77787d, #3f4047);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.45);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
 }
 
 .ydj-channel-fader > i {
@@ -3163,26 +3182,18 @@ html, body {
 }
 
 .ydj-crossfader {
-  display: grid;
-  grid-template-columns: 15px minmax(0, 1fr) 15px;
-  gap: 4px;
-  align-items: center;
+  display: block;
   padding: 3px 18px 4px;
   border-top: 1px solid #25273a;
-  color: #777988;
-  font-size: 7px;
 }
 
-.ydj-crossfader input,
-.ydj-range input {
-  width: 100%;
-  margin: 0;
-  accent-color: #b9b9b5;
-}
-
-.ydj-crossfader input {
+.ydj-crossfader .ydj-performance-crossfader > div {
   height: 38px;
-  cursor: ew-resize;
+}
+
+.ydj-crossfader .ydj-performance-crossfader i {
+  top: 4px;
+  height: 28px;
 }
 
 .ydj-library {
@@ -3420,13 +3431,12 @@ html, body {
   font-size: 9px;
 }
 
-.ydj-overlay {
-  position: absolute;
-  inset: 0;
+.ydj-options {
   display: grid;
+  min-width: 860px;
   width: 100%;
   max-width: none;
-  height: 100%;
+  height: 182px;
   max-height: none;
   margin: 0;
   padding: 0;
@@ -3436,7 +3446,7 @@ html, body {
   color: #ecece8;
 }
 
-.ydj-board .ydj-overlay > header {
+.ydj-board .ydj-options > header {
   display: flex;
   min-width: 0;
   flex-direction: row;
@@ -3447,25 +3457,25 @@ html, body {
   background: #0b0b0d;
 }
 
-.ydj-overlay > header span,
-.ydj-overlay > header strong {
+.ydj-options > header span,
+.ydj-options > header strong {
   display: block;
 }
 
-.ydj-overlay > header span {
+.ydj-options > header span {
   color: #ff8b2a;
   font-size: 7px;
   letter-spacing: 0.1em;
 }
 
-.ydj-overlay > header strong {
+.ydj-options > header strong {
   margin-top: 2px;
   font-size: 10px;
   font-weight: 500;
 }
 
-.ydj-overlay > header button,
-.ydj-overlay-grid button {
+.ydj-options > header button,
+.ydj-options-grid button {
   min-width: 44px;
   min-height: 34px;
   border: 1px solid #3a3b45;
@@ -3474,7 +3484,7 @@ html, body {
   cursor: pointer;
 }
 
-.ydj-overlay-grid {
+.ydj-options-grid {
   display: grid;
   min-width: 0;
   gap: 16px;
@@ -3483,13 +3493,15 @@ html, body {
   overflow: auto;
 }
 
-.ydj-overlay-grid.is-deck {
-  grid-template-columns: minmax(250px, 1.15fr) minmax(150px, 1fr) minmax(150px, 1fr) minmax(250px, 1.25fr);
-  grid-template-rows: 1fr 1fr;
+.ydj-options-grid.is-deck {
+  gap: 8px;
+  grid-template-columns: minmax(250px, 1.2fr) minmax(150px, 0.7fr) minmax(250px, 1.25fr);
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  padding: 8px;
 }
 
-.ydj-overlay-grid.is-mixer {
-  grid-template-columns: repeat(4, minmax(140px, 1fr)) 120px 130px;
+.ydj-options-grid.is-mixer {
+  grid-template-columns: minmax(240px, 1.25fr) minmax(250px, 1.5fr) 110px 100px;
 }
 
 .ydj-panel-block.is-transport {
@@ -3521,67 +3533,131 @@ html, body {
   font-size: 7px;
 }
 
-.ydj-range {
-  display: grid;
-  min-width: 0;
-  grid-template-rows: 16px 44px;
-}
-
-.ydj-range > span {
-  display: flex;
-  justify-content: space-between;
-  color: #747580;
-  font-size: 8px;
-  letter-spacing: 0.07em;
-}
-
-.ydj-range output {
-  color: #e3e3df;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0;
-}
-
-.ydj-range input {
-  height: 44px;
-}
-
 .ydj-beat-settings {
   display: grid;
   grid-column: 1 / -1;
-  grid-template-columns: 100px 130px 80px repeat(4, 44px);
+  grid-template-columns: 190px 110px 160px repeat(4, 44px);
   gap: 8px;
+  align-items: center;
 }
 
-.ydj-beat-settings label {
-  color: #747580;
-  font-size: 7px;
-  letter-spacing: 0.06em;
+.ydj-performance-dials,
+.ydj-mixer-dials {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: repeat(2, minmax(58px, 1fr));
+  align-items: center;
 }
 
-.ydj-beat-settings input {
+.ydj-mixer-dials {
+  grid-template-columns: repeat(3, minmax(58px, 1fr));
+}
+
+.ydj-performance-dials .ydj-knob,
+.ydj-mixer-dials .ydj-knob {
+  height: 58px;
+  grid-template-rows: 37px 12px;
+}
+
+.ydj-performance-dials .ydj-knob-dial,
+.ydj-mixer-dials .ydj-knob-dial {
+  width: 32px;
+  height: 32px;
+}
+
+.ydj-bpm-cluster,
+.ydj-key-cluster {
+  display: grid;
+  height: 44px;
+  grid-template-columns: 44px minmax(72px, 1fr) 44px;
+}
+
+.ydj-bpm-cluster button + button,
+.ydj-key-cluster > * + * {
+  border-left: 0;
+}
+
+.ydj-bpm-cluster .is-readout,
+.ydj-grid-here,
+.ydj-key-cluster span {
+  display: grid;
+  place-content: center;
+  text-align: center;
+}
+
+.ydj-bpm-cluster strong,
+.ydj-grid-here strong,
+.ydj-key-cluster strong {
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.ydj-bpm-cluster small,
+.ydj-grid-here small,
+.ydj-key-cluster small {
   display: block;
-  width: 100%;
-  height: 36px;
-  margin-top: 5px;
-  padding: 0 8px;
-  border: 1px solid #3a3b45;
-  background: #15161e;
-  color: #eeeeeb;
+  margin-top: 2px;
+  color: #747580;
+  font-size: 6px;
+  letter-spacing: 0.08em;
 }
 
-.ydj-beat-settings button {
-  width: 44px;
-  min-width: 44px;
-  min-height: 44px;
-  align-self: end;
+.ydj-key-cluster span {
+  border-top: 1px solid #3a3b45;
+  border-bottom: 1px solid #3a3b45;
+  background: #15161e;
+}
+
+.ydj-performance-crossfader {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: 14px minmax(0, 1fr) 14px;
+  gap: 7px;
+  align-items: center;
+  color: #777988;
+  font-size: 8px;
+  text-align: center;
+}
+
+.ydj-performance-crossfader > div {
+  position: relative;
+  height: 54px;
+  border: 1px solid #30313c;
+  background:
+    linear-gradient(90deg, transparent 49.8%, #53545e 50%, transparent 50.2%),
+    repeating-linear-gradient(90deg, #171821 0 24px, #1d1e28 24px 25px);
+  cursor: ew-resize;
+  touch-action: none;
+}
+
+.ydj-performance-crossfader i {
+  position: absolute;
+  top: 5px;
+  width: 14px;
+  height: 42px;
+  border: 1px solid #08090e;
+  background: linear-gradient(90deg, #55565d, #b5b5b1 48%, #55565d);
+  box-shadow: 0 3px 7px rgba(0, 0, 0, 0.4);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.ydj-options-grid.is-mixer > button.is-active {
+  border-color: #ff8b2a;
+  color: #ff8b2a;
 }
 
 .ydj-board button:focus-visible,
 .ydj-board input:focus-visible,
-.ydj-board select:focus-visible,
 .ydj-knob-dial:focus-visible,
 .ydj-waveform:focus-visible,
 .ydj-fx-pad:focus-visible {
+  outline: 1px solid #ff8b2a;
+  outline-offset: 2px;
+}
+
+.ydj-channel-fader-track:focus-visible,
+.ydj-performance-crossfader > div:focus-visible {
   outline: 1px solid #ff8b2a;
   outline-offset: 2px;
 }
@@ -3607,9 +3683,7 @@ html, body {
     padding-bottom: 2px;
   }
 
-  .ydj-transport button,
-  .ydj-fx-select select,
-  .ydj-crossfader input {
+  .ydj-transport button {
     height: 44px;
   }
 
@@ -3647,11 +3721,6 @@ html, body {
     height: 44px;
   }
 
-  .ydj-overlay-grid.is-deck,
-  .ydj-overlay-grid.is-mixer {
-    grid-template-columns: repeat(6, minmax(150px, 1fr));
-    grid-auto-flow: column;
-  }
 }
 
 @media (max-width: 430px) {
@@ -3675,6 +3744,10 @@ html, body {
   }
 
   .ydj-library {
+    height: 276px;
+  }
+
+  .ydj-options {
     height: 276px;
   }
 

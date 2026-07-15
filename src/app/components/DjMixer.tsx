@@ -408,13 +408,10 @@ function DeckTransport({
   return (
     <div className="ydj-transport">
       <button type="button" className="ydj-pro-button" onClick={onOpenPro}>pro</button>
-      <label className="ydj-fx-select">
-        <span className="dj-visually-hidden">Deck {deck.id} effect</span>
-        <select value={mode} onChange={(event) => onModeChange(event.currentTarget.value as FxMode)}>
-          <option value="echo">FX 1 · Echo</option>
-          <option value="filter">FX 2 · Filter</option>
-        </select>
-      </label>
+      <div className="ydj-fx-select" role="group" aria-label={`Deck ${deck.id} effect`}>
+        <button type="button" className={mode === 'echo' ? 'is-active' : ''} aria-pressed={mode === 'echo'} onClick={() => onModeChange('echo')}>ECHO</button>
+        <button type="button" className={mode === 'filter' ? 'is-active' : ''} aria-pressed={mode === 'filter'} onClick={() => onModeChange('filter')}>FILTER</button>
+      </div>
       <div className="ydj-loop" aria-label={`Deck ${deck.id} beat loop`}>
         <button type="button" disabled={loopIndex === 0} aria-label="Shorter loop" onClick={() => changeLoop(-1)}>−</button>
         <button
@@ -478,6 +475,52 @@ function Deck({
   );
 }
 
+function ChannelFader({ deck, value, peak, onChange }: { deck: DeckId; value: number; peak: number; onChange: (value: number) => void }) {
+  const trackRef = useRef<HTMLDivElement>(null);
+  const update = (clientY: number) => {
+    const track = trackRef.current;
+    if (!track) return;
+    const rect = track.getBoundingClientRect();
+    onChange(Math.min(Math.max(1 - (clientY - rect.top) / rect.height, 0), 1));
+  };
+
+  return (
+    <div className="ydj-channel-fader">
+      <span>{deck}</span>
+      <div
+        ref={trackRef}
+        className="ydj-channel-fader-track"
+        role="slider"
+        tabIndex={0}
+        aria-label={`Deck ${deck} channel fader`}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={Math.round(value * 100)}
+        onPointerDown={(event) => {
+          event.currentTarget.setPointerCapture(event.pointerId);
+          update(event.clientY);
+        }}
+        onPointerMove={(event) => {
+          if (event.currentTarget.hasPointerCapture(event.pointerId)) update(event.clientY);
+        }}
+        onPointerUp={releaseCapturedPointer}
+        onPointerCancel={releaseCapturedPointer}
+        onDoubleClick={() => onChange(0.82)}
+        onKeyDown={(event) => {
+          if (!['ArrowUp', 'ArrowDown', 'Home', 'End'].includes(event.key)) return;
+          event.preventDefault();
+          onChange(event.key === 'Home' ? 0 : event.key === 'End' ? 1 : value + (event.key === 'ArrowUp' ? 0.05 : -0.05));
+        }}
+      >
+        <b style={{ top: `${6.5 + (1 - value) * 81}px` }} aria-hidden="true" />
+      </div>
+      <i className={peak > 0.96 ? 'is-hot' : ''} aria-hidden="true">
+        <b style={{ height: `${Math.max(2, Math.min(100, peak * 100))}%` }} />
+      </i>
+    </div>
+  );
+}
+
 function Mixer({ dispatch, onOpen }: { dispatch: DjDispatch; onOpen: () => void }) {
   const [state] = useDjMixer((snapshot) => snapshot);
   const masterBpm = state.masterDeck
@@ -522,91 +565,103 @@ function Mixer({ dispatch, onOpen }: { dispatch: DjDispatch; onOpen: () => void 
                 onChange={(value) => void dispatch({ type: 'deck.setFilter', deck: deckId, value })}
               />
             </div>
-            <label className="ydj-channel-fader">
-              <span>{deckId}</span>
-              <input
-                type="range"
-                min={0}
-                max={1}
-                step={0.01}
-                value={state.decks[deckId].level}
-                aria-label={`Deck ${deckId} channel fader`}
-                onChange={(event) => void dispatch({
-                  type: 'deck.setLevel',
-                  deck: deckId,
-                  value: Number(event.currentTarget.value),
-                })}
-              />
-              <i className={state.decks[deckId].peak > 0.96 ? 'is-hot' : ''} aria-hidden="true">
-                <b style={{ height: `${Math.max(2, Math.min(100, state.decks[deckId].peak * 100))}%` }} />
-              </i>
-            </label>
+            <ChannelFader
+              deck={deckId}
+              value={state.decks[deckId].level}
+              peak={state.decks[deckId].peak}
+              onChange={(value) => void dispatch({ type: 'deck.setLevel', deck: deckId, value })}
+            />
           </div>
         ))}
       </div>
-      <label className="ydj-crossfader">
-        <span>A</span>
-        <input
-          type="range"
-          min={-1}
-          max={1}
-          step={0.01}
-          value={state.crossfader}
-          aria-label="Crossfader"
-          onChange={(event) => void dispatch({ type: 'mixer.setCrossfader', value: Number(event.currentTarget.value) })}
-        />
-        <span>B</span>
-      </label>
+      <div className="ydj-crossfader">
+        <CrossfaderPad value={state.crossfader} onChange={(value) => void dispatch({ type: 'mixer.setCrossfader', value })} />
+      </div>
     </aside>
   );
 }
 
-function Range({
-  label,
-  value,
-  min,
-  max,
-  step,
-  display,
-  onChange,
-}: {
-  label: string;
-  value: number;
-  min: number;
-  max: number;
-  step: number;
-  display: string;
-  onChange: (value: number) => void;
-}) {
+function CrossfaderPad({ value, onChange }: { value: number; onChange: (value: number) => void }) {
+  const padRef = useRef<HTMLDivElement>(null);
+  const update = (clientX: number) => {
+    const pad = padRef.current;
+    if (!pad) return;
+    const rect = pad.getBoundingClientRect();
+    onChange(Math.min(Math.max(((clientX - rect.left) / rect.width) * 2 - 1, -1), 1));
+  };
+
   return (
-    <label className="ydj-range">
-      <span>{label}<output>{display}</output></span>
-      <input
-        type="range"
-        min={min}
-        max={max}
-        step={step}
-        value={value}
-        onChange={(event) => onChange(Number(event.currentTarget.value))}
-      />
-    </label>
+    <div className="ydj-performance-crossfader">
+      <span>A</span>
+      <div
+        ref={padRef}
+        role="slider"
+        tabIndex={0}
+        aria-label="Performance crossfader"
+        aria-valuemin={-1}
+        aria-valuemax={1}
+        aria-valuenow={value}
+        aria-valuetext={value === 0 ? 'A and B' : value < 0 ? 'Toward A' : 'Toward B'}
+        onPointerDown={(event) => {
+          event.currentTarget.setPointerCapture(event.pointerId);
+          update(event.clientX);
+        }}
+        onPointerMove={(event) => {
+          if (event.currentTarget.hasPointerCapture(event.pointerId)) update(event.clientX);
+        }}
+        onPointerUp={releaseCapturedPointer}
+        onPointerCancel={releaseCapturedPointer}
+        onDoubleClick={() => onChange(0)}
+        onKeyDown={(event) => {
+          if (!['ArrowLeft', 'ArrowRight', 'Home'].includes(event.key)) return;
+          event.preventDefault();
+          onChange(event.key === 'Home' ? 0 : value + (event.key === 'ArrowRight' ? 0.05 : -0.05));
+        }}
+      >
+        <i style={{ left: `${((value + 1) / 2) * 100}%` }} aria-hidden="true" />
+      </div>
+      <span>B</span>
+    </div>
   );
 }
 
 function DeckPanel({ deck, dispatch, onClose }: { deck: DeckState; dispatch: DjDispatch; onClose: () => void }) {
+  const tapTimesRef = useRef<number[]>([]);
   const setNudge = (value: -1 | 0 | 1) => void dispatch({ type: 'deck.setNudge', deck: deck.id, value });
   const nudgeKeyDown = (event: KeyboardEvent<HTMLButtonElement>, value: -1 | 1) => {
     if (event.key !== ' ' && event.key !== 'Enter') return;
     event.preventDefault();
     setNudge(value);
   };
+  const adjustBpm = (amount: number) => void dispatch({
+    type: 'deck.setBpm',
+    deck: deck.id,
+    value: Math.min(Math.max((deck.bpm ?? 140) + amount, 60), 220),
+  });
+  const tapBpm = () => {
+    const now = performance.now();
+    const previous = tapTimesRef.current.at(-1);
+    tapTimesRef.current = previous && now - previous < 2000
+      ? [...tapTimesRef.current.slice(-3), now]
+      : [now];
+    if (tapTimesRef.current.length < 2) return;
+    const intervals = tapTimesRef.current.slice(1).map((time, index) => time - tapTimesRef.current[index]);
+    const bpm = 60000 / (intervals.reduce((sum, interval) => sum + interval, 0) / intervals.length);
+    void dispatch({ type: 'deck.setBpm', deck: deck.id, value: Math.min(Math.max(bpm, 60), 220) });
+  };
+  const camelotKeys = Array.from({ length: 24 }, (_, index) => `${(index % 12) + 1}${index < 12 ? 'A' : 'B'}`);
+  const changeKey = (direction: -1 | 1) => {
+    const currentIndex = camelotKeys.indexOf(deck.keyCamelot ?? '');
+    const nextIndex = ((currentIndex < 0 ? (direction === 1 ? -1 : 0) : currentIndex) + direction + camelotKeys.length) % camelotKeys.length;
+    void dispatch({ type: 'deck.setKey', deck: deck.id, value: camelotKeys[nextIndex] });
+  };
   return (
-    <dialog open className="ydj-overlay" aria-label={`Deck ${deck.id} performance controls`}>
+    <section className="ydj-options" aria-label={`Deck ${deck.id} performance controls`}>
       <header>
         <div><span>DECK {deck.id} / PERFORMANCE</span><strong>{deck.track?.title ?? 'No track loaded'}</strong></div>
         <button type="button" onClick={onClose}>done</button>
       </header>
-      <div className="ydj-overlay-grid is-deck">
+      <div className="ydj-options-grid is-deck">
         <div className="ydj-panel-block is-transport">
           <button type="button" disabled={!deck.track} onClick={() => void dispatch({ type: 'deck.cue', deck: deck.id })}>CUE</button>
           <button
@@ -639,24 +694,10 @@ function DeckPanel({ deck, dispatch, onClose }: { deck: DeckState; dispatch: DjD
             onBlur={() => setNudge(0)}
           >+ BEND</button>
         </div>
-        <Range
-          label="TEMPO"
-          value={deck.tempoPercent}
-          min={-16}
-          max={16}
-          step={0.1}
-          display={`${deck.tempoPercent >= 0 ? '+' : ''}${deck.tempoPercent.toFixed(1)}%`}
-          onChange={(value) => void dispatch({ type: 'deck.setTempo', deck: deck.id, value })}
-        />
-        <Range
-          label="HIGH"
-          value={deck.eq.high}
-          min={-24}
-          max={6}
-          step={1}
-          display={`${deck.eq.high} dB`}
-          onChange={(value) => void dispatch({ type: 'deck.setEq', deck: deck.id, band: 'high', value })}
-        />
+        <div className="ydj-performance-dials">
+          <Knob label="Tempo" value={deck.tempoPercent} min={-16} max={16} step={0.1} resetValue={0} display={`${deck.tempoPercent >= 0 ? '+' : ''}${deck.tempoPercent.toFixed(1)}%`} onChange={(value) => void dispatch({ type: 'deck.setTempo', deck: deck.id, value })} />
+          <Knob label="High" value={deck.eq.high} min={-24} max={6} step={1} resetValue={0} display={`${deck.eq.high} dB`} onChange={(value) => void dispatch({ type: 'deck.setEq', deck: deck.id, band: 'high', value })} />
+        </div>
         <div className="ydj-hot-cues" aria-label="Hot cues">
           {HOT_CUE_SLOTS.map((index) => (
             <button
@@ -674,16 +715,19 @@ function DeckPanel({ deck, dispatch, onClose }: { deck: DeckState; dispatch: DjD
           ))}
         </div>
         <div className="ydj-beat-settings">
-          <label>BPM<input type="number" min={60} max={220} step={0.1} value={deck.bpm ?? ''} onChange={(event) => {
-            const value = Number(event.currentTarget.value);
-            if (value > 0) void dispatch({ type: 'deck.setBpm', deck: deck.id, value });
-          }} /></label>
-          <label>FIRST BEAT<input type="number" min={0} max={Math.max(0, deck.duration)} step={0.01} value={deck.beatOffsetSec} onChange={(event) => void dispatch({
-            type: 'deck.setBeatOffset', deck: deck.id, value: Number(event.currentTarget.value),
-          })} /></label>
-          <label>KEY<input type="text" maxLength={4} placeholder="8A" value={deck.keyCamelot ?? ''} onChange={(event) => void dispatch({
-            type: 'deck.setKey', deck: deck.id, value: event.currentTarget.value,
-          })} /></label>
+          <div className="ydj-bpm-cluster">
+            <button type="button" onClick={() => adjustBpm(-0.1)} aria-label="Lower BPM">−</button>
+            <button type="button" className="is-readout" onClick={tapBpm}><strong>{deck.bpm?.toFixed(1) ?? '—'}</strong><small>TAP BPM</small></button>
+            <button type="button" onClick={() => adjustBpm(0.1)} aria-label="Raise BPM">+</button>
+          </div>
+          <button type="button" className="ydj-grid-here" disabled={!deck.track} onClick={() => void dispatch({ type: 'deck.setBeatOffset', deck: deck.id, value: deck.position })}>
+            <strong>{formatTime(deck.beatOffsetSec)}</strong><small>GRID HERE</small>
+          </button>
+          <div className="ydj-key-cluster">
+            <button type="button" onClick={() => changeKey(-1)} aria-label="Previous musical key">‹</button>
+            <span><strong>{deck.keyCamelot ?? '—'}</strong><small>KEY</small></span>
+            <button type="button" onClick={() => changeKey(1)} aria-label="Next musical key">›</button>
+          </div>
           {HOT_CUE_SLOTS.map((index) => (
             <button
               type="button"
@@ -695,7 +739,7 @@ function DeckPanel({ deck, dispatch, onClose }: { deck: DeckState; dispatch: DjD
           ))}
         </div>
       </div>
-    </dialog>
+    </section>
   );
 }
 
@@ -707,20 +751,22 @@ function MixerPanel({ dispatch, onClose }: { dispatch: DjDispatch; onClose: () =
     void dispatch({ type: 'mode.end' });
   };
   return (
-    <dialog open className="ydj-overlay" aria-label="Master mixer controls">
+    <section className="ydj-options" aria-label="Master mixer controls">
       <header>
         <div><span>MASTER MIXER</span><strong>GROOVY HARD TECHNO</strong></div>
         <button type="button" onClick={onClose}>done</button>
       </header>
-      <div className="ydj-overlay-grid is-mixer">
-        <Range label="CHANNEL A" value={state.decks.A.level} min={0} max={1} step={0.01} display={`${Math.round(state.decks.A.level * 100)}%`} onChange={(value) => void dispatch({ type: 'deck.setLevel', deck: 'A', value })} />
-        <Range label="CROSSFADER" value={state.crossfader} min={-1} max={1} step={0.01} display={state.crossfader === 0 ? 'A / B' : state.crossfader < 0 ? 'A' : 'B'} onChange={(value) => void dispatch({ type: 'mixer.setCrossfader', value })} />
-        <Range label="CHANNEL B" value={state.decks.B.level} min={0} max={1} step={0.01} display={`${Math.round(state.decks.B.level * 100)}%`} onChange={(value) => void dispatch({ type: 'deck.setLevel', deck: 'B', value })} />
-        <Range label="MASTER" value={state.masterLevel} min={0} max={1} step={0.01} display={`${Math.round(state.masterLevel * 100)}%`} onChange={(value) => void dispatch({ type: 'mixer.setMaster', value })} />
-        <button type="button" onClick={() => void dispatch({ type: 'mixer.toggleOutput' })}>{state.outputPaused ? 'RESUME MIX' : 'PAUSE MIX'}</button>
-        <button type="button" onClick={endSet}>RETURN TO VINYL</button>
+      <div className="ydj-options-grid is-mixer">
+        <div className="ydj-mixer-dials">
+          <Knob label="A" value={state.decks.A.level} min={0} max={1} step={0.01} display={`${Math.round(state.decks.A.level * 100)}%`} onChange={(value) => void dispatch({ type: 'deck.setLevel', deck: 'A', value })} />
+          <Knob label="Master" value={state.masterLevel} min={0} max={1} step={0.01} resetValue={0.82} display={`${Math.round(state.masterLevel * 100)}%`} onChange={(value) => void dispatch({ type: 'mixer.setMaster', value })} />
+          <Knob label="B" value={state.decks.B.level} min={0} max={1} step={0.01} display={`${Math.round(state.decks.B.level * 100)}%`} onChange={(value) => void dispatch({ type: 'deck.setLevel', deck: 'B', value })} />
+        </div>
+        <CrossfaderPad value={state.crossfader} onChange={(value) => void dispatch({ type: 'mixer.setCrossfader', value })} />
+        <button type="button" className={state.outputPaused ? '' : 'is-active'} onClick={() => void dispatch({ type: 'mixer.toggleOutput' })}>{state.outputPaused ? 'RESUME MIX' : 'OUTPUT LIVE'}</button>
+        <button type="button" onClick={endSet}>END SET</button>
       </div>
-    </dialog>
+    </section>
   );
 }
 
@@ -827,27 +873,15 @@ export function InlineDjDeck() {
   useEffect(() => {
     if (!panel) return;
     const board = boardRef.current;
-    const overlay = board?.querySelector<HTMLElement>('dialog[open]');
+    const options = board?.querySelector<HTMLElement>('.ydj-options');
     const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     const focusableSelector = 'button:not([disabled]), input:not([disabled]):not([hidden]), [tabindex="0"]';
-    const frame = window.requestAnimationFrame(() => overlay?.querySelector<HTMLElement>(focusableSelector)?.focus());
+    const frame = window.requestAnimationFrame(() => options?.querySelector<HTMLElement>(focusableSelector)?.focus());
     const onKeyDown = (event: globalThis.KeyboardEvent) => {
       if (event.key === 'Escape') {
         event.preventDefault();
         setPanel(null);
         return;
-      }
-      if (event.key !== 'Tab' || !overlay) return;
-      const focusable = Array.from(overlay.querySelectorAll<HTMLElement>(focusableSelector));
-      if (focusable.length === 0) return;
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
-      if (event.shiftKey && document.activeElement === first) {
-        event.preventDefault();
-        last.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault();
-        first.focus();
       }
     };
     document.addEventListener('keydown', onKeyDown);
@@ -866,7 +900,7 @@ export function InlineDjDeck() {
 
   return (
     <div ref={boardRef} className="inline-dj-board ydj-board" aria-label="Groovy hard techno DJ console">
-      <div className="ydj-surface" inert={panel ? true : undefined}>
+      <div className="ydj-surface">
         <header className="ydj-appbar">
           <div className="ydj-brand"><strong>TXN<span>DJ</span></strong><small>groovy hard techno console</small></div>
           <div className="ydj-app-status">
@@ -901,11 +935,11 @@ export function InlineDjDeck() {
             onOpenPro={() => setPanel('B')}
           />
         </div>
-        <Library target={target} dispatch={dispatch} onTargetChange={setTarget} />
+        {panel === 'A' && <DeckPanel deck={state.decks.A} dispatch={dispatch} onClose={() => setPanel(null)} />}
+        {panel === 'B' && <DeckPanel deck={state.decks.B} dispatch={dispatch} onClose={() => setPanel(null)} />}
+        {panel === 'mixer' && <MixerPanel dispatch={dispatch} onClose={() => setPanel(null)} />}
+        {!panel && <Library target={target} dispatch={dispatch} onTargetChange={setTarget} />}
       </div>
-      {panel === 'A' && <DeckPanel deck={state.decks.A} dispatch={dispatch} onClose={() => setPanel(null)} />}
-      {panel === 'B' && <DeckPanel deck={state.decks.B} dispatch={dispatch} onClose={() => setPanel(null)} />}
-      {panel === 'mixer' && <MixerPanel dispatch={dispatch} onClose={() => setPanel(null)} />}
       {state.audioStatus === 'blocked' && <p className="dj-visually-hidden" aria-live="polite">Audio is blocked. Press a deck control to resume.</p>}
     </div>
   );
