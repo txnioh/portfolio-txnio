@@ -404,6 +404,34 @@ html, body {
   color: #111111;
 }
 
+:root[data-audio-transition] {
+  view-transition-name: none;
+}
+
+:root[data-audio-transition] .minimal-coverflow-reflection,
+:root[data-audio-transition] .minimal-coverflow-meta {
+  opacity: 0;
+}
+
+:root[data-audio-transition] .minimal-coverflow-card:not(.is-active-album) {
+  opacity: 0 !important;
+}
+
+.minimal-release-cover {
+  view-transition-name: active-album-cover;
+}
+
+::view-transition-group(active-album-cover) {
+  animation-duration: 420ms;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+::view-transition-old(active-album-cover),
+::view-transition-new(active-album-cover) {
+  animation-duration: 420ms;
+  mix-blend-mode: normal;
+}
+
 .minimal-inline-player.is-dj-mode {
   height: 470px;
   min-height: 470px;
@@ -592,6 +620,10 @@ html, body {
   white-space: nowrap;
 }
 
+.minimal-inline-player .minimal-inline-track {
+  padding: 0;
+}
+
 .minimal-inline-track strong {
   font-weight: 500;
 }
@@ -654,27 +686,36 @@ html, body {
 }
 
 .minimal-timeline-track,
+.minimal-timeline-buffered,
 .minimal-timeline-preview,
 .minimal-timeline-progress {
   position: absolute;
-  top: 50%;
+  top: calc(50% - 2px);
   left: 0;
   height: 4px;
   border-radius: 999px;
-  transform: translateY(-50%);
+  transform-origin: left center;
 }
 
 .minimal-timeline-track {
   right: 0;
+  transform-origin: center;
   background: #dededb;
 }
 
+.minimal-timeline-buffered {
+  right: 0;
+  background: #c7c7c3;
+}
+
 .minimal-timeline-preview {
+  right: 0;
   background: #b9b9b5;
   opacity: 0;
 }
 
 .minimal-timeline-progress {
+  right: 0;
   background: #111111;
 }
 
@@ -694,6 +735,27 @@ html, body {
   font-variant-numeric: tabular-nums;
   line-height: 20px;
   white-space: nowrap;
+}
+
+.minimal-audio-status {
+  margin: 2px 0 -2px;
+  color: rgba(0, 0, 0, 0.4);
+  font-size: 10px;
+  line-height: 14px;
+}
+
+.minimal-inline-player .minimal-audio-status {
+  box-sizing: border-box;
+  height: 14px;
+  padding: 0;
+  overflow: hidden;
+  line-height: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.minimal-audio-status.is-error {
+  color: #9e2d22;
 }
 
 .minimal-collection-label {
@@ -754,18 +816,55 @@ html, body {
   height: 96px;
   margin-left: -48px;
   padding: 0;
-  overflow: hidden;
+  overflow: visible;
   border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 1px;
   background: transparent;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
   cursor: pointer;
   transform-style: preserve-3d;
-  -webkit-box-reflect: below 2px linear-gradient(
+}
+
+.minimal-coverflow-card:not(.is-active-album) {
+  transition:
+    opacity 280ms cubic-bezier(0.22, 1, 0.36, 1)
+    var(--coverflow-reveal-delay, 40ms);
+}
+
+.minimal-coverflow-artwork {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  border-radius: inherit;
+}
+
+.minimal-coverflow-reflection {
+  position: absolute;
+  top: calc(100% + 2px);
+  right: 0;
+  left: 0;
+  height: 96px;
+  opacity: 1;
+  overflow: hidden;
+  pointer-events: none;
+  transition:
+    opacity 520ms cubic-bezier(0.22, 1, 0.36, 1)
+    var(--coverflow-reflection-delay, 150ms);
+  -webkit-mask-image: linear-gradient(
     to bottom,
     rgba(0, 0, 0, 0.24) 0%,
     rgba(0, 0, 0, 0.06) 100%
   );
+  mask-image: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.24) 0%,
+    rgba(0, 0, 0, 0.06) 100%
+  );
+}
+
+.minimal-coverflow-reflection img {
+  transform: scaleY(-1);
 }
 
 .minimal-coverflow-meta {
@@ -780,7 +879,9 @@ html, body {
   justify-content: center;
   gap: 0;
   padding: 8px 0 0;
+  opacity: 1;
   text-align: center;
+  transition: opacity 240ms cubic-bezier(0.22, 1, 0.36, 1) 50ms;
   z-index: 20;
 }
 
@@ -788,21 +889,11 @@ html, body {
   position: absolute;
   inset: -20px -8px;
   z-index: -1;
-  background: rgba(253, 253, 252, 0.46);
-  -webkit-backdrop-filter: blur(6px) saturate(1.08);
-  backdrop-filter: blur(6px) saturate(1.08);
-  -webkit-mask-image: linear-gradient(
+  background: linear-gradient(
     to bottom,
     transparent 0%,
-    #000 32%,
-    #000 68%,
-    transparent 100%
-  );
-  mask-image: linear-gradient(
-    to bottom,
-    transparent 0%,
-    #000 32%,
-    #000 68%,
+    rgba(253, 253, 252, 0.84) 32%,
+    rgba(253, 253, 252, 0.84) 68%,
     transparent 100%
   );
   content: '';
@@ -1280,6 +1371,12 @@ html, body {
     animation: none;
   }
 
+  ::view-transition-group(active-album-cover),
+  ::view-transition-old(active-album-cover),
+  ::view-transition-new(active-album-cover) {
+    animation-duration: 0s;
+  }
+
 }
 
 @media (max-width: 360px) {
@@ -1288,31 +1385,10 @@ html, body {
   }
 }
 
-/* DJ entry */
 .minimal-player-links {
   display: flex;
   align-items: center;
   gap: 14px;
-}
-
-.minimal-mix-label {
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: rgba(0, 0, 0, 0.4);
-  cursor: pointer;
-  font: inherit;
-  font-size: 11px;
-  line-height: 14px;
-}
-
-.minimal-mix-label:hover {
-  color: #111111;
-}
-
-.minimal-mix-label:focus-visible {
-  outline: 1px solid #111111;
-  outline-offset: 3px;
 }
 
 .dj-visually-hidden {
@@ -1324,14 +1400,6 @@ html, body {
   clip: rect(0, 0, 0, 0) !important;
   white-space: nowrap !important;
   border: 0 !important;
-}
-
-@media (max-width: 640px) {
-  .minimal-mix-label {
-    display: inline-flex;
-    min-height: 30px;
-    align-items: center;
-  }
 }
 
 /* Inline DJ deck */

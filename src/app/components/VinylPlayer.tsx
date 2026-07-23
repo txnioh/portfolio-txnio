@@ -2,7 +2,6 @@
 
 import Image from 'next/image';
 import {
-  AnimatePresence,
   motion,
   type PanInfo,
   useReducedMotion,
@@ -16,14 +15,8 @@ import {
   useRef,
   useState,
 } from 'react';
-import { useDjMixer } from '../dj/DjMixerContext';
-import { InlineDjDeck } from './DjMixer';
+import { flushSync } from 'react-dom';
 import { useGlobalAudioPlayer } from './GlobalAudioPlayer';
-
-const SCREEN_TRANSITION = {
-  duration: 0.28,
-  ease: [0.22, 1, 0.36, 1] as const,
-};
 
 const COVER_SPRING = {
   type: 'spring' as const,
@@ -47,6 +40,11 @@ const VINYL_SCRUB_TRANSITION = {
 };
 
 const DRAG_STEP = 20;
+const MAX_CONTINUOUS_AUDIO_DELTA_SECONDS = 1;
+
+type ViewTransitionDocument = Document & {
+  startViewTransition?: (callback: () => void) => { finished: Promise<void> };
+};
 
 function formatTime(seconds: number) {
   if (!Number.isFinite(seconds)) return '--:--';
@@ -83,6 +81,48 @@ function getCoverPose(position: number) {
   };
 }
 
+function getCoverRevealOrder(
+  position: number,
+  selectedIndex: number,
+  trackCount: number,
+) {
+  if (position === 0) return 0;
+
+  const revealPositions: number[] = [];
+  for (let distance = 1; distance <= 3; distance += 1) {
+    if (selectedIndex - distance >= 0) revealPositions.push(-distance);
+    if (selectedIndex + distance < trackCount) revealPositions.push(distance);
+  }
+
+  return revealPositions.indexOf(position) + 1;
+}
+
+function useVinylRotation(visibleTime: number, isPlaying: boolean, isSeeking: boolean) {
+  const [rotation, setRotation] = useState(0);
+  const previousTimeRef = useRef(visibleTime);
+
+  useEffect(() => {
+    const previousTime = previousTimeRef.current;
+    const elapsed = visibleTime - previousTime;
+    previousTimeRef.current = visibleTime;
+
+    if (isSeeking) {
+      setRotation((visibleTime * 180) % 360);
+      return;
+    }
+
+    if (
+      isPlaying
+      && elapsed > 0
+      && elapsed <= MAX_CONTINUOUS_AUDIO_DELTA_SECONDS
+    ) {
+      setRotation((currentRotation) => currentRotation + elapsed * 180);
+    }
+  }, [isPlaying, isSeeking, visibleTime]);
+
+  return rotation;
+}
+
 export function VinylPlayer() {
   const [screen, setScreen] = useState<'player' | 'library'>('player');
   const [collectionPosition, setCollectionPosition] = useState(0);
@@ -96,23 +136,21 @@ export function VinylPlayer() {
   const isDraggingCollectionRef = useRef(false);
   const dragReleaseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const shouldReduceMotion = useReducedMotion();
-  const [djSessionActive, djDispatch] = useDjMixer((snapshot) => snapshot.sessionActive);
   const {
     activeTrack,
     activeTrackIndex,
+    bufferedPercent,
     currentTime,
     duration,
+    error,
     isPlaying,
     isReady,
+    loadState,
     seekTo,
     selectTrack,
     togglePlayback,
     tracks,
   } = useGlobalAudioPlayer();
-
-  useEffect(() => {
-    if (djSessionActive) setScreen('player');
-  }, [djSessionActive]);
 
   useEffect(() => {
     const img = new window.Image();
@@ -151,9 +189,6 @@ export function VinylPlayer() {
     tracks.length - 1,
   );
   const selectedTrack = tracks[selectedIndex] ?? activeTrack;
-  const screenTransition = shouldReduceMotion
-    ? { duration: 0 }
-    : SCREEN_TRANSITION;
   const timelineTransition = shouldReduceMotion
     ? { duration: 0 }
     : TIMELINE_TRANSITION;
@@ -161,7 +196,7 @@ export function VinylPlayer() {
   const visibleTime = seekPercent === null
     ? currentTime
     : (seekPercent / 100) * duration;
-  const vinylRotation = visibleTime * 180;
+  const vinylRotation = useVinylRotation(visibleTime, isPlaying, isSeeking);
   const vinylRotationTransition = shouldReduceMotion
     ? { duration: 0 }
     : isSeeking
@@ -177,15 +212,31 @@ export function VinylPlayer() {
     ));
   }, [tracks.length]);
 
+  const changeScreen = useCallback((nextScreen: 'player' | 'library') => {
+    const viewTransitionDocument = document as ViewTransitionDocument;
+    if (shouldReduceMotion || !viewTransitionDocument.startViewTransition) {
+      setScreen(nextScreen);
+      return;
+    }
+
+    document.documentElement.dataset.audioTransition = `to-${nextScreen}`;
+    const transition = viewTransitionDocument.startViewTransition(() => {
+      flushSync(() => setScreen(nextScreen));
+    });
+    void transition.finished.finally(() => {
+      delete document.documentElement.dataset.audioTransition;
+    });
+  }, [shouldReduceMotion]);
+
   const openLibrary = useCallback(() => {
     setCollectionPosition(activeTrackIndex);
-    setScreen('library');
-  }, [activeTrackIndex]);
+    changeScreen('library');
+  }, [activeTrackIndex, changeScreen]);
 
   const chooseTrack = useCallback((index: number) => {
     selectTrack(index);
-    setScreen('player');
-  }, [selectTrack]);
+    changeScreen('player');
+  }, [changeScreen, selectTrack]);
 
   const selectNextTrack = useCallback(() => {
     selectTrack((activeTrackIndex + 1) % tracks.length);
@@ -325,31 +376,19 @@ export function VinylPlayer() {
       chooseTrack(selectedIndex);
     } else if (event.key === 'Escape') {
       event.preventDefault();
-      setScreen('player');
+      changeScreen('player');
     }
-  }, [chooseTrack, navigateBy, selectedIndex]);
+  }, [changeScreen, chooseTrack, navigateBy, selectedIndex]);
 
   return (
-    <motion.section
-      layout
-      className={`minimal-inline-player minimal-reveal-line${djSessionActive ? ' is-dj-mode' : ''}`}
+    <section
+      className="minimal-inline-player minimal-reveal-line"
       aria-label={screen === 'player' ? 'Now playing' : 'Choose a record'}
-      transition={screenTransition}
     >
-      <AnimatePresence initial={false} mode="wait">
-        {screen === 'player' ? (
-          <motion.div
-            key="player"
+      {screen === 'player' ? (
+          <div
             className="minimal-player-screen"
-            initial={{ opacity: 0, x: -18 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -18 }}
-            transition={screenTransition}
           >
-            {djSessionActive ? (
-              <InlineDjDeck />
-            ) : (
-              <>
             <div className="minimal-release-picker">
               <button
                 type="button"
@@ -414,8 +453,9 @@ export function VinylPlayer() {
                     type="button"
                     onClick={togglePlayback}
                     aria-label={isPlaying ? `Pause ${activeTrack.title}` : `Play ${activeTrack.title}`}
+                    aria-busy={loadState === 'loading'}
                   >
-                    {isPlaying ? 'pause' : 'play'}
+                    {loadState === 'loading' && !isPlaying ? 'wait' : isPlaying ? 'pause' : 'play'}
                   </button>
                   <button
                     type="button"
@@ -446,15 +486,24 @@ export function VinylPlayer() {
                   <motion.span
                     className="minimal-timeline-track"
                     initial={false}
-                    animate={{ height: timelineHeight }}
+                    animate={{ scaleY: timelineHeight / 4 }}
+                    transition={timelineTransition}
+                  />
+                  <motion.span
+                    className="minimal-timeline-buffered"
+                    initial={false}
+                    animate={{
+                      scaleX: bufferedPercent / 100,
+                      scaleY: timelineHeight / 4,
+                    }}
                     transition={timelineTransition}
                   />
                   <motion.span
                     className="minimal-timeline-preview"
                     initial={false}
                     animate={{
-                      width: `${visiblePreviewPercent}%`,
-                      height: timelineHeight,
+                      scaleX: visiblePreviewPercent / 100,
+                      scaleY: timelineHeight / 4,
                       opacity: previewPercent !== null || isSeeking ? 1 : 0,
                     }}
                     transition={timelineTransition}
@@ -463,18 +512,27 @@ export function VinylPlayer() {
                     className="minimal-timeline-progress"
                     initial={false}
                     animate={{
-                      width: `${visibleProgressPercent}%`,
-                      height: timelineHeight,
+                      scaleX: visibleProgressPercent / 100,
+                      scaleY: timelineHeight / 4,
                     }}
                     transition={timelineTransition}
                   />
                 </div>
                 <span className="minimal-inline-time">
-                  {isReady
+                  {loadState === 'loading' && !isReady
+                    ? 'loading…'
+                    : isReady
                     ? `${formatTime(currentTime)} / ${formatTime(duration)}`
                     : '--:-- / --:--'}
                 </span>
               </div>
+              <p
+                className={`minimal-audio-status${error ? ' is-error' : ''}`}
+                role={error ? 'alert' : 'status'}
+                aria-live="polite"
+              >
+                {error ?? ''}
+              </p>
               <div className="minimal-player-links">
                 <button
                   type="button"
@@ -483,36 +541,22 @@ export function VinylPlayer() {
                 >
                   Browse {tracks.length} records ↗
                 </button>
-                <button
-                  type="button"
-                  className="minimal-mix-label"
-                  onClick={() => void djDispatch({ type: 'mode.open' })}
-                >
-                  mix ↗
-                </button>
               </div>
             </div>
-              </>
-            )}
-          </motion.div>
+          </div>
         ) : (
-          <motion.div
-            key="library"
+          <div
             ref={libraryRef}
             className="minimal-library-screen"
             tabIndex={0}
             role="region"
             aria-label="Record collection"
             onKeyDown={handleLibraryKeyDown}
-            initial={{ x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 20 }}
-            transition={screenTransition}
           >
             <button
               type="button"
               className="minimal-library-back"
-              onClick={() => setScreen('player')}
+              onClick={() => changeScreen('player')}
             >
               ← Playing
             </button>
@@ -529,11 +573,21 @@ export function VinylPlayer() {
                 if (Math.abs(position) > 3) return null;
 
                 const pose = getCoverPose(position);
+                const revealOrder = getCoverRevealOrder(
+                  position,
+                  selectedIndex,
+                  tracks.length,
+                );
                 return (
                   <motion.button
                     type="button"
                     key={track.id}
-                    className="minimal-coverflow-card"
+                    className={`minimal-coverflow-card${position === 0 ? ' is-active-album' : ''}`}
+                    style={{
+                      viewTransitionName: position === 0 ? 'active-album-cover' : undefined,
+                      '--coverflow-reveal-delay': `${40 + revealOrder * 75}ms`,
+                      '--coverflow-reflection-delay': `${150 + revealOrder * 90}ms`,
+                    } as CSSProperties}
                     onClick={() => {
                       if (isDraggingCollectionRef.current) return;
                       if (position === 0) {
@@ -550,14 +604,26 @@ export function VinylPlayer() {
                     animate={pose}
                     transition={shouldReduceMotion ? { duration: 0 } : COVER_SPRING}
                   >
-                    <Image
-                      src={track.cover}
-                      alt={`${track.album} cover`}
-                      fill
-                      sizes="96px"
-                      draggable={false}
-                      className="minimal-vinyl-cover"
-                    />
+                    <span className="minimal-coverflow-artwork">
+                      <Image
+                        src={track.cover}
+                        alt={`${track.album} cover`}
+                        fill
+                        sizes="96px"
+                        draggable={false}
+                        className="minimal-vinyl-cover"
+                      />
+                    </span>
+                    <span className="minimal-coverflow-reflection" aria-hidden="true">
+                      <Image
+                        src={track.cover}
+                        alt=""
+                        fill
+                        sizes="96px"
+                        draggable={false}
+                        className="minimal-vinyl-cover"
+                      />
+                    </span>
                   </motion.button>
                 );
               })}
@@ -568,9 +634,8 @@ export function VinylPlayer() {
               <span>{selectedTrack.artist} · {selectedTrack.album}</span>
             </div>
 
-          </motion.div>
+          </div>
         )}
-      </AnimatePresence>
-    </motion.section>
+    </section>
   );
 }
