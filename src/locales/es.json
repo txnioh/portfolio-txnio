@@ -158,7 +158,6 @@
     },
     "projectDescriptions": {
         "txniOS": "Simulación interactiva de Mac OS 7 con ventanas funcionales y la estética clásica del sistema.",
-        "Spacio": "Una app web para explorar modelos BIM, sensores y capas ambientales en una interfaz espacial.",
         "Minder": "Una app para subir imágenes, comentarios y proyectos utilizando Firebase, React, TypeScript, Next.js y autenticación de Google."
     }
 }

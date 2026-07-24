@@ -158,7 +158,6 @@
     },
     "projectDescriptions": {
         "txniOS": "Interactive simulation of Mac OS 7 with functional windows and classic system aesthetics.",
-        "Spacio": "A web app for exploring BIM models, sensors, and environmental layers in one spatial interface.",
         "Minder": "An app to upload images, comments and projects using Firebase, React, TypeScript, Next.js and Google authentication."
     }
 }

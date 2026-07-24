@@ -33,14 +33,6 @@ const projects: Project[] = [
     imagePath: "/projects-img/project-txnios-main.webp"
   },
   {
-    id: 8,
-    title: "Spacio",
-    description: "", // Will be populated from translations
-    githubUrl: "https://github.com/txnioh/spacio",
-    demoUrl: "https://spacio.txnio.com/",
-    imagePath: "/projects-img/project-spacio-bim.gif"
-  },
-  {
     id: 6,
     title: "Minder",
     description: "", // Will be populated from translations
